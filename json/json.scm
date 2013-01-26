@@ -140,6 +140,8 @@
       (else #f))))
 
 ;;
+;; Main parser functions
+;;
 
 (define (json-read-true port)
   (expect-string port "true")
@@ -159,16 +161,14 @@
 (define (json-read-array port)
   (let loop ((c (peek-char port)) (values '()))
     (case c
-      ;; Skip whitespace
-      ((#\ht #\vt #\lf #\cr #\sp)
-       (read-char port)
-       (loop (peek-char port) values))
-      ;; skip comma and continue
-      ((#\,)
+      ;; Skip whitespace and comma
+      ((#\ht #\vt #\lf #\cr #\sp #\,)
        (read-char port)
        (loop (peek-char port) values))
       ;; end of array
-      ((#\]) values)
+      ((#\])
+       (read-char port)
+       values)
       ;; this can be any json object
       (else
        (let ((value (json-read port)))
