@@ -37,7 +37,6 @@
 
 (define (read-exp-part port)
   (let ((c (peek-char port)) (s ""))
-    (pk "hola" s)
     (cond
      ;; Stop parsing if end of string found.
      ((eof-object? c) s)
@@ -64,7 +63,6 @@
 
 (define (read-real-part port)
   (let ((c (peek-char port)) (s ""))
-    (pk "hola" s)
     (cond
      ;; Return string when reaching enf of string.
      ((eof-object? c) s)
@@ -93,7 +91,6 @@
 
 (define (read-number port)
   (let loop ((c (peek-char port)) (s ""))
-    (pk s)
     (cond
      ;; Return string when reaching enf of string.
      ((eof-object? c) s)
@@ -172,16 +169,25 @@
   (string->number (read-number port)))
 
 (define (json-read-array port)
-  (let loop ((values '()))
-    (case (peek-char port)
-      ;; skip comma and continue
-      ((#\,)
-       (read-char port)
-       (loop values))
-      ;; end of array
-      ((#\]) values)
-      ;; this can be any json object
-      (else (loop (append values (list (json-read port))))))))
+  (let loop ((c (peek-char port)) (values '()))
+    (cond
+     ;; Skip whitespace
+     ((char-whitespace? c)
+      (read-char port)
+      (loop (peek-char port) values))
+     (else
+      (case c
+       ;; skip comma and continue
+       ((#\,)
+        (read-char port)
+        (loop (peek-char port) values))
+       ;; end of array
+       ((#\]) values)
+       ;; this can be any json object
+       (else
+        (let ((value (json-read port)))
+          (loop (peek-char port)
+                (append values (list value))))))))))
 
 (define (json-read-string port)
   ;; Read string until \ or " are found.
