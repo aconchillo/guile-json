@@ -2,16 +2,6 @@
   #:use-module (ice-9 rdelim)
   #:export (json->scm))
 
-(define (expect ch expected)
-  (if (not (char=? ch expected))
-      (throw 'json-invalid)
-      ch))
-
-(define (expect-string port expected)
-  (list->string
-   (map (lambda (ch) (expect ch (read-char port)))
-        (string->list expected))))
-
 ;;
 ;; Number parsing helpers
 ;;
@@ -178,6 +168,16 @@
 ;; String parsing helpers
 ;;
 
+(define (expect ch expected)
+  (if (not (char=? ch expected))
+      (throw 'json-invalid)
+      ch))
+
+(define (expect-string port expected)
+  (list->string
+   (map (lambda (ch) (expect ch (read-char port)))
+        (string->list expected))))
+
 (define (read-hex-digit port)
   (let ((c (read-char port)))
     (case c
@@ -283,6 +283,10 @@
       ((#\") (json-read-string port))
       ;; anything else should be a number
       (else (json-read-number port)))))
+
+;;
+;; Public procedures
+;;
 
 (define (json->scm s)
   (json-read (open-input-string s)))
