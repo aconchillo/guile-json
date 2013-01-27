@@ -311,7 +311,9 @@
 ;; Public procedures
 ;;
 
-(define (json->scm s)
-  (json-read (open-input-string s)))
+(define* (json->scm #:optional (port (current-input-port)))
+  "Parse a JSON document into native. Takes one optional argument,
+@var{port}, which defaults to the current input port."
+  (json-read port))
 
 ;;; (json) ends here
