@@ -292,20 +292,24 @@
 
 (define (json-read port)
   (let loop ((c (peek-char port)))
-    (case c
-      ;; skip whitespaces
-      ((#\ht #\vt #\lf #\cr #\sp)
-       (read-char port)
-       (loop (peek-char port)))
-      ;; read json values
-      ((#\t) (json-read-true port))
-      ((#\f) (json-read-false port))
-      ((#\n) (json-read-null port))
-      ((#\{) (json-read-object port))
-      ((#\[) (json-read-array port))
-      ((#\") (json-read-string port))
-      ;; anything else should be a number
-      (else (json-read-number port)))))
+    (cond
+     ;;If we reach the end we might have an incomplete document
+     ((eof-object? c) (throw 'json-invalid))
+     (else
+      (case c
+        ;; skip whitespaces
+        ((#\ht #\vt #\lf #\cr #\sp)
+         (read-char port)
+         (loop (peek-char port)))
+        ;; read json values
+        ((#\t) (json-read-true port))
+        ((#\f) (json-read-false port))
+        ((#\n) (json-read-null port))
+        ((#\{) (json-read-object port))
+        ((#\[) (json-read-array port))
+        ((#\") (json-read-string port))
+        ;; anything else should be a number
+        (else (json-read-number port)))))))
 
 ;;
 ;; Public procedures
