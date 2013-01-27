@@ -2,14 +2,14 @@
   #:use-module (ice-9 rdelim)
   #:export (json->scm))
 
-(define (expect ch expected exception)
+(define (expect ch expected)
   (if (not (char=? ch expected))
-      (throw exception)
+      (throw 'json-invalid)
       ch))
 
-(define (expect-string port expected exception)
+(define (expect-string port expected)
   (list->string
-   (map (lambda (ch) (expect ch (read-char port) exception))
+   (map (lambda (ch) (expect ch (read-char port)))
         (string->list expected))))
 
 ;;
@@ -98,7 +98,7 @@
          (string-append s
                         (string ch)
                         (or (read-real-part port)
-                            (throw 'json-invalid-number)))))
+                            (throw 'json-invalid)))))
       ((#\1 #\2 #\3 #\4 #\5 #\6 #\7 #\8 #\9)
        (let ((ch (read-char port)))
          (string-append s
@@ -106,8 +106,8 @@
                         (read-digits port)
                         (or (read-real-part port)
                             (read-exp-part port)
-                            (throw 'json-invalid-number)))))
-      (else (throw 'json-invalid-number)))))
+                            (throw 'json-invalid)))))
+      (else (throw 'json-invalid)))))
 
 ;;
 ;; Object parsing helpers
@@ -127,7 +127,7 @@
        (read-char port)
        (cons key (json-read port)))
       ;; invalid object
-      (else (throw 'json-invalid-object))))))
+      (else (throw 'json-invalid))))))
 
 (define (read-object port)
   (let loop ((c (peek-char port)))
@@ -139,7 +139,7 @@
       ;; Read key and value
       ((#\") (read-pair port))
       ;; invalid object
-      (else (throw 'json-invalid-object)))))
+      (else (throw 'json-invalid)))))
 
 ;;
 ;; Array parsing helpers
@@ -171,7 +171,7 @@
     (case c
       ((#\0 #\1 #\2 #\3 #\4 #\5 #\6 #\7 #\8 #\9
         #\A #\B #\C #\D #\E #\F #\a #\b #\c #\d #\e #\f) c)
-      (else (throw 'json-invalid-hex-digit)))))
+      (else (throw 'json-invalid)))))
 
 (define (read-control-char port)
   (let ((c (read-char port)))
@@ -205,24 +205,24 @@
          (if ch
              (loop (string-append result (car current) ch)
                    (read-delimited "\\\"" port 'split))
-             (throw 'json-invalid-string))))
+             (throw 'json-invalid))))
       (else
-       (throw 'json-invalid-string)))))
+       (throw 'json-invalid)))))
 
 ;;
 ;; Main parser functions
 ;;
 
 (define (json-read-true port)
-  (expect-string port "true" 'json-invalid-true)
+  (expect-string port "true")
   #t)
 
 (define (json-read-false port)
-  (expect-string port "false" 'json-invalid-false)
+  (expect-string port "false")
   #f)
 
 (define (json-read-null port)
-  (expect-string port "null" 'json-invalid-null)
+  (expect-string port "null")
   #nil)
 
 (define (json-read-number port)
@@ -235,7 +235,7 @@
       ((#\ht #\vt #\lf #\cr #\sp) (loop (peek-char port)))
       ;; read array values
       ((#\{) (read-object port))
-      (else (throw 'json-invalid-object)))))
+      (else (throw 'json-invalid)))))
 
 (define (json-read-array port)
   (let loop ((c (read-char port)))
@@ -244,7 +244,7 @@
       ((#\ht #\vt #\lf #\cr #\sp) (loop (peek-char port)))
       ;; read array values
       ((#\[) (read-array port))
-      (else (throw 'json-invalid-array)))))
+      (else (throw 'json-invalid)))))
 
 (define (json-read-string port)
   (let loop ((c (read-char port)))
@@ -253,7 +253,7 @@
       ((#\ht #\vt #\lf #\cr #\sp) (loop (peek-char port)))
       ;; read string contents
       ((#\") (read-string port))
-      (else (throw 'json-invalid-string)))))
+      (else (throw 'json-invalid)))))
 
 (define (json-read port)
   (let loop ((c (peek-char port)))
