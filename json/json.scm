@@ -125,19 +125,31 @@
       ;; Skip colon and read value
       ((#\:)
        (read-char port)
-       (cons key (json-read port)))
+       (cons (string->symbol key) (json-read port)))
       ;; invalid object
       (else (throw 'json-invalid))))))
 
 (define (read-object port)
-  (let loop ((c (peek-char port)))
+  (let loop ((c (peek-char port))
+             (pairs (make-hash-table)))
     (case c
       ;; Skip whitespaces
       ((#\ht #\vt #\lf #\cr #\sp)
        (read-char port)
-       (loop (peek-char port)))
-      ;; Read key and value
-      ((#\") (read-pair port))
+       (loop (peek-char port) pairs))
+      ;; end of object
+      ((#\})
+       (read-char port)
+       pairs)
+      ;; Read one pair and continue
+      ((#\")
+       (let ((pair (read-pair port)))
+         (hashq-set! pairs (car pair) (cdr pair))
+         (loop (peek-char port) pairs)))
+      ;; Skip comma and read more pairs
+      ((#\,)
+       (read-char port)
+       (loop (peek-char port) pairs))
       ;; invalid object
       (else (throw 'json-invalid)))))
 
