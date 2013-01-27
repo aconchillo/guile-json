@@ -2,14 +2,15 @@
   #:use-module (ice-9 rdelim)
   #:export (json->scm))
 
-(define (expect ch expected)
+(define (expect ch expected exception)
   (if (not (char=? ch expected))
-    (error 'read "expected: ~v, got: ~a" expected ch))
-  ch)
+      (throw exception)
+      ch))
 
-(define (expect-string port expected)
-  (list->string (map (lambda (ch) (expect ch (read-char port)))
-                     (string->list expected))))
+(define (expect-string port expected exception)
+  (list->string
+   (map (lambda (ch) (expect ch (read-char port) exception))
+        (string->list expected))))
 
 ;;
 ;; Number parsing helpers
@@ -109,6 +110,59 @@
       (else (throw 'json-invalid-number)))))
 
 ;;
+;; Object parsing helpers
+;;
+
+(define (read-pair port)
+  ;; Read string key
+  (let ((key (json-read-string port)))
+    (let loop ((c (peek-char port)))
+      (case c
+      ;; Skip whitespaces
+      ((#\ht #\vt #\lf #\cr #\sp)
+       (read-char port)
+       (loop (peek-char port)))
+      ;; Skip colon and read value
+      ((#\:)
+       (read-char port)
+       (cons key (json-read port)))
+      ;; invalid object
+      (else (throw 'json-invalid-object))))))
+
+(define (read-object port)
+  (let loop ((c (peek-char port)))
+    (case c
+      ;; Skip whitespaces
+      ((#\ht #\vt #\lf #\cr #\sp)
+       (read-char port)
+       (loop (peek-char port)))
+      ;; Read key and value
+      ((#\") (read-pair port))
+      ;; invalid object
+      (else (throw 'json-invalid-object)))))
+
+;;
+;; Array parsing helpers
+;;
+
+(define (read-array port)
+  (let loop ((c (peek-char port)) (values '()))
+    (case c
+      ;; Skip whitespace and comma
+      ((#\ht #\vt #\lf #\cr #\sp #\,)
+       (read-char port)
+       (loop (peek-char port) values))
+      ;; end of array
+      ((#\])
+       (read-char port)
+       values)
+      ;; this can be any json object
+      (else
+       (let ((value (json-read port)))
+         (loop (peek-char port)
+               (append values (list value))))))))
+
+;;
 ;; String parsing helpers
 ;;
 
@@ -139,44 +193,8 @@
          (utf16->string utf)))
       (else #f))))
 
-;;
-;; Main parser functions
-;;
-
-(define (json-read-true port)
-  (expect-string port "true")
-  #t)
-
-(define (json-read-false port)
-  (expect-string port "false")
-  #f)
-
-(define (json-read-null port)
-  (expect-string port "null")
-  #nil)
-
-(define (json-read-number port)
-  (string->number (read-number port)))
-
-(define (json-read-array port)
-  (let loop ((c (peek-char port)) (values '()))
-    (case c
-      ;; Skip whitespace and comma
-      ((#\ht #\vt #\lf #\cr #\sp #\,)
-       (read-char port)
-       (loop (peek-char port) values))
-      ;; end of array
-      ((#\])
-       (read-char port)
-       values)
-      ;; this can be any json object
-      (else
-       (let ((value (json-read port)))
-         (loop (peek-char port)
-               (append values (list value))))))))
-
-(define (json-read-string port)
-  ;; Read string until \ or " are found.
+(define (read-string port)
+  ;; Read characters until \ or " are found.
   (let loop ((result "")
              (current (read-delimited "\\\"" port 'split)))
     (case (cdr current)
@@ -191,25 +209,67 @@
       (else
        (throw 'json-invalid-string)))))
 
+;;
+;; Main parser functions
+;;
+
+(define (json-read-true port)
+  (expect-string port "true" 'json-invalid-true)
+  #t)
+
+(define (json-read-false port)
+  (expect-string port "false" 'json-invalid-false)
+  #f)
+
+(define (json-read-null port)
+  (expect-string port "null" 'json-invalid-null)
+  #nil)
+
+(define (json-read-number port)
+  (string->number (read-number port)))
+
+(define (json-read-object port)
+  (let loop ((c (read-char port)))
+    (case c
+      ;; skip whitespace
+      ((#\ht #\vt #\lf #\cr #\sp) (loop (peek-char port)))
+      ;; read array values
+      ((#\{) (read-object port))
+      (else (throw 'json-invalid-object)))))
+
+(define (json-read-array port)
+  (let loop ((c (read-char port)))
+    (case c
+      ;; skip whitespace
+      ((#\ht #\vt #\lf #\cr #\sp) (loop (peek-char port)))
+      ;; read array values
+      ((#\[) (read-array port))
+      (else (throw 'json-invalid-array)))))
+
+(define (json-read-string port)
+  (let loop ((c (read-char port)))
+    (case c
+      ;; skip whitespace
+      ((#\ht #\vt #\lf #\cr #\sp) (loop (peek-char port)))
+      ;; read string contents
+      ((#\") (read-string port))
+      (else (throw 'json-invalid-string)))))
+
 (define (json-read port)
   (let loop ((c (peek-char port)))
     (case c
-      ((#\t) (json-read-true port))
-      ((#\f) (json-read-false port))
-      ((#\n) (json-read-null port))
-      ;; skip whitespace
+      ;; skip whitespaces
       ((#\ht #\vt #\lf #\cr #\sp)
        (read-char port)
        (loop (peek-char port)))
-      ;; skip bracket and read array
-      ((#\[)
-       (read-char port)
-       (json-read-array port))
-      ;; skip double quote and read string
-      ((#\")
-       (read-char port)
-       (json-read-string port))
-      ;; anything else must be a number
+      ;; read json values
+      ((#\t) (json-read-true port))
+      ((#\f) (json-read-false port))
+      ((#\n) (json-read-null port))
+      ((#\{) (json-read-object port))
+      ((#\[) (json-read-array port))
+      ((#\") (json-read-string port))
+      ;; anything else should be a number
       (else (json-read-number port)))))
 
 (define (json->scm s)
