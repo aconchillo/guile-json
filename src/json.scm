@@ -255,9 +255,9 @@
 ;; Main parser functions
 ;;
 
-(define-syntax json-read-complex
+(define-syntax json-read-delimited
   (syntax-rules ()
-    ((json-read-complex port delim read-func)
+    ((json-read-delimited port delim read-func)
      (let loop ((c (read-char port)))
        (case c
          ;; skip whitespace
@@ -279,13 +279,13 @@
   #nil)
 
 (define (json-read-object port)
-  (json-read-complex port #\{ read-object))
+  (json-read-delimited port #\{ read-object))
 
 (define (json-read-array port)
-  (json-read-complex port #\[ read-array))
+  (json-read-delimited port #\[ read-array))
 
 (define (json-read-string port)
-  (json-read-complex port #\" read-string))
+  (json-read-delimited port #\" read-string))
 
 (define (json-read-number port)
   (string->number (read-number port)))
