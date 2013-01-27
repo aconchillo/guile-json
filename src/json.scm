@@ -255,6 +255,17 @@
 ;; Main parser functions
 ;;
 
+(define-syntax json-read-complex
+  (syntax-rules ()
+    ((json-read-complex port delim read-func)
+     (let loop ((c (read-char port)))
+       (case c
+         ;; skip whitespace
+         ((#\ht #\vt #\lf #\cr #\sp) (loop (peek-char port)))
+         ;; read contents
+         ((delim) (read-func port))
+         (else (throw 'json-invalid)))))))
+
 (define (json-read-true port)
   (expect-string port "true")
   #t)
@@ -267,35 +278,17 @@
   (expect-string port "null")
   #nil)
 
-(define (json-read-number port)
-  (string->number (read-number port)))
-
 (define (json-read-object port)
-  (let loop ((c (read-char port)))
-    (case c
-      ;; skip whitespace
-      ((#\ht #\vt #\lf #\cr #\sp) (loop (peek-char port)))
-      ;; read array values
-      ((#\{) (read-object port))
-      (else (throw 'json-invalid)))))
+  (json-read-complex port #\{ read-object))
 
 (define (json-read-array port)
-  (let loop ((c (read-char port)))
-    (case c
-      ;; skip whitespace
-      ((#\ht #\vt #\lf #\cr #\sp) (loop (peek-char port)))
-      ;; read array values
-      ((#\[) (read-array port))
-      (else (throw 'json-invalid)))))
+  (json-read-complex port #\[ read-array))
 
 (define (json-read-string port)
-  (let loop ((c (read-char port)))
-    (case c
-      ;; skip whitespace
-      ((#\ht #\vt #\lf #\cr #\sp) (loop (peek-char port)))
-      ;; read string contents
-      ((#\") (read-string port))
-      (else (throw 'json-invalid)))))
+  (json-read-complex port #\" read-string))
+
+(define (json-read-number port)
+  (string->number (read-number port)))
 
 (define (json-read port)
   (let loop ((c (peek-char port)))
