@@ -36,12 +36,15 @@
 
 (define-syntax json
   (lambda (x)
-    (syntax-case x (array object)
+    (syntax-case x (unquote array object)
       ((_ val) (or (string? (syntax->datum #'val))
                    (number? (syntax->datum #'val))
                    (boolean? (syntax->datum #'val))
                    (null? (syntax->datum #'val)))
        #'val)
+
+      ((_ (unquote val))
+        #'val)
 
       ((_ (array x ...))
        #'(list (json x) ...))
