@@ -1,4 +1,4 @@
-;;; (json) --- Guile JSON implementation.
+;;; (json parser) --- Guile JSON implementation.
 
 ;; Copyright (C) 2013 Aleix Conchillo Flaque <aconchillo at gmail dot com>
 ;;
@@ -27,7 +27,7 @@
 
 ;;; Code:
 
-(define-module (json)
+(define-module (json parser)
   #:use-module (ice-9 rdelim)
   #:use-module (rnrs bytevectors)
   #:export (json->scm))
@@ -320,4 +320,4 @@
 @var{port}, which defaults to the current input port."
   (json-read port))
 
-;;; (json) ends here
+;;; (json parser) ends here

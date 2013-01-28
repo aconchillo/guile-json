@@ -20,7 +20,7 @@
 # Fifth Floor, Boston, MA  02110-1301  USA
 
 AC_INIT([guile-json], [0.1.0], [aconchillo@gmail.com])
-AC_CONFIG_SRCDIR(src/json.scm)
+AC_CONFIG_SRCDIR(json.scm)
 AC_CONFIG_AUX_DIR([build-aux])
 AM_INIT_AUTOMAKE([color-tests -Wall -Wno-portability])
 AM_SILENT_RULES([yes])
@@ -37,7 +37,7 @@ fi
 GUILE_MODULE_REQUIRED([ice-9 rdelim])
 GUILE_MODULE_REQUIRED([rnrs bytevectors])
 
-AC_CONFIG_FILES([Makefile src/Makefile])
+AC_CONFIG_FILES([Makefile json/Makefile])
 AC_CONFIG_FILES([env], [chmod +x env])
 
 AC_OUTPUT
