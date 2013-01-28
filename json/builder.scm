@@ -54,7 +54,7 @@
    "{"
    (string-join (hash-map->list
                  (lambda (k v)
-                   (string-append (json-build-string (symbol->string k))
+                   (string-append (json-build-string k)
                                   " : "
                                   (json-build v)))
                  scm) ", ")

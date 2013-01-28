@@ -145,7 +145,7 @@
       ;; Skip colon and read value
       ((#\:)
        (read-char port)
-       (cons (string->symbol key) (json-read port)))
+       (cons key (json-read port)))
       ;; invalid object
       (else (throw 'json-invalid))))))
 
@@ -164,7 +164,7 @@
       ;; Read one pair and continue
       ((#\")
        (let ((pair (read-pair port)))
-         (hashq-set! pairs (car pair) (cdr pair))
+         (hash-set! pairs (car pair) (cdr pair))
          (loop (peek-char port) pairs)))
       ;; Skip comma and read more pairs
       ((#\,)
