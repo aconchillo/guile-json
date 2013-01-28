@@ -28,6 +28,7 @@
 ;;; Code:
 
 (define-module (json)
+  #:use-module (json builder)
   #:use-module (json parser)
   #:use-module (json syntax))
 
@@ -39,7 +40,8 @@
                     (resolve-interface '(mod ...)))
        ...))))
 
-(re-export-modules (json parser)
+(re-export-modules (json builder)
+                   (json parser)
                    (json syntax))
 
 ;;; (json) ends here
