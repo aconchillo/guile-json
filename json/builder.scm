@@ -28,6 +28,7 @@
 ;;; Code:
 
 (define-module (json builder)
+  #:use-module (srfi srfi-1)
   #:export (scm->json))
 
 ;;
@@ -44,7 +45,22 @@
   (number->string scm))
 
 (define (json-build-string scm)
-  (string-append "\"" scm "\""))
+  (string-append
+   "\""
+   (list->string
+    (fold-right append '()
+                (map
+                 (lambda (c)
+                   (case c
+                     ((#\" #\\ #\/) `(#\\ ,c))
+                     ((#\bs) '(#\\ #\b))
+                     ((#\ff) '(#\\ #\f))
+                     ((#\lf) '(#\\ #\n))
+                     ((#\cr) '(#\\ #\r))
+                     ((#\ht) '(#\\ #\t))
+                     (else (list c))))
+                 (string->list scm))))
+   "\""))
 
 (define (json-build-array scm)
   (string-append "[" (string-join (map json-build scm) ", ") "]"))
