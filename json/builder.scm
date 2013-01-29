@@ -40,6 +40,7 @@
   (let* ((bv (string->utf8 (string c)))
          (len (bytevector-length bv)))
     (cond
+     ;; If we have a 3 byte UTF-8 we need to output it as \uHHHH
      ((eq? len 3)
       (let* ((bv0 (bytevector-u8-ref bv 0))
              (bv1 (bytevector-u8-ref bv 1))
@@ -49,7 +50,9 @@
                             (logand bv2 #b00111111))))
         (append (list #\\ #\u)
                 (string->list (number->string code-point 16)))))
+     ;; A single byte UTF-8
      ((eq? len 1) (list c))
+     ;; Anything else should wrong, hopefully.
      (else (throw 'json-invalid)))))
 
 ;;
