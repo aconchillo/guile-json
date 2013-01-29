@@ -1,6 +1,6 @@
 moddir=$(prefix)/share/guile/site/json
 
-SOURCES = parser.scm syntax.scm
+SOURCES = builder.scm parser.scm syntax.scm
 
 GOBJECTS = $(SOURCES:%.scm=%.go)
 
