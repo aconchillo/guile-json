@@ -37,10 +37,13 @@
 ;; String builder helpers
 ;;
 
+(define (unicode->string unicode)
+  (format #f "\\u~4,'0x" unicode))
+
 (define (char->unicode-string c)
   (let ((unicode (char->integer c)))
     (if (< unicode 32)
-        (format #f "\\u~4,'0x" unicode)
+        (unicode->string unicode)
         (string c))))
 
 (define (u8v-2->unicode bv)
@@ -56,9 +59,6 @@
     (+ (ash (logand bv0 #b00001111) 12)
        (ash (logand bv1 #b00111111) 6)
        (logand bv2 #b00111111))))
-
-(define (unicode->string unicode)
-  (format #f "\\u~4,'0x" unicode))
 
 (define (build-char-string c)
   (let* ((bv (string->utf8 (string c)))
