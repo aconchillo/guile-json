@@ -37,6 +37,12 @@
 ;; String builder helpers
 ;;
 
+(define (char->unicode-string c)
+  (let ((unicode (char->integer c)))
+    (if (< unicode 32)
+        (format #f "\\u~4,'0x" unicode)
+        (string c))))
+
 (define (u8v-2->unicode bv)
   (let ((bv0 (bytevector-u8-ref bv 0))
         (bv1 (bytevector-u8-ref bv 1)))
@@ -52,20 +58,20 @@
        (logand bv2 #b00111111))))
 
 (define (unicode->string unicode)
-  (format #f "~4,'0x" unicode))
+  (format #f "\\u~4,'0x" unicode))
 
-(define (build-char c)
+(define (build-char-string c)
   (let* ((bv (string->utf8 (string c)))
          (len (bytevector-length bv)))
     (cond
      ;; A single byte UTF-8
-     ((eq? len 1) (list c))
+     ((eq? len 1) (char->unicode-string c))
      ;; If we have a 2 or 3 byte UTF-8 we need to output it as \uHHHH
      ((or (eq? len 2) (eq? len 3))
       (let ((unicode (if (eq? len 2)
                          (u8v-2->unicode bv)
                          (u8v-3->unicode bv))))
-        (append (list #\\ #\u) (string->list (unicode->string unicode)))))
+        (unicode->string unicode)))
      ;; Anything else should wrong, hopefully.
      (else (throw 'json-invalid)))))
 
@@ -96,7 +102,7 @@
                      ((#\lf) '(#\\ #\n))
                      ((#\cr) '(#\\ #\r))
                      ((#\ht) '(#\\ #\t))
-                     (else (build-char c))))
+                     (else (string->list (build-char-string c)))))
                  (string->list scm))))
    "\""))
 
