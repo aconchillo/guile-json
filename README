@@ -1,11 +1,55 @@
+
 * guile-json
 
-guile-json is a JSON module for Guile. It supports parsing and building
-JSON documents according to the http:://json.org specification. These
-are the main features:
+guile-json is a JSON module for Guile. It supports parsing and
+building JSON documents according to the http:://json.org
+specification. These are the main features:
 
 - Strictly complies to http://json.org specification.
 
 - Unicode support for strings.
 
 - Build JSON documents programatically via macros.
+
+
+* Installation
+
+guile-json is freely available for download under the terms of the GNU
+General Public License version 3 (GPLv3).
+
+Download the latest tarball [[http://download.savannah.gnu.org/releases/guile-json/0.1.0/guile-json-0.1.0.tar.gz][guile-json-0.1.0.tar.gz]] and untar it. Then,
+run the typical commands:
+
+    : $ ./configure --prefix=<guile-prefix>
+    : $ make
+    : $ sudo make install
+
+Where <guile-prefix> should preferably be the same as your system Guile
+installation directory (e.g. /usr).
+
+You can also clone the source code:
+
+    : $ git clone git://git.sv.nongnu.org/bitpacket.git
+
+Or, if you are under a firewall:
+
+    : $ git clone http://git.sv.nongnu.org/r/bitpacket.git
+
+
+* Checking installation
+
+If everything installed successfuly you should be up and running:
+
+    : $ guile
+    : scheme@(guile-user)> (use-modules (json))
+    : scheme@(guile-user)> (scm->json (json (array 1 2 3)))
+    : $1 = "[1, 2, 3]"
+
+It might be that you installed guile-json somewhere differenlty than
+your system's Guile. If so, you need to indicate Guile where to find
+guile-json, for example:
+
+    : $ GUILE_LOAD_PATH=/usr/local/share/guile/site guile
+
+
+* Usage
