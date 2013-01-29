@@ -29,7 +29,28 @@
 
 (define-module (json builder)
   #:use-module (srfi srfi-1)
+  #:use-module (rnrs bytevectors)
   #:export (scm->json))
+
+;;
+;; String builder helpers
+;;
+
+(define (build-char c)
+  (let* ((bv (string->utf8 (string c)))
+         (len (bytevector-length bv)))
+    (cond
+     ((eq? len 3)
+      (let* ((bv0 (bytevector-u8-ref bv 0))
+             (bv1 (bytevector-u8-ref bv 1))
+             (bv2 (bytevector-u8-ref bv 2))
+             (code-point (+ (ash (logand bv0 #b00001111) 12)
+                            (ash (logand bv1 #b00111111) 6)
+                            (logand bv2 #b00111111))))
+        (append (list #\\ #\u)
+                (string->list (number->string code-point 16)))))
+     ((eq? len 1) (list c))
+     (else (throw 'json-invalid)))))
 
 ;;
 ;; Main builder functions
@@ -58,7 +79,7 @@
                      ((#\lf) '(#\\ #\n))
                      ((#\cr) '(#\\ #\r))
                      ((#\ht) '(#\\ #\t))
-                     (else (list c))))
+                     (else (build-char c))))
                  (string->list scm))))
    "\""))
 

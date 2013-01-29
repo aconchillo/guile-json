@@ -36,6 +36,7 @@ fi
 
 GUILE_MODULE_REQUIRED([ice-9 rdelim])
 GUILE_MODULE_REQUIRED([rnrs bytevectors])
+GUILE_MODULE_REQUIRED([srfi srfi-1])
 
 AC_CONFIG_FILES([Makefile json/Makefile])
 AC_CONFIG_FILES([env], [chmod +x env])
