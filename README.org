@@ -9,7 +9,7 @@ specification. These are the main features:
 
 - Unicode support for strings.
 
-- Build JSON documents programatically via macros.
+- Build JSON documents programmatically via macros.
 
 
 * Installation
@@ -38,14 +38,14 @@ Or, if you are under a firewall:
 
 * Checking installation
 
-If everything installed successfuly you should be up and running:
+If everything installed successfully you should be up and running:
 
     : $ guile
     : scheme@(guile-user)> (use-modules (json))
     : scheme@(guile-user)> (scm->json (json (array 1 2 3)))
     : $1 = "[1, 2, 3]"
 
-It might be that you installed guile-json somewhere differenlty than
+It might be that you installed guile-json somewhere differently than
 your system's Guile. If so, you need to indicate Guile where to find
 guile-json, for example:
 
