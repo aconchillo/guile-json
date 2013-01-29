@@ -28,6 +28,7 @@
 ;;; Code:
 
 (define-module (json builder)
+  #:use-module (ice-9 format)
   #:use-module (srfi srfi-1)
   #:use-module (rnrs bytevectors)
   #:export (scm->json))
@@ -36,22 +37,35 @@
 ;; String builder helpers
 ;;
 
+(define (u8v-2->unicode bv)
+  (let ((bv0 (bytevector-u8-ref bv 0))
+        (bv1 (bytevector-u8-ref bv 1)))
+    (+ (ash (logand bv0 #b00011111) 6)
+       (logand bv1 #b00111111))))
+
+(define (u8v-3->unicode bv)
+  (let ((bv0 (bytevector-u8-ref bv 0))
+        (bv1 (bytevector-u8-ref bv 1))
+        (bv2 (bytevector-u8-ref bv 2)))
+    (+ (ash (logand bv0 #b00001111) 12)
+       (ash (logand bv1 #b00111111) 6)
+       (logand bv2 #b00111111))))
+
+(define (unicode->string unicode)
+  (format #f "~4,'0x" unicode))
+
 (define (build-char c)
   (let* ((bv (string->utf8 (string c)))
          (len (bytevector-length bv)))
     (cond
-     ;; If we have a 3 byte UTF-8 we need to output it as \uHHHH
-     ((eq? len 3)
-      (let* ((bv0 (bytevector-u8-ref bv 0))
-             (bv1 (bytevector-u8-ref bv 1))
-             (bv2 (bytevector-u8-ref bv 2))
-             (code-point (+ (ash (logand bv0 #b00001111) 12)
-                            (ash (logand bv1 #b00111111) 6)
-                            (logand bv2 #b00111111))))
-        (append (list #\\ #\u)
-                (string->list (number->string code-point 16)))))
      ;; A single byte UTF-8
      ((eq? len 1) (list c))
+     ;; If we have a 2 or 3 byte UTF-8 we need to output it as \uHHHH
+     ((or (eq? len 2) (eq? len 3))
+      (let ((unicode (if (eq? len 2)
+                         (u8v-2->unicode bv)
+                         (u8v-3->unicode bv))))
+        (append (list #\\ #\u) (string->list (unicode->string unicode)))))
      ;; Anything else should wrong, hopefully.
      (else (throw 'json-invalid)))))
 
