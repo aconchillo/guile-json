@@ -45,7 +45,7 @@ Guildhall/Dorodango packaging system.
 
 * Usage
 
-guile-json provides a few functions to parse and build a JSON
+guile-json provides a few procedures to parse and build a JSON
 document. A JSON document is transformed into or from native Guile
 values according to the following table:
 
@@ -59,7 +59,7 @@ values according to the following table:
 | false  | #f         |
 | null   | #nil       |
 
-This is the list of the available functions:
+** Procedures
 
 - (*json->scm* #:optional port) Reads a JSON document from the given
   port, or from the current input port if none is given.
@@ -84,9 +84,10 @@ This is the list of the available functions:
   - /escape/ : if true, the slash (/ solidus) character will be escaped.
   - /pretty/ : if true, the JSON document will be pretty printed.
 
+** Macros
 
 It is also possible to build JSON documents programmaticaly using the
-(json) macro. Here are some examples:
+main /json/ macro (and /object/ and /array/). Here are some examples:
 
 - Build the string "hello world":
 
