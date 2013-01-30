@@ -32,7 +32,7 @@ If everything installed successfully you should be up and running:
     : $ guile
     : scheme@(guile-user)> (use-modules (json))
     : scheme@(guile-user)> (scm->json (json (array 1 2 3)))
-    : $1 = "[1, 2, 3]"
+    : [1, 2, 3]
 
 It might be that you installed guile-json somewhere differently than
 your system's Guile. If so, you need to indicate Guile where to find
@@ -59,12 +59,12 @@ values according to the following table:
 | false  | #f         |
 | null   | #nil       |
 
-These are the available functions:
+This is the list of the available functions:
 
 - (*json->scm* #:optional port) Reads a JSON document from the given
   port, or from the current input port if none is given.
 
-  /port/ is optional, it defaults to the current input port.
+  - /port/ : is optional, it defaults to the current input port.
 
 - (*json-string->scm* str) : Reads a JSON document from the given
   string.
@@ -74,15 +74,43 @@ These are the available functions:
   written into the given port, or to the current output port if non is
   given.
 
-  /port/ : it defaults to the current output port.
-
-  /escape/ : if true, the slash (/ solidus) character will be escaped.
-
-  /pretty/ : if true, the JSON document will be pretty printed.
+  - /port/ : it defaults to the current output port.
+  - /escape/ : if true, the slash (/ solidus) character will be escaped.
+  - /pretty/ : if true, the JSON document will be pretty printed.
 
 - (*scm->json-string* native #:key escape pretty) : Creates a JSON
   document from the given native Guile value into a string.
 
-  /escape/ : if true, the slash (/ solidus) character will be escaped.
+  - /escape/ : if true, the slash (/ solidus) character will be escaped.
+  - /pretty/ : if true, the JSON document will be pretty printed.
 
-  /pretty/ : if true, the JSON document will be pretty printed.
+
+It is also possible to build JSON documents programmaticaly using the
+(json) macro. Here are some examples:
+
+- Build the string "hello world":
+
+    : (json "hello world"))
+
+- Build the [1, 2, 3] array:
+
+    : scheme@(guile-user)> (scm->json (json (array 1 2 3)))
+    : [1, 2, 3]
+
+- Build the object { "project" : "foo", "author" : "bar" }:
+
+    : scheme@(guile-user)> (scm->json (json (object ("project" "foo")
+    :                                               ("author" "bar"))))
+    : {"author" : "bar", "project" : "foo"}
+
+- Build the object { "values" : [ 234, 98.56 ] }:
+
+    : scheme@(guile-user)> (scm->json (json (object ("values" (array 234 98.56)))))
+    : {"values" : [234, 98.56]}
+
+- Build the object { "values" : [ 234, 98.56 ] } again, this time using
+  a variable:
+
+    : scheme@(guile-user)> (define values '(234 98.56))
+    : scheme@(guile-user)> (scm->json (json (object ("values" ,values))))
+    : {"values" : [1, 2, 3]}
