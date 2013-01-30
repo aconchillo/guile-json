@@ -81,7 +81,7 @@
 ;;
 
 (define (build-object-pair p port escape pretty level)
-  (format port "~A" (indent-string pretty level))
+  (simple-format port "~A" (indent-string pretty level))
   (json-build-string (car p) port escape)
   (simple-format port " : ")
   (json-build (cdr p) port escape pretty level))
