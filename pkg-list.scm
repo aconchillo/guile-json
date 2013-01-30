@@ -30,4 +30,4 @@
    "is released under the GPLv3.")
   (homepage "https://github.com/aconchillo/guile-json")
   (libraries "json.scm" "json")
-  (documentation "README.org" "COPYING"))
+  (documentation "README" "COPYING"))
