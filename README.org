@@ -7,9 +7,11 @@ specification. These are the main features:
 
 - Strictly complies to http://json.org specification.
 
+- Build JSON documents programmatically via macros.
+
 - Unicode support for strings.
 
-- Build JSON documents programmatically via macros.
+- Allows JSON pretty printing.
 
 
 * Installation
