@@ -44,3 +44,45 @@ A pkg-list.scm file is also provided for users of the
 Guildhall/Dorodango packaging system.
 
 * Usage
+
+guile-json provides a few functions to parse and build a JSON
+document. A JSON document is transformed into or from native Guile
+values according to the following table:
+
+| JSON   | Guile      |
+|--------+------------|
+| string | string     |
+| number | number     |
+| object | hash-table |
+| array  | list       |
+| true   | #t         |
+| false  | #f         |
+| null   | #nil       |
+
+These are the available functions:
+
+- (*json->scm* #:optional port) Reads a JSON document from the given
+  port, or from the current input port if none is given.
+
+  /port/ is optional, it defaults to the current input port.
+
+- (*json-string->scm* str) : Reads a JSON document from the given
+  string.
+
+- (*scm->json* native #:optional port #:key escape pretty) : Creates a
+  JSON document from the given native Guile value. The JSON document is
+  written into the given port, or to the current output port if non is
+  given.
+
+  /port/ : it defaults to the current output port.
+
+  /escape/ : if true, the slash (/ solidus) character will be escaped.
+
+  /pretty/ : if true, the JSON document will be pretty printed.
+
+- (*scm->json-string* native #:key escape pretty) : Creates a JSON
+  document from the given native Guile value into a string.
+
+  /escape/ : if true, the slash (/ solidus) character will be escaped.
+
+  /pretty/ : if true, the JSON document will be pretty printed.
