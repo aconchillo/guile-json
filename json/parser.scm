@@ -30,7 +30,8 @@
 (define-module (json parser)
   #:use-module (ice-9 rdelim)
   #:use-module (rnrs bytevectors)
-  #:export (json->scm))
+  #:export (json->scm
+            json-string->scm))
 
 ;;
 ;; Number parsing helpers
@@ -317,7 +318,13 @@
 
 (define* (json->scm #:optional (port (current-input-port)))
   "Parse a JSON document into native. Takes one optional argument,
-@var{port}, which defaults to the current input port."
+@var{port}, which defaults to the current input port from where the JSON
+document is read."
   (json-read port))
+
+(define* (json-string->scm str)
+  "Parse a JSON document into native. Takes a string argument,
+@var{str}, that contains the JSON document."
+  (call-with-input-string str (lambda (p) (json->scm p))))
 
 ;;; (json parser) ends here
