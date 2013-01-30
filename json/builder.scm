@@ -80,10 +80,17 @@
 ;; Object builder functions
 ;;
 
-(define (build-object-pair p port)
-  (json-build-string (car p) port)
+(define (build-object-pair p port escape pretty level)
+  (format port "~A" (indent-string pretty level))
+  (json-build-string (car p) port escape)
   (simple-format port " : ")
-  (json-build (cdr p) port))
+  (json-build (cdr p) port escape pretty level))
+
+(define (build-newline port pretty)
+  (cond (pretty (newline port))))
+
+(define (indent-string pretty level)
+  (if pretty (format #f "~v_" (* 4 level)) ""))
 
 ;;
 ;; Main builder functions
@@ -98,7 +105,7 @@
 (define (json-build-number scm port)
   (simple-format port "~A" (number->string scm)))
 
-(define (json-build-string scm port)
+(define (json-build-string scm port escape)
   (simple-format
    port "\"~A\""
    (list->string
@@ -106,59 +113,68 @@
                 (map
                  (lambda (c)
                    (case c
-                     ((#\" #\\ #\/) `(#\\ ,c))
+                     ((#\" #\\) `(#\\ ,c))
                      ((#\bs) '(#\\ #\b))
                      ((#\ff) '(#\\ #\f))
                      ((#\lf) '(#\\ #\n))
                      ((#\cr) '(#\\ #\r))
                      ((#\ht) '(#\\ #\t))
+                     ((#\/) (if escape `(#\\ ,c) (list c)))
                      (else (string->list (build-char-string c)))))
                  (string->list scm))))))
 
-(define (json-build-array scm port)
+(define (json-build-array scm port escape pretty level)
   (simple-format port "[")
   (for-each (lambda (v)
-              (json-build v port)
+              (json-build v port escape pretty (+ level 1))
               (simple-format port ", "))
             (drop-right scm 1))
-  (json-build (last scm) port)
+  (json-build (last scm) port escape pretty (+ level 1))
   (simple-format port "]"))
 
-(define (json-build-object scm port)
-  (simple-format port "{")
+(define (json-build-object scm port escape pretty level)
+  (build-newline port pretty)
+  (simple-format port "~A{" (indent-string pretty level))
+  (build-newline port pretty)
   (let* ((pairs (hash-map->list cons scm))
          (last-pair (last pairs)))
     (for-each (lambda (p)
-                (build-object-pair p port)
-                (simple-format port ", "))
+                (build-object-pair p port escape pretty (+ level 1))
+                (simple-format port ", ")
+                (build-newline port pretty))
               (drop-right pairs 1))
-    (build-object-pair last-pair port))
-  (simple-format port "}"))
+    (build-object-pair last-pair port escape pretty (+ level 1)))
+  (build-newline port pretty)
+  (simple-format port "~A}" (indent-string pretty level)))
 
-(define (json-build scm port)
+(define (json-build scm port escape pretty level)
   (cond
    ((eq? scm #nil) (json-build-null port))
    ((boolean? scm) (json-build-boolean scm port))
    ((number? scm) (json-build-number scm port))
-   ((string? scm) (json-build-string scm port))
-   ((list? scm) (json-build-array scm port))
-   ((hash-table? scm) (json-build-object scm port))
+   ((string? scm) (json-build-string scm port escape))
+   ((list? scm) (json-build-array scm port escape pretty level))
+   ((hash-table? scm) (json-build-object scm port escape pretty level))
    (else (throw 'json-invalid))))
 
 ;;
 ;; Public procedures
 ;;
 
-(define* (scm->json scm #:optional (port (current-output-port)))
+(define* (scm->json scm
+                    #:optional (port (current-output-port))
+                    #:key (escape #f) (pretty #f))
   "Creates a JSON document from native. The argument @var{scm} contains
 the native value of the JSON document. Takes one optional argument,
 @var{port}, which defaults to the current output port where the JSON
 document will be written."
-  (json-build scm port))
+  (json-build scm port escape pretty 0))
 
-(define* (scm->json-string scm)
+(define* (scm->json-string scm #:key (escape #f) (pretty #f))
   "Creates a JSON document from native into a string. The argument
 @var{scm} contains the native value of the JSON document."
-  (call-with-output-string (lambda (p) (scm->json scm p))))
+  (call-with-output-string
+   (lambda (p)
+     (scm->json scm p #:escape escape #:pretty pretty))))
 
 ;;; (json builder) ends here
