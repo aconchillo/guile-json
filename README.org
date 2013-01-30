@@ -19,8 +19,11 @@ specification. These are the main features:
 guile-json is freely available for download under the terms of the GNU
 General Public License version 3 (GPLv3).
 
-Download the latest tarball [[http://hacks-galore.org/aleix/guile-json/guile-json-0.1.0.tar.gz][guile-json-0.1.0.tar.gz]] and untar it. Then,
-run the typical sequence:
+Download the latest tarball and untar it:
+
+- [[http://hacks-galore.org/aleix/guile-json/guile-json-0.1.0.tar.gz][guile-json-0.1.0.tar.gz]]
+
+Then, run the typical sequence:
 
     : $ ./configure --prefix=<guile-prefix>
     : $ make
@@ -45,6 +48,7 @@ guile-json, for example:
 A pkg-list.scm file is also provided for users of the
 Guildhall/Dorodango packaging system.
 
+
 * Usage
 
 guile-json provides a few procedures to parse and build a JSON
@@ -60,6 +64,12 @@ values according to the following table:
 | true   | #t         |
 | false  | #f         |
 | null   | #nil       |
+
+To start using guile-json procedures and macros you first need to load
+the module:
+
+    : scheme@(guile-user)> (use-modules (json))
+
 
 ** Procedures
 
@@ -86,6 +96,7 @@ values according to the following table:
   - /escape/ : if true, the slash (/ solidus) character will be escaped.
   - /pretty/ : if true, the JSON document will be pretty printed.
 
+
 ** Macros
 
 It is also possible to build JSON documents programmatically using the
@@ -93,7 +104,8 @@ main /json/ macro (and /object/ and /array/). Here are some examples:
 
 - Build the string "hello world":
 
-    : (json "hello world"))
+    : scheme@(guile-user)> (scm->json (json "hello world"))
+    : "hello world"
 
 - Build the [1, 2, 3] array:
 
