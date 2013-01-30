@@ -31,7 +31,8 @@
   #:use-module (ice-9 format)
   #:use-module (srfi srfi-1)
   #:use-module (rnrs bytevectors)
-  #:export (scm->json))
+  #:export (scm->json
+            scm->json-string))
 
 ;;
 ;; String builder helpers
@@ -76,21 +77,32 @@
      (else (throw 'json-invalid)))))
 
 ;;
+;; Object builder functions
+;;
+
+(define (build-object-pair p port)
+  (json-build-string (car p) port)
+  (simple-format port " : ")
+  (json-build (cdr p) port))
+
+;;
 ;; Main builder functions
 ;;
 
-(define (json-build-null)
-  "null")
+(define (json-build-null port)
+  (simple-format port "null"))
 
-(define (json-build-boolean scm)
-  (if scm "true" "false"))
+(define (json-build-boolean scm port)
+  (simple-format port "~A" (if scm "true" "false")))
 
-(define (json-build-number scm)
-  (number->string scm))
+(define (json-build-number scm port)
+  (simple-format port "~A" (number->string scm)))
 
-(define (json-build-string scm)
-  (string-append
-   "\""
+(define (json-build-string scm port)
+  (simple-format port "\"")
+  (simple-format
+   port
+   "~A"
    (list->string
     (fold-right append '()
                 (map
@@ -103,39 +115,53 @@
                      ((#\cr) '(#\\ #\r))
                      ((#\ht) '(#\\ #\t))
                      (else (string->list (build-char-string c)))))
-                 (string->list scm))))
-   "\""))
+                 (string->list scm)))))
+  (simple-format port "\""))
 
-(define (json-build-array scm)
-  (string-append "[" (string-join (map json-build scm) ", ") "]"))
+(define (json-build-array scm port)
+  (simple-format port "[")
+  (for-each (lambda (v)
+              (json-build v port)
+              (simple-format port ", "))
+            (drop-right scm 1))
+  (json-build (last scm) port)
+  (simple-format port "]"))
 
-(define (json-build-object scm)
-  (string-append
-   "{"
-   (string-join (hash-map->list
-                 (lambda (k v)
-                   (string-append (json-build-string k)
-                                  " : "
-                                  (json-build v)))
-                 scm) ", ")
-   "}"))
+(define (json-build-object scm port)
+  (simple-format port "{")
+  (let* ((pairs (hash-map->list cons scm))
+         (last-pair (last pairs)))
+    (for-each (lambda (p)
+                (build-object-pair p port)
+                (simple-format port ", "))
+              (drop-right pairs 1))
+    (build-object-pair last-pair port))
+  (simple-format port "}"))
 
-(define (json-build scm)
+(define (json-build scm port)
   (cond
-   ((eq? scm #nil) (json-build-null))
-   ((boolean? scm) (json-build-boolean scm))
-   ((number? scm) (json-build-number scm))
-   ((string? scm) (json-build-string scm))
-   ((list? scm) (json-build-array scm))
-   ((hash-table? scm) (json-build-object scm))
+   ((eq? scm #nil) (json-build-null port))
+   ((boolean? scm) (json-build-boolean scm port))
+   ((number? scm) (json-build-number scm port))
+   ((string? scm) (json-build-string scm port))
+   ((list? scm) (json-build-array scm port))
+   ((hash-table? scm) (json-build-object scm port))
    (else (throw 'json-invalid))))
 
 ;;
 ;; Public procedures
 ;;
 
-(define* (scm->json scm)
-  "Creates a JSON document from native."
-  (json-build scm))
+(define* (scm->json scm #:optional (port (current-output-port)))
+  "Creates a JSON document from native. The argument @var{scm} contains
+the native value of the JSON document. Takes one optional argument,
+@var{port}, which defaults to the current output port where the JSON
+document will be written."
+  (json-build scm port))
+
+(define* (scm->json-string scm)
+  "Creates a JSON document from native into a string. The argument
+@var{scm} contains the native value of the JSON document."
+  (call-with-output-string (lambda (p) (scm->json scm p))))
 
 ;;; (json builder) ends here
