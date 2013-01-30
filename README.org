@@ -88,7 +88,7 @@ values according to the following table:
 
 ** Macros
 
-It is also possible to build JSON documents programmaticaly using the
+It is also possible to build JSON documents programmatically using the
 main /json/ macro (and /object/ and /array/). Here are some examples:
 
 - Build the string "hello world":
