@@ -51,9 +51,7 @@
 
       ((_ (object (k v) ...))
        #'(let ((pairs (make-hash-table)))
-           (hashq-set! pairs
-                       (string->symbol (syntax->datum #'k))
-                       (json v)) ...
+           (hash-set! pairs (syntax->datum #'k) (json v)) ...
            pairs)))))
 
 ;;; (json syntax) ends here
