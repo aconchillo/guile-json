@@ -99,10 +99,8 @@
   (simple-format port "~A" (number->string scm)))
 
 (define (json-build-string scm port)
-  (simple-format port "\"")
   (simple-format
-   port
-   "~A"
+   port "\"~A\""
    (list->string
     (fold-right append '()
                 (map
@@ -115,8 +113,7 @@
                      ((#\cr) '(#\\ #\r))
                      ((#\ht) '(#\\ #\t))
                      (else (string->list (build-char-string c)))))
-                 (string->list scm)))))
-  (simple-format port "\""))
+                 (string->list scm))))))
 
 (define (json-build-array scm port)
   (simple-format port "[")
