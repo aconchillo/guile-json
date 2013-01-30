@@ -2,6 +2,9 @@ SUBDIRS = json
 
 ACLOCAL_AMFLAGS = -I build-aux
 
+dist-hook:
+	$(SHELL) $(top_srcdir)/ChangeLog > $(top_distdir)/ChangeLog
+
 moddir=$(prefix)/share/guile/site
 
 SOURCES = json.scm
