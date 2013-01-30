@@ -19,7 +19,7 @@ specification. These are the main features:
 guile-json is freely available for download under the terms of the GNU
 General Public License version 3 (GPLv3).
 
-Download the latest tarball guile-json-0.1.0.tar.gz and untar it. Then,
+Download the latest tarball [[http://hacks-galore.org/aleix/guile-json/guile-json-0.1.0.tar.gz][guile-json-0.1.0.tar.gz]] and untar it. Then,
 run the typical sequence:
 
     : $ ./configure --prefix=<guile-prefix>
