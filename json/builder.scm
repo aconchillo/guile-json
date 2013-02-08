@@ -81,9 +81,9 @@
 ;;
 
 (define (build-object-pair p port escape pretty level)
-  (simple-format port "~A" (indent-string pretty level))
+  (display (indent-string pretty level) port)
   (json-build-string (car p) port escape)
-  (simple-format port " : ")
+  (display " : " port)
   (json-build (cdr p) port escape pretty level))
 
 (define (build-newline port pretty)
@@ -97,17 +97,17 @@
 ;;
 
 (define (json-build-null port)
-  (simple-format port "null"))
+  (display "null" port))
 
 (define (json-build-boolean scm port)
-  (simple-format port "~A" (if scm "true" "false")))
+  (display (if scm "true" "false") port))
 
 (define (json-build-number scm port)
-  (simple-format port "~A" (number->string scm)))
+  (display (number->string scm) port))
 
 (define (json-build-string scm port escape)
-  (simple-format
-   port "\"~A\""
+  (display "\"" port)
+  (display
    (list->string
     (fold-right append '()
                 (map
@@ -121,17 +121,19 @@
                      ((#\ht) '(#\\ #\t))
                      ((#\/) (if escape `(#\\ ,c) (list c)))
                      (else (string->list (build-char-string c)))))
-                 (string->list scm))))))
+                 (string->list scm))))
+   port)
+  (display "\"" port))
 
 (define (json-build-array scm port escape pretty level)
-  (simple-format port "[")
+  (display "[" port)
   (unless (null? scm)
     (json-build (car scm) port escape pretty (+ level 1))
     (for-each (lambda (v)
-                (simple-format port ", ")
+                (display ", " port)
                 (json-build v port escape pretty (+ level 1)))
               (cdr scm)))
-  (simple-format port "]"))
+  (display "]" port))
 
 (define (json-build-object scm port escape pretty level)
   (build-newline port pretty)
@@ -141,9 +143,9 @@
     (unless (null? pairs)
       (build-object-pair (car pairs) port escape pretty (+ level 1))
       (for-each (lambda (p)
-                  (simple-format port ", ")
-                  (build-object-pair p port escape pretty (+ level 1))
-                  (build-newline port pretty))
+                  (display "," port)
+                  (build-newline port pretty)
+                  (build-object-pair p port escape pretty (+ level 1)))
                 (cdr pairs))))
   (build-newline port pretty)
   (simple-format port "~A}" (indent-string pretty level)))
