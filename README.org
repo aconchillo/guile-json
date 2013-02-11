@@ -21,7 +21,7 @@ General Public License version 3 (GPLv3).
 
 Download the latest tarball and untar it:
 
-- [[http://hacks-galore.org/aleix/guile-json/guile-json-0.1.2.tar.gz][guile-json-0.1.2.tar.gz]]
+- [[http://hacks-galore.org/aleix/guile-json/guile-json-0.1.3.tar.gz][guile-json-0.1.3.tar.gz]]
 
 Then, run the typical sequence:
 
