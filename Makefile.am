@@ -2,8 +2,12 @@ SUBDIRS = json
 
 ACLOCAL_AMFLAGS = -I build-aux
 
+PKG_LIST_VERSION=$(shell echo $(PACKAGE_VERSION) | sed "s/\./ /g")
+
 dist-hook:
 	$(SHELL) $(top_srcdir)/ChangeLog > $(top_distdir)/ChangeLog
+	cp $(top_srcdir)/pkg-list.scm.in $(top_distdir)/pkg-list.scm
+	sed -i "s/%VERSION%/$(PKG_LIST_VERSION)/" $(top_distdir)/pkg-list.scm
 
 moddir=$(prefix)/share/guile/site
 
@@ -12,7 +16,7 @@ SOURCES = json.scm
 GOBJECTS = $(SOURCES:%.scm=%.go)
 
 nobase_mod_DATA = $(SOURCES) $(NOCOMP_SOURCES) $(GOBJECTS)
-EXTRA_DIST = pkg-list.scm $(SOURCES) $(NOCOMP_SOURCES)
+EXTRA_DIST = $(SOURCES) $(NOCOMP_SOURCES)
 
 CLEANFILES = $(GOBJECTS)
 

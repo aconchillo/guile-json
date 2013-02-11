@@ -21,7 +21,7 @@
 ;; Boston, MA  02111-1307,  USA       gnu@gnu.org
 ;;
 
-(package (json (0 1 0))
+(package (json (%VERSION%))
   (depends (srfi-1))
   (synopsis "JSON parser/writer for Guile")
   (description
