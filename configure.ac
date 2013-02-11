@@ -19,7 +19,7 @@
 # write to the Free Software Foundation, Inc., 51 Franklin Street,
 # Fifth Floor, Boston, MA  02110-1301  USA
 
-AC_INIT([guile-json], [0.1.2], [aconchillo@gmail.com])
+AC_INIT([guile-json], [0.1.3], [aconchillo@gmail.com])
 AC_CONFIG_SRCDIR(json.scm)
 AC_CONFIG_AUX_DIR([build-aux])
 AM_INIT_AUTOMAKE([color-tests -Wall -Wno-portability])
