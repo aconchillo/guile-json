@@ -21,7 +21,7 @@ General Public License version 3 (GPLv3).
 
 Download the latest tarball and untar it:
 
-- [[http://download.savannah.gnu.org/releases/guile-json/guile-json-0.1.3.tar.gz][guile-json-0.1.3.tar.gz]]
+- [[http://download.savannah.gnu.org/releases/guile-json/guile-json-0.2.0.tar.gz][guile-json-0.2.0.tar.gz]]
 
 Then, run the typical sequence:
 
@@ -95,6 +95,27 @@ the module:
 
   - /escape/ : if true, the slash (/ solidus) character will be escaped.
   - /pretty/ : if true, the JSON document will be pretty printed.
+
+
+** Exceptions
+
+A /json-invalid/ exception is thrown if an error is found during the
+JSON parsing. Since version 0.2.0, the /json-invalid/ exception has a
+parser argument that contains additional error information (e.g. row and
+column where error was found). The parser is a record type with the
+following predicate and accessors:
+
+- (*json-parser?* parser) : Tells whether the given argument is a JSON
+  parser record type.
+
+- (*json-parser-port* parser) : Get the port that the parser was reading
+  from.
+
+- (*json-parser-row* parser) : Get the current character row the parser
+  was at.
+
+- (*json-parser-column* parser) : Get the current character column the
+  parser was at.
 
 
 ** Macros
