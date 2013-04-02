@@ -32,7 +32,11 @@
   #:use-module (rnrs bytevectors)
   #:use-module (srfi srfi-9)
   #:export (json->scm
-            json-string->scm))
+            json-string->scm
+            json-parser?
+            json-parser-port
+            json-parser-row
+            json-parser-column))
 
 ;;
 ;; Parser record and read helpers
