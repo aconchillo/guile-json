@@ -30,35 +30,67 @@
 (define-module (json parser)
   #:use-module (ice-9 rdelim)
   #:use-module (rnrs bytevectors)
+  #:use-module (srfi srfi-9)
   #:export (json->scm
             json-string->scm))
+
+;;
+;; Parser record and read helpers
+;;
+
+(define-record-type json-parser
+  (make-json-parser port row column)
+  json-parser?
+  (port json-parser-port)
+  (row json-parser-row json-parser-set-row)
+  (column json-parser-column json-parser-set-column))
+
+(define (parser-peek-char parser)
+  (peek-char (json-parser-port parser)))
+
+(define (parser-read-char parser)
+  (let ((c (read-char (json-parser-port parser))))
+    (case c
+      ((#\lf #\cr)
+       (json-parser-set-column parser 0)
+       (json-parser-set-row parser (+ (json-parser-row parser) 1)))
+      (else
+       (json-parser-set-column parser (+ (json-parser-column parser) 1))))
+    c))
+
+(define (parser-read-delimited parser delim handle-delim)
+  (let* ((port (json-parser-port parser))
+         (current (read-delimited delim port handle-delim)))
+    (json-parser-set-column parser (+ (json-parser-column parser)
+                                      (string-length (car current))))
+    current))
 
 ;;
 ;; Number parsing helpers
 ;;
 
 ;; Read + or -. . If something different is found, return empty string.
-(define (read-sign port)
-  (let loop ((c (peek-char port)) (s ""))
+(define (read-sign parser)
+  (let loop ((c (parser-peek-char parser)) (s ""))
     (case c
       ((#\+ #\-)
-       (let ((ch (read-char port)))
+       (let ((ch (parser-read-char parser)))
          (string-append s (string ch))))
       (else s))))
 
 ;; Read digits [0..9]. If something different is found, return empty
 ;; string.
-(define (read-digits port)
-  (let loop ((c (peek-char port)) (s ""))
+(define (read-digits parser)
+  (let loop ((c (parser-peek-char parser)) (s ""))
     (case c
       ((#\0 #\1 #\2 #\3 #\4 #\5 #\6 #\7 #\8 #\9)
-       (let ((ch (read-char port)))
-         (loop (peek-char port)
+       (let ((ch (parser-read-char parser)))
+         (loop (parser-peek-char parser)
                (string-append s (string ch)))))
       (else s))))
 
-(define (read-exp-part port)
-  (let ((c (peek-char port)) (s ""))
+(define (read-exp-part parser)
+  (let ((c (parser-peek-char parser)) (s ""))
     (case c
       ;; Stop parsing if whitespace found.
       ((#\ht #\vt #\lf #\cr #\sp) s)
@@ -66,9 +98,9 @@
       ((#\, #\] #\}) s)
       ;; We might have the exponential part
       ((#\e #\E)
-       (let ((ch (read-char port)) ; current char
-             (sign (read-sign port))
-             (digits (read-digits port)))
+       (let ((ch (parser-read-char parser)) ; current char
+             (sign (read-sign parser))
+             (digits (read-digits parser)))
          ;; If we don't have sign or digits, we have an invalid
          ;; number.
          (if (not (and (string-null? sign)
@@ -79,8 +111,8 @@
       ;; invalid number.
       (else #f))))
 
-(define (read-real-part port)
-  (let ((c (peek-char port)) (s ""))
+(define (read-real-part parser)
+  (let ((c (parser-peek-char parser)) (s ""))
     (case c
       ;; Stop parsing if whitespace found.
       ((#\ht #\vt #\lf #\cr #\sp) s)
@@ -88,13 +120,13 @@
       ((#\, #\] #\}) s)
       ;; If we read . we might have a real number
       ((#\.)
-       (let ((ch (read-char port))
-             (digits (read-digits port)))
+       (let ((ch (parser-read-char parser))
+             (digits (read-digits parser)))
          ;; If we have digits, try to read the exponential part,
          ;; otherwise we have an invalid number.
          (cond
           ((not (string-null? digits))
-           (let ((exp (read-exp-part port)))
+           (let ((exp (read-exp-part parser)))
              (cond
               (exp (string-append s (string ch) digits exp))
               (else #f))))
@@ -103,121 +135,122 @@
       ;; processing.
       (else #f))))
 
-(define (read-number port)
-  (let loop ((c (peek-char port)) (s ""))
+(define (read-number parser)
+  (let loop ((c (parser-peek-char parser)) (s ""))
     (case c
       ;; Stop parsing if whitespace found.
       ((#\ht #\vt #\lf #\cr #\sp) s)
       ;; We might be in an array or object, so stop here too.
       ((#\, #\] #\}) s)
       ((#\-)
-       (let ((ch (read-char port)))
-         (loop (peek-char port)
+       (let ((ch (parser-read-char parser)))
+         (loop (parser-peek-char parser)
                (string-append s (string ch)))))
       ((#\0)
-       (let ((ch (read-char port)))
+       (let ((ch (parser-read-char parser)))
          (string-append s
                         (string ch)
-                        (or (read-real-part port)
-                            (throw 'json-invalid)))))
+                        (or (read-real-part parser)
+                            (throw 'json-invalid parser)))))
       ((#\1 #\2 #\3 #\4 #\5 #\6 #\7 #\8 #\9)
-       (let ((ch (read-char port)))
+       (let ((ch (parser-read-char parser)))
          (string-append s
                         (string ch)
-                        (read-digits port)
-                        (or (read-real-part port)
-                            (read-exp-part port)
-                            (throw 'json-invalid)))))
-      (else (throw 'json-invalid)))))
+                        (read-digits parser)
+                        (or (read-real-part parser)
+                            (read-exp-part parser)
+                            (throw 'json-invalid parser)))))
+      (else (throw 'json-invalid parser)))))
 
 ;;
 ;; Object parsing helpers
 ;;
 
-(define (read-pair port)
+(define (read-pair parser)
   ;; Read string key
-  (let ((key (json-read-string port)))
-    (let loop ((c (peek-char port)))
+  (let ((key (json-read-string parser)))
+    (let loop ((c (parser-peek-char parser)))
       (case c
       ;; Skip whitespaces
       ((#\ht #\vt #\lf #\cr #\sp)
-       (read-char port)
-       (loop (peek-char port)))
+       (parser-read-char parser)
+       (loop (parser-peek-char parser)))
       ;; Skip colon and read value
       ((#\:)
-       (read-char port)
-       (cons key (json-read port)))
+       (parser-read-char parser)
+       (cons key (json-read parser)))
       ;; invalid object
-      (else (throw 'json-invalid))))))
+      (else (throw 'json-invalid parser))))))
 
-(define (read-object port)
-  (let loop ((c (peek-char port))
+(define (read-object parser)
+  (let loop ((c (parser-peek-char parser))
              (pairs (make-hash-table)))
     (case c
       ;; Skip whitespaces
       ((#\ht #\vt #\lf #\cr #\sp)
-       (read-char port)
-       (loop (peek-char port) pairs))
+       (parser-read-char parser)
+       (loop (parser-peek-char parser) pairs))
       ;; end of object
       ((#\})
-       (read-char port)
+       (parser-read-char parser)
        pairs)
       ;; Read one pair and continue
       ((#\")
-       (let ((pair (read-pair port)))
+       (let ((pair (read-pair parser)))
          (hash-set! pairs (car pair) (cdr pair))
-         (loop (peek-char port) pairs)))
+         (loop (parser-peek-char parser) pairs)))
       ;; Skip comma and read more pairs
       ((#\,)
-       (read-char port)
-       (loop (peek-char port) pairs))
+       (parser-read-char parser)
+       (loop (parser-peek-char parser) pairs))
       ;; invalid object
-      (else (throw 'json-invalid)))))
+      (else (throw 'json-invalid parser)))))
 
 ;;
 ;; Array parsing helpers
 ;;
 
-(define (read-array port)
-  (let loop ((c (peek-char port)) (values '()))
+(define (read-array parser)
+  (let loop ((c (parser-peek-char parser)) (values '()))
     (case c
       ;; Skip whitespace and comma
       ((#\ht #\vt #\lf #\cr #\sp #\,)
-       (read-char port)
-       (loop (peek-char port) values))
+       (parser-read-char parser)
+       (loop (parser-peek-char parser) values))
       ;; end of array
       ((#\])
-       (read-char port)
+       (parser-read-char parser)
        values)
       ;; this can be any json object
       (else
-       (let ((value (json-read port)))
-         (loop (peek-char port)
+       (let ((value (json-read parser)))
+         (loop (parser-peek-char parser)
                (append values (list value))))))))
 
 ;;
 ;; String parsing helpers
 ;;
 
-(define (expect ch expected)
-  (if (not (char=? ch expected))
-      (throw 'json-invalid)
-      ch))
+(define (expect parser expected)
+  (let ((ch (parser-read-char parser)))
+    (if (not (char=? ch expected))
+      (throw 'json-invalid parser)
+      ch)))
 
-(define (expect-string port expected)
+(define (expect-string parser expected)
   (list->string
-   (map (lambda (ch) (expect ch (read-char port)))
+   (map (lambda (ch) (expect parser ch))
         (string->list expected))))
 
-(define (read-hex-digit port)
-  (let ((c (read-char port)))
+(define (read-hex-digit parser)
+  (let ((c (parser-read-char parser)))
     (case c
       ((#\0 #\1 #\2 #\3 #\4 #\5 #\6 #\7 #\8 #\9
         #\A #\B #\C #\D #\E #\F #\a #\b #\c #\d #\e #\f) c)
-      (else (throw 'json-invalid)))))
+      (else (throw 'json-invalid parser)))))
 
-(define (read-control-char port)
-  (let ((c (read-char port)))
+(define (read-control-char parser)
+  (let ((c (parser-read-char parser)))
     (case c
       ((#\" #\\ #\/) (string c))
       ((#\b) (string #\bs))
@@ -226,31 +259,31 @@
       ((#\r) (string #\cr))
       ((#\t) (string #\ht))
       ((#\u)
-       (let* ((utf1 (string (read-hex-digit port)
-                            (read-hex-digit port)))
-              (utf2 (string (read-hex-digit port)
-                            (read-hex-digit port)))
+       (let* ((utf1 (string (read-hex-digit parser)
+                            (read-hex-digit parser)))
+              (utf2 (string (read-hex-digit parser)
+                            (read-hex-digit parser)))
               (vu8 (list (string->number utf1 16)
                          (string->number utf2 16)))
               (utf (u8-list->bytevector vu8)))
          (utf16->string utf)))
       (else #f))))
 
-(define (read-string port)
+(define (read-string parser)
   ;; Read characters until \ or " are found.
   (let loop ((result "")
-             (current (read-delimited "\\\"" port 'split)))
+             (current (parser-read-delimited parser "\\\"" 'split)))
     (case (cdr current)
       ((#\")
        (string-append result (car current)))
       ((#\\)
-       (let ((ch (read-control-char port)))
+       (let ((ch (read-control-char parser)))
          (if ch
              (loop (string-append result (car current) ch)
-                   (read-delimited "\\\"" port 'split))
-             (throw 'json-invalid))))
+                   (parser-read-delimited parser "\\\"" 'split))
+             (throw 'json-invalid parser ))))
       (else
-       (throw 'json-invalid)))))
+       (throw 'json-invalid parser)))))
 
 ;;
 ;; Main parser functions
@@ -258,59 +291,59 @@
 
 (define-syntax json-read-delimited
   (syntax-rules ()
-    ((json-read-delimited port delim read-func)
-     (let loop ((c (read-char port)))
+    ((json-read-delimited parser delim read-func)
+     (let loop ((c (parser-read-char parser)))
        (case c
          ;; skip whitespace
-         ((#\ht #\vt #\lf #\cr #\sp) (loop (peek-char port)))
+         ((#\ht #\vt #\lf #\cr #\sp) (loop (parser-peek-char parser)))
          ;; read contents
-         ((delim) (read-func port))
-         (else (throw 'json-invalid)))))))
+         ((delim) (read-func parser))
+         (else (throw 'json-invalid parser)))))))
 
-(define (json-read-true port)
-  (expect-string port "true")
+(define (json-read-true parser)
+  (expect-string parser "true")
   #t)
 
-(define (json-read-false port)
-  (expect-string port "false")
+(define (json-read-false parser)
+  (expect-string parser "false")
   #f)
 
-(define (json-read-null port)
-  (expect-string port "null")
+(define (json-read-null parser)
+  (expect-string parser "null")
   #nil)
 
-(define (json-read-object port)
-  (json-read-delimited port #\{ read-object))
+(define (json-read-object parser)
+  (json-read-delimited parser #\{ read-object))
 
-(define (json-read-array port)
-  (json-read-delimited port #\[ read-array))
+(define (json-read-array parser)
+  (json-read-delimited parser #\[ read-array))
 
-(define (json-read-string port)
-  (json-read-delimited port #\" read-string))
+(define (json-read-string parser)
+  (json-read-delimited parser #\" read-string))
 
-(define (json-read-number port)
-  (string->number (read-number port)))
+(define (json-read-number parser)
+  (string->number (read-number parser)))
 
-(define (json-read port)
-  (let loop ((c (peek-char port)))
+(define (json-read parser)
+  (let loop ((c (parser-peek-char parser)))
     (cond
      ;;If we reach the end we might have an incomplete document
-     ((eof-object? c) (throw 'json-invalid))
+     ((eof-object? c) (throw 'json-invalid parser))
      (else
       (case c
         ;; skip whitespaces
         ((#\ht #\vt #\lf #\cr #\sp)
-         (read-char port)
-         (loop (peek-char port)))
+         (parser-read-char parser)
+         (loop (parser-peek-char parser)))
         ;; read json values
-        ((#\t) (json-read-true port))
-        ((#\f) (json-read-false port))
-        ((#\n) (json-read-null port))
-        ((#\{) (json-read-object port))
-        ((#\[) (json-read-array port))
-        ((#\") (json-read-string port))
+        ((#\t) (json-read-true parser))
+        ((#\f) (json-read-false parser))
+        ((#\n) (json-read-null parser))
+        ((#\{) (json-read-object parser))
+        ((#\[) (json-read-array parser))
+        ((#\") (json-read-string parser))
         ;; anything else should be a number
-        (else (json-read-number port)))))))
+        (else (json-read-number parser)))))))
 
 ;;
 ;; Public procedures
@@ -320,7 +353,7 @@
   "Parse a JSON document into native. Takes one optional argument,
 @var{port}, which defaults to the current input port from where the JSON
 document is read."
-  (json-read port))
+  (json-read (make-json-parser port 0 0)))
 
 (define* (json-string->scm str)
   "Parse a JSON document into native. Takes a string argument,
