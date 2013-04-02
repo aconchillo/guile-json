@@ -1,4 +1,10 @@
 
+* Version 0.2.0 (Apr 2, 2013)
+
+  - Improve parser errors by providing an additional parser argument to
+    the json-invalid exception.
+
+
 * Version 0.1.3 (Feb 10, 2013)
 
   - Automatically update pkg-list.scm version.
