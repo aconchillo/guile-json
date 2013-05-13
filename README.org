@@ -2,7 +2,7 @@
 * guile-json
 
 guile-json is a JSON module for Guile. It supports parsing and
-building JSON documents according to the http:://json.org
+building JSON documents according to the http://json.org
 specification. These are the main features:
 
 - Strictly complies to http://json.org specification.
