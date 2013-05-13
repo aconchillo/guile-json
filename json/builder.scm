@@ -103,7 +103,9 @@
   (display (if scm "true" "false") port))
 
 (define (json-build-number scm port)
-  (display (number->string scm) port))
+  (if (and (rational? scm) (not (integer? scm)))
+      (display (number->string (exact->inexact scm)) port)
+      (display (number->string scm) port)))
 
 (define (json-build-string scm port escape)
   (display "\"" port)
