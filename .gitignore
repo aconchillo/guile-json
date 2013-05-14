@@ -13,4 +13,4 @@ Makefile
 Makefile.in
 *.go
 
-guile-json-*.tar.gz
+guile-json-*
