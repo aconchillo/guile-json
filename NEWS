@@ -1,4 +1,12 @@
 
+* Version 0.3.0 (May 13, 2013)
+
+  - Re-licensed under LGPLv3.
+
+  - Convert rationals to floats to comply with JSON spec.
+    (closes github #3, patch from Doug Woos)
+
+
 * Version 0.2.0 (Apr 2, 2013)
 
   - Improve parser errors by providing an additional parser argument to
