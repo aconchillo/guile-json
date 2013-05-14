@@ -1,6 +1,6 @@
 ## Autoconf macros for working with Guile.
 ##
-##   Copyright (C) 1998,2001, 2006, 2010 Free Software Foundation, Inc.
+##   Copyright (C) 1998,2001, 2006, 2010, 2012 Free Software Foundation, Inc.
 ##
 ## This library is free software; you can redistribute it and/or
 ## modify it under the terms of the GNU Lesser General Public License
@@ -22,6 +22,7 @@
 ## Index
 ## -----
 ##
+## GUILE_PKG -- find Guile development files
 ## GUILE_PROGS -- set paths to Guile interpreter, config and tool programs
 ## GUILE_FLAGS -- set flags for compiling and linking with Guile
 ## GUILE_SITE_DIR -- find path to Guile "site" directory
@@ -38,53 +39,85 @@
 ## NOTE: Comments preceding an AC_DEFUN (starting from "Usage:") are massaged
 ## into doc/ref/autoconf-macros.texi (see Makefile.am in that directory).
 
-# GUILE_PROGS -- set paths to Guile interpreter, config and tool programs
+# GUILE_PKG -- find Guile development files
 #
-# Usage: GUILE_PROGS
+# Usage: GUILE_PKG([VERSIONS])
 #
-# This macro looks for programs @code{guile}, @code{guile-config} and
-# @code{guile-tools}, and sets variables @var{GUILE}, @var{GUILE_CONFIG} and
-# @var{GUILE_TOOLS}, to their paths, respectively.  If either of the first two
-# is not found, signal error.
+# This macro runs the @code{pkg-config} tool to find development files
+# for an available version of Guile.
 #
-# The variables are marked for substitution, as by @code{AC_SUBST}.
+# By default, this macro will search for the latest stable version of
+# Guile (e.g. 2.0), falling back to the previous stable version
+# (e.g. 1.8) if it is available.  If no guile-@var{VERSION}.pc file is
+# found, an error is signalled.  The found version is stored in
+# @var{GUILE_EFFECTIVE_VERSION}.
 #
-AC_DEFUN([GUILE_PROGS],
- [AC_PATH_PROG(GUILE,guile)
-  if test "$GUILE" = "" ; then
-      AC_MSG_ERROR([guile required but not found])
+# If @code{GUILE_PROGS} was already invoked, this macro ensures that the
+# development files have the same effective version as the Guile
+# program.
+#
+# @var{GUILE_EFFECTIVE_VERSION} is marked for substitution, as by
+# @code{AC_SUBST}.
+#
+AC_DEFUN([GUILE_PKG],
+ [PKG_PROG_PKG_CONFIG
+  _guile_versions_to_search="m4_default([$1], [2.0 1.8])"
+  if test -n "$GUILE_EFFECTIVE_VERSION"; then
+    _guile_tmp=""
+    for v in $_guile_versions_to_search; do
+      if test "$v" = "$GUILE_EFFECTIVE_VERSION"; then
+        _guile_tmp=$v
+      fi
+    done
+    if test -z "$_guile_tmp"; then
+      AC_MSG_FAILURE([searching for guile development files for versions $_guile_versions_to_search, but previously found $GUILE version $GUILE_EFFECTIVE_VERSION])
+    fi
+    _guile_versions_to_search=$GUILE_EFFECTIVE_VERSION
   fi
-  AC_SUBST(GUILE)
-  AC_PATH_PROG(GUILE_CONFIG,guile-config)
-  if test "$GUILE_CONFIG" = "" ; then
-      AC_MSG_ERROR([guile-config required but not found])
+  GUILE_EFFECTIVE_VERSION=""
+  _guile_errors=""
+  for v in $_guile_versions_to_search; do
+    AC_MSG_NOTICE([checking for guile $v])
+    if test -z "$GUILE_EFFECTIVE_VERSION"; then
+      PKG_CHECK_EXISTS([guile-$v], [GUILE_EFFECTIVE_VERSION=$v], [])
+    fi
+  done
+
+  if test -z "$GUILE_EFFECTIVE_VERSION"; then
+    AC_MSG_ERROR([
+No Guile development packages were found.
+
+Please verify that you have Guile installed.  If you installed Guile
+from a binary distribution, please verify that you have also installed
+the development packages.  If you installed it yourself, you might need
+to adjust your PKG_CONFIG_PATH; see the pkg-config man page for more.
+])
   fi
-  AC_SUBST(GUILE_CONFIG)
-  AC_PATH_PROG(GUILE_TOOLS,guile-tools)
-  AC_SUBST(GUILE_TOOLS)
+  AC_MSG_NOTICE([found guile $v])
+  AC_SUBST([GUILE_EFFECTIVE_VERSION])
  ])
 
 # GUILE_FLAGS -- set flags for compiling and linking with Guile
 #
 # Usage: GUILE_FLAGS
 #
-# This macro runs the @code{guile-config} script, installed with Guile, to
-# find out where Guile's header files and libraries are installed.  It sets
-# four variables, @var{GUILE_CFLAGS}, @var{GUILE_LDFLAGS}, @var{GUILE_LIBS},
-# and @var{GUILE_LTLIBS}.
+# This macro runs the @code{pkg-config} tool to find out how to compile
+# and link programs against Guile.  It sets four variables:
+# @var{GUILE_CFLAGS}, @var{GUILE_LDFLAGS}, @var{GUILE_LIBS}, and
+# @var{GUILE_LTLIBS}.
 #
 # @var{GUILE_CFLAGS}: flags to pass to a C or C++ compiler to build code that
 # uses Guile header files.  This is almost always just one or more @code{-I}
 # flags.
 #
-# @var{GUILE_LDFLAGS}: flags to pass to the compiler to link a program against
-# Guile.  This includes @code{-lguile} for the Guile library itself, any
-# libraries that Guile itself requires (like -lqthreads), and so on.  It may
-# also include one or more @code{-L} flag to tell the compiler where to find
-# the libraries.  But it does not include flags that influence the program's
-# runtime search path for libraries, and will therefore lead to a program
-# that fails to start, unless all necessary libraries are installed in a
-# standard location such as @file{/usr/lib}.
+# @var{GUILE_LDFLAGS}: flags to pass to the compiler to link a program
+# against Guile.  This includes @code{-lguile-@var{VERSION}} for the
+# Guile library itself, and may also include one or more @code{-L} flag
+# to tell the compiler where to find the libraries.  But it does not
+# include flags that influence the program's runtime search path for
+# libraries, and will therefore lead to a program that fails to start,
+# unless all necessary libraries are installed in a standard location
+# such as @file{/usr/lib}.
 #
 # @var{GUILE_LIBS} and @var{GUILE_LTLIBS}: flags to pass to the compiler or to
 # libtool, respectively, to link a program against Guile.  It includes flags
@@ -97,16 +130,14 @@ AC_DEFUN([GUILE_PROGS],
 # The variables are marked for substitution, as by @code{AC_SUBST}.
 #
 AC_DEFUN([GUILE_FLAGS],
- [dnl Find guile-config.
-  AC_REQUIRE([GUILE_PROGS])dnl
+ [AC_REQUIRE([GUILE_PKG])
+  PKG_CHECK_MODULES(GUILE, [guile-$GUILE_EFFECTIVE_VERSION])
 
-  AC_MSG_CHECKING([libguile compile flags])
-  GUILE_CFLAGS="`$GUILE_CONFIG compile`"
-  AC_MSG_RESULT([$GUILE_CFLAGS])
+  dnl GUILE_CFLAGS and GUILE_LIBS are already defined and AC_SUBST'd by
+  dnl PKG_CHECK_MODULES.  But GUILE_LIBS to pkg-config is GUILE_LDFLAGS
+  dnl to us.
 
-  AC_MSG_CHECKING([libguile link flags])
-  GUILE_LDFLAGS="`$GUILE_CONFIG link`"
-  AC_MSG_RESULT([$GUILE_LDFLAGS])
+  GUILE_LDFLAGS=$GUILE_LIBS
 
   dnl Determine the platform dependent parameters needed to use rpath.
   dnl AC_LIB_LINKFLAGS_FROM_LIBS is defined in gnulib/m4/lib-link.m4 and needs
@@ -116,6 +147,7 @@ AC_DEFUN([GUILE_FLAGS],
   AC_LIB_LINKFLAGS_FROM_LIBS([GUILE_LTLIBS], [$GUILE_LDFLAGS], [yes])
   GUILE_LTLIBS="$GUILE_LDFLAGS $GUILE_LTLIBS"
 
+  AC_SUBST([GUILE_EFFECTIVE_VERSION])
   AC_SUBST([GUILE_CFLAGS])
   AC_SUBST([GUILE_LDFLAGS])
   AC_SUBST([GUILE_LIBS])
@@ -133,14 +165,59 @@ AC_DEFUN([GUILE_FLAGS],
 # The variable is marked for substitution, as by @code{AC_SUBST}.
 #
 AC_DEFUN([GUILE_SITE_DIR],
- [AC_REQUIRE([GUILE_PROGS])dnl
+ [AC_REQUIRE([GUILE_PKG])
   AC_MSG_CHECKING(for Guile site directory)
-  GUILE_SITE=`[$GUILE_CONFIG] info sitedir`
-  if test "$GUILE_SITE" = ""; then
-     GUILE_SITE=`[$GUILE_CONFIG] info pkgdatadir`/site
-  fi
+  GUILE_SITE=`$PKG_CONFIG --print-errors --variable=sitedir guile-$GUILE_EFFECTIVE_VERSION`
   AC_MSG_RESULT($GUILE_SITE)
+  if test "$GUILE_SITE" = ""; then
+     AC_MSG_FAILURE(sitedir not found)
+  fi
   AC_SUBST(GUILE_SITE)
+ ])
+
+# GUILE_PROGS -- set paths to Guile interpreter, config and tool programs
+#
+# Usage: GUILE_PROGS
+#
+# This macro looks for programs @code{guile} and @code{guild}, setting
+# variables @var{GUILE} and @var{GUILD} to their paths, respectively.
+# If @code{guile} is not found, signal an error.
+#
+# The effective version of the found @code{guile} is set to
+# @var{GUILE_EFFECTIVE_VERSION}.  This macro ensures that the effective
+# version is compatible with the result of a previous invocation of
+# @code{GUILE_FLAGS}, if any.
+#
+# As a legacy interface, it also looks for @code{guile-config} and
+# @code{guile-tools}, setting @var{GUILE_CONFIG} and @var{GUILE_TOOLS}.
+#
+# The variables are marked for substitution, as by @code{AC_SUBST}.
+#
+AC_DEFUN([GUILE_PROGS],
+ [AC_PATH_PROG(GUILE,guile)
+  if test "$GUILE" = "" ; then
+      AC_MSG_ERROR([guile required but not found])
+  fi
+  AC_SUBST(GUILE)
+
+  _guile_prog_version=`$GUILE -c "(display (effective-version))"`
+  if test -z "$GUILE_EFFECTIVE_VERSION"; then
+    GUILE_EFFECTIVE_VERSION=$_guile_prog_version
+  elif test "$GUILE_EFFECTIVE_VERSION" != "$_guile_prog_version"; then
+    AC_MSG_ERROR([found development files for Guile $GUILE_EFFECTIVE_VERSION, but $GUILE has effective version $_guile_prog_version])
+  fi
+
+  AC_PATH_PROG(GUILD,guild)
+  AC_SUBST(GUILD)
+
+  AC_PATH_PROG(GUILE_CONFIG,guile-config)
+  AC_SUBST(GUILE_CONFIG)
+  if test -n "$GUILD"; then
+    GUILE_TOOLS=$GUILD
+  else
+    AC_PATH_PROG(GUILE_TOOLS,guile-tools)
+  fi
+  AC_SUBST(GUILE_TOOLS)
  ])
 
 # GUILE_CHECK -- evaluate Guile Scheme code and capture the return value

@@ -3,6 +3,8 @@
 
   - Re-licensed under LGPLv3.
 
+  - Use new guile.m4 macro.
+
   - Convert rationals to floats to comply with JSON spec.
     (closes github #3, patch from Doug Woos)
 

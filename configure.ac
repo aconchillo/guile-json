@@ -29,19 +29,6 @@ AM_SILENT_RULES([yes])
 
 GUILE_PROGS
 
-if $GUILE_TOOLS | grep -q compile; then
-   # everything cool
-   true
-else
-   AC_MSG_ERROR([Guile 2.0 required.])
-fi
-
-GUILE_MODULE_REQUIRED([ice-9 format])
-GUILE_MODULE_REQUIRED([ice-9 rdelim])
-GUILE_MODULE_REQUIRED([rnrs bytevectors])
-GUILE_MODULE_REQUIRED([srfi srfi-1])
-GUILE_MODULE_REQUIRED([srfi srfi-9])
-
 AC_CONFIG_FILES([Makefile json/Makefile])
 AC_CONFIG_FILES([env], [chmod +x env])
 
