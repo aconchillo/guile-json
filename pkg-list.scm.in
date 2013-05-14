@@ -25,7 +25,7 @@
   (description
    "guile-json supports the parsing and writing of JSON from Guile."
    "It aims to be fully compliant with the json.org specification, and"
-   "is released under the GPLv3.")
+   "is released under the LGPLv3.")
   (homepage "https://github.com/aconchillo/guile-json")
   (libraries "json.scm" "json")
-  (documentation "README" "COPYING"))
+  (documentation "README" "COPYING" "COPYING.LESSER"))
