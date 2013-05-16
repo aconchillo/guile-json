@@ -1,6 +1,6 @@
 ;;; (json builder) --- Guile JSON implementation.
 
-;; Copyright (C) 2013 Aleix Conchillo Flaque <aconchillo at gmail dot com>
+;; Copyright (C) 2013 Aleix Conchillo Flaque <aconchillo@gmail.com>
 ;;
 ;; This file is part of guile-json.
 ;;
