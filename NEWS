@@ -1,4 +1,10 @@
 
+* Version 0.3.1 (Jul 6, 2013)
+
+  - Use pure sh script syntax in env.in.
+    (thanks to Andrew Gaylard)
+
+
 * Version 0.3.0 (May 13, 2013)
 
   - Re-licensed under LGPLv3.
