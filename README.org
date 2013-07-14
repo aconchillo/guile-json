@@ -73,7 +73,7 @@ the module:
 
 ** Procedures
 
-- (*json->scm* #:optional port) Reads a JSON document from the given
+- (*json->scm* #:optional port) : Reads a JSON document from the given
   port, or from the current input port if none is given.
 
   - /port/ : is optional, it defaults to the current input port.
