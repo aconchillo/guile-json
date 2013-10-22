@@ -32,40 +32,26 @@
   #:export (json->scm
             json-string->scm
             json-parser?
-            json-parser-port
-            json-parser-row
-            json-parser-column))
+            json-parser-port))
 
 ;;
 ;; Parser record and read helpers
 ;;
 
 (define-record-type json-parser
-  (make-json-parser port row column)
+  (make-json-parser port)
   json-parser?
-  (port json-parser-port)
-  (row json-parser-row json-parser-set-row)
-  (column json-parser-column json-parser-set-column))
+  (port json-parser-port))
 
 (define (parser-peek-char parser)
   (peek-char (json-parser-port parser)))
 
 (define (parser-read-char parser)
-  (let ((c (read-char (json-parser-port parser))))
-    (case c
-      ((#\lf #\cr)
-       (json-parser-set-column parser 0)
-       (json-parser-set-row parser (+ (json-parser-row parser) 1)))
-      (else
-       (json-parser-set-column parser (+ (json-parser-column parser) 1))))
-    c))
+  (read-char (json-parser-port parser)))
 
 (define (parser-read-delimited parser delim handle-delim)
-  (let* ((port (json-parser-port parser))
-         (current (read-delimited delim port handle-delim)))
-    (json-parser-set-column parser (+ (json-parser-column parser)
-                                      (string-length (car current))))
-    current))
+  (let ((port (json-parser-port parser)))
+    (read-delimited delim port handle-delim)))
 
 ;;
 ;; Number parsing helpers
@@ -355,7 +341,7 @@
   "Parse a JSON document into native. Takes one optional argument,
 @var{port}, which defaults to the current input port from where the JSON
 document is read."
-  (json-read (make-json-parser port 0 0)))
+  (json-read (make-json-parser port)))
 
 (define* (json-string->scm str)
   "Parse a JSON document into native. Takes a string argument,
