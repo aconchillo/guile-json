@@ -26,30 +26,32 @@
 ;;; Code:
 
 (define-module (json syntax)
+  #:use-module (ice-9 match)
   #:export (json))
 
-;;
-;; Public procedures
-;;
+(define (list->hash-table lst)
+  (let loop ((table (make-hash-table))
+             (lst lst))
+    (match lst
+      (((key value) . rest)
+       (hash-set! table key value)
+       (loop table rest))
+      (() table))))
 
 (define-syntax json
-  (lambda (x)
-    (syntax-case x (unquote array object)
-      ((_ val) (or (string? (syntax->datum #'val))
-                   (number? (syntax->datum #'val))
-                   (boolean? (syntax->datum #'val))
-                   (null? (syntax->datum #'val)))
-       #'val)
-
-      ((_ (unquote val))
-       #'val)
-
-      ((_ (array x ...))
-       #'(list (json x) ...))
-
-      ((_ (object (k v) ...))
-       #'(let ((pairs (make-hash-table)))
-           (hash-set! pairs (syntax->datum #'k) (json v)) ...
-           pairs)))))
+  (syntax-rules (unquote unquote-splicing array object)
+    ((_ (unquote val))
+     val)
+    ((_ ((unquote-splicing val) . rest))
+     (append val (json rest)))
+    ((_ (array val . rest))
+     (cons (json val) (json rest)))
+    ((_ (object key+val ...))
+     (list->hash-table
+      (json (array key+val ...))))
+    ((_ (val . rest))
+     (cons (json val) (json rest)))
+    ((_ val)
+     (quote val))))
 
 ;;; (json syntax) ends here
