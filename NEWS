@@ -1,4 +1,10 @@
 
+* Version 0.4.0 (Aug 17, 2014)
+
+  - Add unquote-splicing support to json form.
+    (thanks to David Thompson)
+
+
 * Version 0.3.1 (Jul 6, 2013)
 
   - Use pure sh script syntax in env.in.
