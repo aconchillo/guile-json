@@ -1,7 +1,7 @@
 #
 # configure.ac
 #
-# Copyright (C) 2013 Aleix Conchillo Flaque <aconchillo@gmail.com>
+# Copyright (C) 2013, 2014 Aleix Conchillo Flaque <aconchillo@gmail.com>
 #
 # This file is part of guile-json.
 #
@@ -21,7 +21,7 @@
 # 02110-1301 USA
 #
 
-AC_INIT([guile-json], [0.3.1], [aconchillo@gmail.com])
+AC_INIT([guile-json], [0.4.0], [aconchillo@gmail.com])
 AC_CONFIG_SRCDIR(json.scm)
 AC_CONFIG_AUX_DIR([build-aux])
 AM_INIT_AUTOMAKE([color-tests -Wall -Wno-portability])

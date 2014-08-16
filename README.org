@@ -9,7 +9,7 @@ specification. These are the main features:
 
 - Build JSON documents programmatically via macros.
 
-- Unicode support for strings.
+- Basic unicode support for strings.
 
 - Allows JSON pretty printing.
 
@@ -21,7 +21,7 @@ Lesser General Public License version 3 (LGPLv3+).
 
 Download the latest tarball and untar it:
 
-- [[http://download.savannah.gnu.org/releases/guile-json/guile-json-0.3.1.tar.gz][guile-json-0.3.1.tar.gz]]
+- [[http://download.savannah.gnu.org/releases/guile-json/guile-json-0.4.0.tar.gz][guile-json-0.4.0.tar.gz]]
 
 Then, run the typical sequence:
 
@@ -126,6 +126,12 @@ main /json/ macro (and /object/ and /array/). Here are some examples:
 
     : scheme@(guile-user)> (scm->json (json (array 1 2 3)))
     : [1, 2, 3]
+
+- Build the [1, 2, 3, 4] array using unquote-splicing:
+
+    : scheme@(guile-user)> (define values '(2 3))
+    : scheme@(guile-user)> (scm->json (json (array 1 ,@values 4)))
+    : [1, 2, 3, 4]
 
 - Build the object { "project" : "foo", "author" : "bar" }:
 
