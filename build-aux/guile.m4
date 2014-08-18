@@ -1,17 +1,17 @@
 ## Autoconf macros for working with Guile.
 ##
-##   Copyright (C) 1998,2001, 2006, 2010, 2012 Free Software Foundation, Inc.
+##   Copyright (C) 1998,2001, 2006, 2010, 2012, 2013, 2014 Free Software Foundation, Inc.
 ##
 ## This library is free software; you can redistribute it and/or
 ## modify it under the terms of the GNU Lesser General Public License
 ## as published by the Free Software Foundation; either version 3 of
 ## the License, or (at your option) any later version.
-## 
+##
 ## This library is distributed in the hope that it will be useful,
 ## but WITHOUT ANY WARRANTY; without even the implied warranty of
 ## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 ## Lesser General Public License for more details.
-## 
+##
 ## You should have received a copy of the GNU Lesser General Public
 ## License along with this library; if not, write to the Free Software
 ## Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
@@ -77,8 +77,8 @@ AC_DEFUN([GUILE_PKG],
   GUILE_EFFECTIVE_VERSION=""
   _guile_errors=""
   for v in $_guile_versions_to_search; do
-    AC_MSG_NOTICE([checking for guile $v])
     if test -z "$GUILE_EFFECTIVE_VERSION"; then
+      AC_MSG_NOTICE([checking for guile $v])
       PKG_CHECK_EXISTS([guile-$v], [GUILE_EFFECTIVE_VERSION=$v], [])
     fi
   done
@@ -93,7 +93,7 @@ the development packages.  If you installed it yourself, you might need
 to adjust your PKG_CONFIG_PATH; see the pkg-config man page for more.
 ])
   fi
-  AC_MSG_NOTICE([found guile $v])
+  AC_MSG_NOTICE([found guile $GUILE_EFFECTIVE_VERSION])
   AC_SUBST([GUILE_EFFECTIVE_VERSION])
  ])
 
@@ -177,11 +177,15 @@ AC_DEFUN([GUILE_SITE_DIR],
 
 # GUILE_PROGS -- set paths to Guile interpreter, config and tool programs
 #
-# Usage: GUILE_PROGS
+# Usage: GUILE_PROGS([VERSION])
 #
 # This macro looks for programs @code{guile} and @code{guild}, setting
 # variables @var{GUILE} and @var{GUILD} to their paths, respectively.
 # If @code{guile} is not found, signal an error.
+#
+# By default, this macro will search for the latest stable version of
+# Guile (e.g. 2.0). x.y or x.y.z versions can be specified. If an older
+# version is found, the macro will signal an error.
 #
 # The effective version of the found @code{guile} is set to
 # @var{GUILE_EFFECTIVE_VERSION}.  This macro ensures that the effective
@@ -195,17 +199,48 @@ AC_DEFUN([GUILE_SITE_DIR],
 #
 AC_DEFUN([GUILE_PROGS],
  [AC_PATH_PROG(GUILE,guile)
+  _guile_required_version="m4_default([$1], [$GUILE_EFFECTIVE_VERSION])"
+  if test -z "$_guile_required_version"; then
+    _guile_required_version=2.0
+  fi
   if test "$GUILE" = "" ; then
       AC_MSG_ERROR([guile required but not found])
   fi
   AC_SUBST(GUILE)
 
-  _guile_prog_version=`$GUILE -c "(display (effective-version))"`
+  _guile_effective_version=`$GUILE -c "(display (effective-version))"`
   if test -z "$GUILE_EFFECTIVE_VERSION"; then
-    GUILE_EFFECTIVE_VERSION=$_guile_prog_version
-  elif test "$GUILE_EFFECTIVE_VERSION" != "$_guile_prog_version"; then
-    AC_MSG_ERROR([found development files for Guile $GUILE_EFFECTIVE_VERSION, but $GUILE has effective version $_guile_prog_version])
+    GUILE_EFFECTIVE_VERSION=$_guile_effective_version
+  elif test "$GUILE_EFFECTIVE_VERSION" != "$_guile_effective_version"; then
+    AC_MSG_ERROR([found development files for Guile $GUILE_EFFECTIVE_VERSION, but $GUILE has effective version $_guile_effective_version])
   fi
+
+  _guile_major_version=`$GUILE -c "(display (major-version))"`
+  _guile_minor_version=`$GUILE -c "(display (minor-version))"`
+  _guile_micro_version=`$GUILE -c "(display (micro-version))"`
+  _guile_prog_version="$_guile_major_version.$_guile_minor_version.$_guile_micro_version"
+
+  AC_MSG_CHECKING([for Guile version >= $_guile_required_version])
+  _major_version=`echo $_guile_required_version | cut -d . -f 1`
+  _minor_version=`echo $_guile_required_version | cut -d . -f 2`
+  _micro_version=`echo $_guile_required_version | cut -d . -f 3`
+  if test "$_guile_major_version" -ge "$_major_version"; then
+    if test "$_guile_minor_version" -ge "$_minor_version"; then
+      if test -n "$_micro_version"; then
+        if test "$_guile_micro_version" -lt "$_micro_version"; then
+          AC_MSG_ERROR([Guile $_guile_required_version required, but $_guile_prog_version found])
+        fi
+      fi
+    elif test "$GUILE_EFFECTIVE_VERSION" == "$_major_version.$_minor_version" -a -z "$_micro_version"; then
+      # Allow prereleases that have the right effective version.
+      true
+    else
+      as_fn_error $? "Guile $_guile_required_version required, but $_guile_prog_version found" "$LINENO" 5
+    fi
+  else
+    AC_MSG_ERROR([Guile $_guile_required_version required, but $_guile_prog_version found])
+  fi
+  AC_MSG_RESULT([$_guile_prog_version])
 
   AC_PATH_PROG(GUILD,guild)
   AC_SUBST(GUILD)
