@@ -79,10 +79,11 @@
 ;;
 
 (define (build-object-pair p port escape pretty level)
-  (display (indent-string pretty level) port)
-  (json-build-string (car p) port escape)
-  (display " : " port)
-  (json-build (cdr p) port escape pretty level))
+  (let ((key (if (symbol? (car p)) (symbol->string (car p)) (car p))))
+    (display (indent-string pretty level) port)
+    (json-build-string key port escape)
+    (display " : " port)
+    (json-build (cdr p) port escape pretty level)))
 
 (define (build-newline port pretty)
   (cond (pretty (newline port))))
