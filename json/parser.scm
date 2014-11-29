@@ -171,9 +171,6 @@
       (else (throw 'json-invalid parser))))))
 
 (define* (read-object parser #:optional use-symbol)
-  (display "json-read-object")
-  (display use-symbol)
-  (newline)
   (let loop ((c (parser-peek-char parser))
              (pairs (make-hash-table)))
     (case c
