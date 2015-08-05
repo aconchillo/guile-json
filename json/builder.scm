@@ -1,6 +1,7 @@
 ;;; (json builder) --- Guile JSON implementation.
 
 ;; Copyright (C) 2013 Aleix Conchillo Flaque <aconchillo@gmail.com>
+;; Copyright (C) 2015 Jan Nieuwenhuizen <janneke@gnu.org>
 ;;
 ;; This file is part of guile-json.
 ;;
@@ -105,6 +106,12 @@
       (display (number->string (exact->inexact scm)) port)
       (display (number->string scm) port)))
 
+(define (->string x)
+  (cond ((char? x) (make-string 1 x))
+        ((number? x) (number->string x))
+        ((symbol? x) (symbol->string x))
+        (else x)))
+
 (define (json-build-string scm port escape)
   (display "\"" port)
   (display
@@ -121,7 +128,7 @@
                      ((#\ht) '(#\\ #\t))
                      ((#\/) (if escape `(#\\ ,c) (list c)))
                      (else (string->list (build-char-string c)))))
-                 (string->list scm))))
+                 (string->list (->string scm)))))
    port)
   (display "\"" port))
 
@@ -155,6 +162,7 @@
    ((eq? scm #nil) (json-build-null port))
    ((boolean? scm) (json-build-boolean scm port))
    ((number? scm) (json-build-number scm port))
+   ((symbol? scm) (json-build-string (symbol->string scm) port escape))
    ((string? scm) (json-build-string scm port escape))
    ((list? scm) (json-build-array scm port escape pretty level))
    ((hash-table? scm) (json-build-object scm port escape pretty level))
