@@ -1,4 +1,11 @@
 
+* Version 0.5.0 (Feb 21, 2015)
+
+  - Allow converting simple alists to json
+      e.g.: (scm->json-string '((a . 1) (b . 2))))
+    (thanks to Jan Nieuwenhuizen)
+
+
 * Version 0.4.0 (Aug 17, 2014)
 
   - Add unquote-splicing support to json form.
