@@ -21,7 +21,7 @@ Lesser General Public License version 3 (LGPLv3+).
 
 Download the latest tarball and untar it:
 
-- [[http://download.savannah.gnu.org/releases/guile-json/guile-json-0.4.0.tar.gz][guile-json-0.4.0.tar.gz]]
+- [[http://download.savannah.gnu.org/releases/guile-json/guile-json-0.5.0.tar.gz][guile-json-0.5.0.tar.gz]]
 
 Then, run the typical sequence:
 
