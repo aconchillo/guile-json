@@ -7,7 +7,7 @@ specification. These are the main features:
 
 - Strictly complies to http://json.org specification.
 
-- Build JSON documents programmatically via macros.
+- Build JSON documents programmatically via quasiquote.
 
 - Basic unicode support for strings.
 
@@ -36,7 +36,7 @@ If everything installed successfully you should be up and running:
 
     : $ guile
     : scheme@(guile-user)> (use-modules (json))
-    : scheme@(guile-user)> (scm->json (json (array 1 2 3)))
+    : scheme@(guile-user)> (scm->json (list 1 2 3))
     : [1, 2, 3]
 
 It might be that you installed guile-json somewhere differently than
@@ -112,41 +112,41 @@ port (calling /port-line/ or /port-column/ on the port).
   from.
 
 
-** Macros
+** Examples using quasiquote
 
 It is also possible to build JSON documents programmatically using the
-main /json/ macro (and /object/ and /array/). Here are some examples:
+quasiquote feature of scheme. Here are some examples:
 
 - Build the string "hello world":
 
-    : scheme@(guile-user)> (scm->json (json "hello world"))
+    : scheme@(guile-user)> (scm->json "hello world")
     : "hello world"
 
 - Build the [1, 2, 3] array:
 
-    : scheme@(guile-user)> (scm->json (json (array 1 2 3)))
+    : scheme@(guile-user)> (scm->json (list 1 2 3))
     : [1, 2, 3]
 
 - Build the [1, 2, 3, 4] array using unquote-splicing:
 
     : scheme@(guile-user)> (define values '(2 3))
-    : scheme@(guile-user)> (scm->json (json (array 1 ,@values 4)))
+    : scheme@(guile-user)> (scm->json `(1 ,@values 4))
     : [1, 2, 3, 4]
 
 - Build the object { "project" : "foo", "author" : "bar" }:
 
-    : scheme@(guile-user)> (scm->json (json (object ("project" "foo")
-    :                                               ("author" "bar"))))
+    : scheme@(guile-user)> (scm->json `(("project" . "foo")
+                                        ("author" . "bar")))
     : {"author" : "bar", "project" : "foo"}
 
 - Build the object { "values" : [ 234, 98.56 ] }:
 
-    : scheme@(guile-user)> (scm->json (json (object ("values" (array 234 98.56)))))
+    : scheme@(guile-user)> (scm->json `(("values" . (234 98.56))))
     : {"values" : [234, 98.56]}
 
 - Build the object { "values" : [ 234, 98.56 ] } again, this time using
   a variable:
 
     : scheme@(guile-user)> (define values '(234 98.56))
-    : scheme@(guile-user)> (scm->json (json (object ("values" ,values))))
+    : scheme@(guile-user)> (scm->json `(("values" . ,values)))
     : {"values" : [1, 2, 3]}
