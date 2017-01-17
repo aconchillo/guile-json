@@ -9,7 +9,7 @@ specification. These are the main features:
 
 - Build JSON documents programmatically using scheme data types.
 
-- Supports UTF-8 (doesn't support unicode hexadecimal digits).
+- Supports UTF-8 (doesn't fully support unicode hexadecimal digits).
 
 - Allows JSON pretty printing.
 
