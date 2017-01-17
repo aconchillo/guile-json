@@ -65,8 +65,8 @@ values according to the following table:
 | false  | #f          |
 | null   | #nil        |
 
-*Note*: Association lists are also tranformed to JSON objects, in this
-case ordered will be preserved.
+*Note* (*): Association lists are also tranformed to JSON objects, in
+this case ordered will be preserved.
 
 To start using guile-json procedures and macros you first need to load
 the module:
@@ -133,14 +133,14 @@ port (calling /port-line/ or /port-column/ on the port).
     : scheme@(guile-user)> (scm->json `(1 ,@values 4))
     : [1, 2, 3, 4]
 
-- Build the object { "project" : "foo", "author" : "bar" } using an association
-  list (see how symbols can also be used):
+- Build the object { "project" : "foo", "author" : "bar" } using an
+  association list (see how symbols can also be used):
 
     : scheme@(guile-user)> (scm->json '(("project" . "foo") (author . bar)))
     : {"project" : "foo","author" : "bar"}
 
-- Build again the same object { "project" : "foo", "author" : "bar" } using a
-  hash table:
+- Build again the same object { "project" : "foo", "author" : "bar" }
+  using a hash table:
 
     : scheme@(guile-user)> (scm->json (alist->hash-table '((project . foo) (author . bar))))
     : {"project" : "foo","author" : "bar"}
