@@ -5,11 +5,11 @@ guile-json is a JSON module for Guile. It supports parsing and
 building JSON documents according to the http://json.org
 specification. These are the main features:
 
-- Strictly complies to http://json.org specification.
+- Mostly complies to http://json.org specification (see UTF-8 below).
 
-- Build JSON documents programmatically via macros.
+- Build JSON documents programmatically using scheme data types.
 
-- Basic unicode support for strings.
+- Supports UTF-8 (doesn't support unicode hexadecimal digits).
 
 - Allows JSON pretty printing.
 
@@ -36,7 +36,7 @@ If everything installed successfully you should be up and running:
 
     : $ guile
     : scheme@(guile-user)> (use-modules (json))
-    : scheme@(guile-user)> (scm->json (json (array 1 2 3)))
+    : scheme@(guile-user)> (scm->json '(1 2 3))
     : [1, 2, 3]
 
 It might be that you installed guile-json somewhere differently than
@@ -55,15 +55,18 @@ guile-json provides a few procedures to parse and build a JSON
 document. A JSON document is transformed into or from native Guile
 values according to the following table:
 
-| JSON   | Guile      |
-|--------+------------|
-| string | string     |
-| number | number     |
-| object | hash-table |
-| array  | list       |
-| true   | #t         |
-| false  | #f         |
-| null   | #nil       |
+| JSON   | Guile       |
+|--------+-------------|
+| string | string      |
+| number | number      |
+| object | hash-table* |
+| array  | list        |
+| true   | #t          |
+| false  | #f          |
+| null   | #nil        |
+
+*Note*: Association lists are also tranformed to JSON objects, in this
+case ordered will be preserved.
 
 To start using guile-json procedures and macros you first need to load
 the module:
@@ -112,41 +115,44 @@ port (calling /port-line/ or /port-column/ on the port).
   from.
 
 
-** Macros
-
-It is also possible to build JSON documents programmatically using the
-main /json/ macro (and /object/ and /array/). Here are some examples:
+** Examples
 
 - Build the string "hello world":
 
-    : scheme@(guile-user)> (scm->json (json "hello world"))
+    : scheme@(guile-user)> (scm->json "hello world")
     : "hello world"
 
 - Build the [1, 2, 3] array:
 
-    : scheme@(guile-user)> (scm->json (json (array 1 2 3)))
+    : scheme@(guile-user)> (scm->json '(1 2 3))
     : [1, 2, 3]
 
 - Build the [1, 2, 3, 4] array using unquote-splicing:
 
     : scheme@(guile-user)> (define values '(2 3))
-    : scheme@(guile-user)> (scm->json (json (array 1 ,@values 4)))
+    : scheme@(guile-user)> (scm->json `(1 ,@values 4))
     : [1, 2, 3, 4]
 
-- Build the object { "project" : "foo", "author" : "bar" }:
+- Build the object { "project" : "foo", "author" : "bar" } using an association
+  list (see how symbols can also be used):
 
-    : scheme@(guile-user)> (scm->json (json (object ("project" "foo")
-    :                                               ("author" "bar"))))
-    : {"author" : "bar", "project" : "foo"}
+    : scheme@(guile-user)> (scm->json '(("project" . "foo") (author . bar)))
+    : {"project" : "foo","author" : "bar"}
+
+- Build again the same object { "project" : "foo", "author" : "bar" } using a
+  hash table:
+
+    : scheme@(guile-user)> (scm->json (alist->hash-table '((project . foo) (author . bar))))
+    : {"project" : "foo","author" : "bar"}
 
 - Build the object { "values" : [ 234, 98.56 ] }:
 
-    : scheme@(guile-user)> (scm->json (json (object ("values" (array 234 98.56)))))
+    : scheme@(guile-user)> (scm->json '(("values" 234 98.56)))
     : {"values" : [234, 98.56]}
 
 - Build the object { "values" : [ 234, 98.56 ] } again, this time using
   a variable:
 
     : scheme@(guile-user)> (define values '(234 98.56))
-    : scheme@(guile-user)> (scm->json (json (object ("values" ,values))))
-    : {"values" : [1, 2, 3]}
+    : scheme@(guile-user)> (scm->json `(("values" ,@values)))
+    : {"values" : [234, 98.56]}
