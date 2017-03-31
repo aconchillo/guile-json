@@ -170,7 +170,7 @@
       ;; invalid object
       (else (throw 'json-invalid parser))))))
 
-(define (read-object parser)
+(define* (read-object parser #:optional use-symbol)
   (let loop ((c (parser-peek-char parser))
              (pairs (make-hash-table)))
     (case c
@@ -184,8 +184,11 @@
        pairs)
       ;; Read one pair and continue
       ((#\")
-       (let ((pair (read-pair parser)))
-         (hash-set! pairs (car pair) (cdr pair))
+       (let* ((pair (read-pair parser))
+		(key (if use-symbol
+			 (string->symbol (car pair))
+			 (car pair))))
+         (hash-set! pairs key (cdr pair))
          (loop (parser-peek-char parser) pairs)))
       ;; Skip comma and read more pairs
       ((#\,)
@@ -300,8 +303,9 @@
   (expect-string parser "null")
   #nil)
 
-(define (json-read-object parser)
-  (json-read-delimited parser #\{ read-object))
+(define* (json-read-object parser use-symbol)
+  (let ((reader (lambda (x) (read-object x use-symbol))))
+    (json-read-delimited parser #\{ reader)))
 
 (define (json-read-array parser)
   (json-read-delimited parser #\[ read-array))
@@ -312,7 +316,7 @@
 (define (json-read-number parser)
   (string->number (read-number parser)))
 
-(define (json-read parser)
+(define* (json-read parser #:optional use-symbol)
   (let loop ((c (parser-peek-char parser)))
     (cond
      ;;If we reach the end we might have an incomplete document
@@ -327,7 +331,7 @@
         ((#\t) (json-read-true parser))
         ((#\f) (json-read-false parser))
         ((#\n) (json-read-null parser))
-        ((#\{) (json-read-object parser))
+        ((#\{) (json-read-object parser use-symbol))
         ((#\[) (json-read-array parser))
         ((#\") (json-read-string parser))
         ;; anything else should be a number
@@ -337,15 +341,15 @@
 ;; Public procedures
 ;;
 
-(define* (json->scm #:optional (port (current-input-port)))
+(define* (json->scm #:optional (port (current-input-port)) #:key use-symbol)
   "Parse a JSON document into native. Takes one optional argument,
 @var{port}, which defaults to the current input port from where the JSON
 document is read."
-  (json-read (make-json-parser port)))
+  (json-read (make-json-parser port) use-symbol))
 
-(define* (json-string->scm str)
+(define* (json-string->scm str #:optional use-symbol)
   "Parse a JSON document into native. Takes a string argument,
 @var{str}, that contains the JSON document."
-  (call-with-input-string str (lambda (p) (json->scm p))))
+  (call-with-input-string str (lambda (p) (json->scm p #:use-symbol #t))))
 
 ;;; (json parser) ends here

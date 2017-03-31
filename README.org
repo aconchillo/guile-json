@@ -76,12 +76,14 @@ the module:
 
 ** Procedures
 
-- (*json->scm* #:optional port) : Reads a JSON document from the given
+- (*json->scm* #:optional port #:key use-symbol) : Reads a JSON document from the given
   port, or from the current input port if none is given.
 
   - /port/ : is optional, it defaults to the current input port.
+  - /use-symbol/ : is optional, if #t symbols are used instead of
+    string to build hash-tables from objects.
 
-- (*json-string->scm* str) : Reads a JSON document from the given
+- (*json-string->scm* str #:optional use-symbol) : Reads a JSON document from the given
   string.
 
 - (*scm->json* native #:optional port #:key escape pretty) : Creates a
