@@ -23,6 +23,10 @@ Download the latest tarball and untar it:
 
 - [[http://download.savannah.gnu.org/releases/guile-json/guile-json-0.6.0.tar.gz][guile-json-0.6.0.tar.gz]]
 
+If you are cloning the repository make sure you run this first:
+
+    : $ autoreconf -vif
+
 Then, run the typical sequence:
 
     : $ ./configure --prefix=<guile-prefix>
