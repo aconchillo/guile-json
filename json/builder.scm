@@ -60,17 +60,28 @@
        (ash (logand bv1 #b00111111) 6)
        (logand bv2 #b00111111))))
 
+(define (u8v-4->unicode bv)
+  (let ((bv0 (bytevector-u8-ref bv 0))
+        (bv1 (bytevector-u8-ref bv 1))
+        (bv2 (bytevector-u8-ref bv 2))
+        (bv3 (bytevector-u8-ref bv 3)))
+    (+ (ash (logand bv0 #b00000111) 18)
+       (ash (logand bv1 #b00111111) 12)
+       (ash (logand bv2 #b00111111) 6)
+       (logand bv3 #b00111111))))
+
 (define (build-char-string c)
   (let* ((bv (string->utf8 (string c)))
          (len (bytevector-length bv)))
     (cond
      ;; A single byte UTF-8
      ((eq? len 1) (char->unicode-string c))
-     ;; If we have a 2 or 3 byte UTF-8 we need to output it as \uHHHH
-     ((or (eq? len 2) (eq? len 3))
-      (let ((unicode (if (eq? len 2)
-                         (u8v-2->unicode bv)
-                         (u8v-3->unicode bv))))
+     ;; If we have a 2 to 4 byte UTF-8 we need to output it as \uHHHH
+     ((or (eq? len 2) (eq? len 3) (eq? len 4))
+      (let ((unicode (case len
+                       ((2) (u8v-2->unicode bv))
+                       ((3) (u8v-3->unicode bv))
+                       ((4) (u8v-4->unicode bv)))))
         (unicode->string unicode)))
      ;; Anything else should wrong, hopefully.
      (else (throw 'json-invalid)))))
