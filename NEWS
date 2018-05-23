@@ -1,4 +1,13 @@
 
+* Version 1.0.0 (May 23, 2018)
+
+  - Support 4-byte unicode characters.
+    (thanks to Christopher Lam)
+
+  - Remove deprecated `json` macro.
+
+  - Dual GPLv3 and LGPLv3 license.
+
 * Version 0.6.0 (Jan 16, 2017)
 
   - Deprecate json macro in favor of scheme data types.
