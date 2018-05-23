@@ -29,8 +29,7 @@
 
 (define-module (json)
   #:use-module (json builder)
-  #:use-module (json parser)
-  #:use-module (json syntax))
+  #:use-module (json parser))
 
 (define-syntax re-export-modules
   (syntax-rules ()
@@ -41,7 +40,6 @@
        ...))))
 
 (re-export-modules (json builder)
-                   (json parser)
-                   (json syntax))
+                   (json parser))
 
 ;;; (json) ends here
