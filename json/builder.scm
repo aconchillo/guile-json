@@ -129,7 +129,6 @@
   (and (pair? x)
        (let loop ((x x))
          (or (null? x)
-             (null? (car x))
              (and (pair? (car x)) (atom? (caar x))
                   (loop (cdr x)))))))
 
