@@ -23,7 +23,7 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 #
 
-moddir = $(datadir)/guile/site/json
+moddir = $(datadir)/guile/site/@GUILE_EFFECTIVE_VERSION@/json
 
 SOURCES = builder.scm parser.scm
 

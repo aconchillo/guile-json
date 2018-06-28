@@ -34,7 +34,7 @@ dist-hook:
 	cp $(top_srcdir)/pkg-list.scm.in $(top_distdir)/pkg-list.scm
 	sed -i '' "s/%VERSION%/$(PKG_LIST_VERSION)/g" $(top_distdir)/pkg-list.scm
 
-moddir = $(datadir)/guile/site
+moddir = $(datadir)/guile/site/@GUILE_EFFECTIVE_VERSION@
 
 SOURCES = json.scm
 
