@@ -23,13 +23,16 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 #
 
-moddir=$(prefix)/share/guile/site/json
+moddir = $(datadir)/guile/site/@GUILE_EFFECTIVE_VERSION@/json
+objdir = $(libdir)/guile/@GUILE_EFFECTIVE_VERSION@/site-ccache/json
 
 SOURCES = builder.scm parser.scm
 
 GOBJECTS = $(SOURCES:%.scm=%.go)
 
-nobase_mod_DATA = $(SOURCES) $(NOCOMP_SOURCES) $(GOBJECTS)
+nobase_mod_DATA = $(SOURCES) $(NOCOMP_SOURCES)
+nobase_nodist_obj_DATA = $(GOBJECTS)
+
 EXTRA_DIST = $(SOURCES) $(NOCOMP_SOURCES)
 
 CLEANFILES = $(GOBJECTS)

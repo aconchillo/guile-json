@@ -32,15 +32,17 @@ PKG_LIST_VERSION=$(shell echo $(PACKAGE_VERSION) | sed "s/\./ /g")
 dist-hook:
 	$(SHELL) $(top_srcdir)/ChangeLog > $(top_distdir)/ChangeLog
 	cp $(top_srcdir)/pkg-list.scm.in $(top_distdir)/pkg-list.scm
-	sed -i '' "s/%VERSION%/$(PKG_LIST_VERSION)/g" $(top_distdir)/pkg-list.scm
+	sed -i "s/%VERSION%/$(PKG_LIST_VERSION)/g" $(top_distdir)/pkg-list.scm
 
-moddir=$(prefix)/share/guile/site
+moddir = $(datadir)/guile/site/@GUILE_EFFECTIVE_VERSION@
+objdir = $(libdir)/guile/@GUILE_EFFECTIVE_VERSION@/site-ccache
 
 SOURCES = json.scm
-
 GOBJECTS = $(SOURCES:%.scm=%.go)
 
-nobase_mod_DATA = $(SOURCES) $(NOCOMP_SOURCES) $(GOBJECTS)
+nobase_mod_DATA = $(SOURCES) $(NOCOMP_SOURCES)
+nobase_nodist_obj_DATA = $(GOBJECTS)
+
 EXTRA_DIST = $(SOURCES) $(NOCOMP_SOURCES)
 
 CLEANFILES = $(GOBJECTS)
