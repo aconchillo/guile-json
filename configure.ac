@@ -23,7 +23,7 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 #
 
-AC_INIT([guile-json], [1.1.0], [aconchillo@gmail.com])
+AC_INIT([guile-json], [1.1.1], [aconchillo@gmail.com])
 AC_CONFIG_SRCDIR(json.scm)
 AC_CONFIG_AUX_DIR([build-aux])
 AM_INIT_AUTOMAKE([color-tests -Wall -Wno-portability])
