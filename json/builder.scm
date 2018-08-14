@@ -92,14 +92,19 @@
 (define (build-object-pair p port escape pretty level)
   (display (indent-string pretty level) port)
   (json-build-string (car p) port escape)
-  (display " : " port)
+  (build-space port pretty)
+  (display ":" port)
+  (build-space port pretty)
   (json-build (cdr p) port escape pretty level))
 
 (define (build-newline port pretty)
   (cond (pretty (newline port))))
 
+(define (build-space port pretty)
+  (cond (pretty (display " " port))))
+
 (define (indent-string pretty level)
-  (if pretty (format #f "~v_" (* 4 level)) ""))
+  (if pretty (format #f "~v_" (* 2 level)) ""))
 
 ;;
 ;; Main builder functions
@@ -157,13 +162,15 @@
   (unless (null? scm)
     (json-build (car scm) port escape pretty (+ level 1))
     (for-each (lambda (v)
-                (display ", " port)
+                (display "," port)
+                (build-space port pretty)
                 (json-build v port escape pretty (+ level 1)))
               (cdr scm)))
   (display "]" port))
 
 (define (json-build-object scm port escape pretty level)
-  (build-newline port pretty)
+  (cond ((> level 0)
+         (build-newline port pretty)))
   (simple-format port "~A{" (indent-string pretty level))
   (build-newline port pretty)
   (let ((pairs scm))
