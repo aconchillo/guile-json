@@ -19,7 +19,7 @@
 # along with guile-json. If not, see https://www.gnu.org/licenses/.
 #
 
-AC_INIT([guile-json], [1.1.1], [aconchillo@gmail.com])
+AC_INIT([guile-json], [1.2.0], [aconchillo@gmail.com])
 AC_CONFIG_SRCDIR(json.scm)
 AC_CONFIG_AUX_DIR([build-aux])
 AM_INIT_AUTOMAKE([color-tests -Wall -Wno-portability])
