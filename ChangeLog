@@ -1,6 +1,9 @@
+
+## Copyright (C) 2018 Aleix Conchillo Flaque <aconchillo@gmail.com>
+
 ## The contents of this file will be generated during 'make dist' by the
 ## shell command:
 
   git log --summary --stat
 
-# which you can run using 'sh ChangeLog'
+## which you can run using 'sh ChangeLog'

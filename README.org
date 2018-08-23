@@ -14,10 +14,6 @@ specification.
 
 * Installation
 
-guile-json is freely available for download under the terms of the GNU General
-Public License version 3 (GPLv3) as well as the GNU Lesser General Public
-License version 3 (LGPLv3).
-
 Download the latest tarball and untar it:
 
 - [[http://download.savannah.gnu.org/releases/guile-json/guile-json-1.1.1.tar.gz][guile-json-1.1.1.tar.gz]]
@@ -159,3 +155,16 @@ port (calling /port-line/ or /port-column/ on the port).
     : scheme@(guile-user)> (define values '(234 98.56))
     : scheme@(guile-user)> (scm->json `(("values" ,@values)))
     : {"values" : [234, 98.56]}
+
+
+* License
+
+guile-json is freely available for download under the terms of the GNU General
+Public License version 3 (GPLv3).
+
+Copying and distribution of this file, with or without modification,
+are permitted in any medium without royalty provided the copyright
+notice and this notice are preserved.  This file is offered as-is,
+without any warranty.
+
+Copyright (C) 2013-2018 Aleix Conchillo Flaque <aconchillo@gmail.com>
