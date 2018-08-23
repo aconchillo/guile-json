@@ -159,12 +159,17 @@ port (calling /port-line/ or /port-column/ on the port).
 
 * License
 
-guile-json is freely available for download under the terms of the GNU General
-Public License version 3 (GPLv3).
-
-Copying and distribution of this file, with or without modification,
-are permitted in any medium without royalty provided the copyright
-notice and this notice are preserved.  This file is offered as-is,
-without any warranty.
-
 Copyright (C) 2013-2018 Aleix Conchillo Flaque <aconchillo@gmail.com>
+
+guile-json is free software: you can redistribute it and/or modify it
+under the terms of the GNU General Public License as published by the
+Free Software Foundation; either version 3 of the License, or (at your
+option) any later version.
+
+guile-json is distributed in the hope that it will be useful, but
+WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with guile-json. If not, see https://www.gnu.org/licenses/.
