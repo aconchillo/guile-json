@@ -20,6 +20,7 @@
 #
 
 AC_INIT([guile-json], [1.2.0], [aconchillo@gmail.com])
+AC_CONFIG_MACRO_DIRS([m4])
 AC_CONFIG_SRCDIR(json.scm)
 AC_CONFIG_AUX_DIR([build-aux])
 AM_INIT_AUTOMAKE([color-tests -Wall -Wno-portability])
