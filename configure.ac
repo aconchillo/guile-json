@@ -33,6 +33,7 @@ m4_pattern_forbid([^GUILE_PKG])
 dnl Check for Guile 2.x, and substitute 'GUILE_EFFECTIVE_VERSION'.
 GUILE_PKG([2.2 2.0])
 GUILE_PROGS
+GUILE_SITE_DIR
 
 AC_CONFIG_FILES([Makefile json/Makefile])
 AC_CONFIG_FILES([env], [chmod +x env])
