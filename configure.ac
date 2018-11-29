@@ -20,6 +20,7 @@
 #
 
 AC_INIT([guile-json], [1.2.0], [aconchillo@gmail.com])
+AC_CONFIG_MACRO_DIRS([m4])
 AC_CONFIG_SRCDIR(json.scm)
 AC_CONFIG_AUX_DIR([build-aux])
 AM_INIT_AUTOMAKE([color-tests -Wall -Wno-portability])
@@ -31,8 +32,9 @@ m4_pattern_forbid([PKG_CHECK_MODULES])
 m4_pattern_forbid([^GUILE_PKG])
 
 dnl Check for Guile 2.x, and substitute 'GUILE_EFFECTIVE_VERSION'.
-GUILE_PKG([2.2 2.0])
+GUILE_PKG([3.0 2.2 2.0])
 GUILE_PROGS
+GUILE_SITE_DIR
 
 AC_CONFIG_FILES([Makefile json/Makefile])
 AC_CONFIG_FILES([env], [chmod +x env])
