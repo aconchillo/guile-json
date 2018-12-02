@@ -2,6 +2,9 @@
 
 * Version 1.3.1 (Dec 1, 2018)
 
+  - Fix guile.m4 to allow multiple candidates for guild, guile-config and
+    guile-tools.
+
   - Use GUILE_SITE as the variable instead of GUILE_SITE_DIR.
     (Fixes #20)
 
