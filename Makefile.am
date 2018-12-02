@@ -31,7 +31,7 @@ dist-hook:
         # '' is to make OS X happy
 	sed -i '' "s/%VERSION%/$(PKG_LIST_VERSION)/g" $(top_distdir)/pkg-list.scm
 
-moddir = $(GUILE_SITE_DIR)
+moddir = $(GUILE_SITE)
 objdir = $(GUILE_SITE_CCACHE)
 
 SOURCES = json.scm
