@@ -36,4 +36,4 @@ CLEANFILES = $(GOBJECTS)
 GUILE_WARNINGS = -Wunbound-variable -Warity-mismatch -Wformat
 SUFFIXES = .scm .go
 .scm.go:
-	$(top_builddir)/env $(GUILE_TOOLS) compile $(GUILE_WARNINGS) -o "$@" "$<"
+	$(top_builddir)/env $(GUILD) compile $(GUILE_WARNINGS) -o "$@" "$<"
