@@ -36,9 +36,11 @@ GUILE_PKG([3.0 2.2 2.0])
 GUILE_PROGS
 GUILE_SITE_DIR
 
-dnl Guile prefix.
+dnl Guile prefix and libdir.
 GUILE_PREFIX=`$PKG_CONFIG --print-errors --variable=prefix guile-$GUILE_EFFECTIVE_VERSION`
+GUILE_LIBDIR=`$PKG_CONFIG --print-errors --variable=libdir guile-$GUILE_EFFECTIVE_VERSION`
 AC_SUBST(GUILE_PREFIX)
+AC_SUBST(GUILE_LIBDIR)
 
 AC_CONFIG_FILES([Makefile json/Makefile])
 AC_CONFIG_FILES([env], [chmod +x env])
@@ -55,7 +57,7 @@ echo "    $prefix"
 echo
 echo "If you want to install in Guile system's directory re-run with:"
 echo
-echo "    --prefix=$GUILE_PREFIX"
+echo "    --prefix=$GUILE_PREFIX --libdir=$GUILE_LIBDIR"
 echo
 
 # configure.ac ends here
