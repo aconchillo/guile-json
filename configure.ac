@@ -36,9 +36,26 @@ GUILE_PKG([3.0 2.2 2.0])
 GUILE_PROGS
 GUILE_SITE_DIR
 
+dnl Guile prefix.
+GUILE_PREFIX=`$PKG_CONFIG --print-errors --variable=prefix guile-$GUILE_EFFECTIVE_VERSION`
+AC_SUBST(GUILE_PREFIX)
+
 AC_CONFIG_FILES([Makefile json/Makefile])
 AC_CONFIG_FILES([env], [chmod +x env])
 
 AC_OUTPUT
+
+
+echo
+echo "*** $PACKAGE $VERSION has been successfully configured ***"
+echo
+echo "$PACKAGE installation prefix is:"
+echo
+echo "    $prefix"
+echo
+echo "If you want to install in Guile system's directory re-run with:"
+echo
+echo "    --prefix=$GUILE_PREFIX"
+echo
 
 # configure.ac ends here

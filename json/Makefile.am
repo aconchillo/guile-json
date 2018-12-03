@@ -19,8 +19,8 @@
 # along with guile-json. If not, see https://www.gnu.org/licenses/.
 #
 
-moddir = $(GUILE_SITE)/json
-objdir = $(GUILE_SITE_CCACHE)/json
+moddir=$(datadir)/guile/site/$(GUILE_EFFECTIVE_VERSION)/json
+objdir=$(libdir)/guile/$(GUILE_EFFECTIVE_VERSION)/site-ccache/json
 
 SOURCES = builder.scm parser.scm
 
