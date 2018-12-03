@@ -47,13 +47,17 @@ AC_CONFIG_FILES([env], [chmod +x env])
 
 AC_OUTPUT
 
+dnl This is just for printing $libdir below.
+LIBDIR=`eval echo $libdir`
+LIBDIR=`eval echo $LIBDIR`
+AC_SUBST([LIBDIR])
 
 echo
 echo "*** $PACKAGE $VERSION has been successfully configured ***"
 echo
-echo "$PACKAGE installation prefix is:"
+echo "$PACKAGE is using:"
 echo
-echo "    $prefix"
+echo "    --prefix=$prefix --libdir=$LIBDIR"
 echo
 echo "If you want to install in Guile system's directory re-run with:"
 echo
