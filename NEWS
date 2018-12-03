@@ -1,5 +1,12 @@
 
 
+* Version 1.3.2 (Dec 2, 2018)
+
+  - Don't use GUILE_SITE and GUILE_SITE_CCACHE, build them as before. Print a
+    helper message at the end of configure output to help users to install in
+    Guile system's directory.
+
+
 * Version 1.3.1 (Dec 1, 2018)
 
   - Fix guile.m4 to allow multiple candidates for guild, guile-config and
