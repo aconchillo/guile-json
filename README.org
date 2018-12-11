@@ -36,7 +36,7 @@ If everything installed successfully you should be up and running:
     : $ guile
     : scheme@(guile-user)> (use-modules (json))
     : scheme@(guile-user)> (scm->json '(1 2 3))
-    : [1, 2, 3]
+    : [1,2,3]
 
 It might be that you installed guile-json somewhere differently than
 your system's Guile. If so, you need to indicate Guile where to find
@@ -54,18 +54,15 @@ guile-json provides a few procedures to parse and build a JSON
 document. A JSON document is transformed into or from native Guile
 values according to the following table:
 
-| JSON   | Guile       |
-|--------+-------------|
-| string | string      |
-| number | number      |
-| object | hash-table* |
-| array  | list        |
-| true   | #t          |
-| false  | #f          |
-| null   | #nil        |
-
-*Note* (*): Association lists are also tranformed to JSON objects, in
-this case ordered will be preserved.
+| JSON   | Guile      |
+|--------+------------|
+| string | string     |
+| number | number     |
+| object | hash-table |
+| array  | list       |
+| true   | #t         |
+| false  | #f         |
+| null   | #nil       |
 
 To start using guile-json procedures and macros you first need to load
 the module:
@@ -118,43 +115,37 @@ port (calling /port-line/ or /port-column/ on the port).
 
 - Build the string "hello world":
 
-    : scheme@(guile-user)> (scm->json "hello world ")
+    : > (scm->json "hello world ")
     : "hello world"
 
 - Build the [1, 2, 3] array:
 
-    : scheme@(guile-user)> (scm->json '(1 2 3))
-    : [1, 2, 3]
+    : > (scm->json '(1 2 3))
+    : [1,2,3]
 
 - Build the [1, 2, 3, 4] array using unquote-splicing:
 
-    : scheme@(guile-user)> (define values '(2 3))
-    : scheme@(guile-user)> (scm->json `(1 ,@values 4))
-    : [1, 2, 3, 4]
+    : > (define values '(2 3))
+    : > (scm->json `(1 ,@values 4))
+    : [1,2,3,4]
 
-- Build the object { "project" : "foo", "author" : "bar" } using an
-  association list (see how symbols can also be used):
+- Build the object { "project" : "foo", "author" : "bar" } using a hash table
+  (needs (ice-9 hash-table) module). See how symbols can also be used:
 
-    : scheme@(guile-user)> (scm->json '(("project" . "foo") (author . bar)))
-    : {"project" : "foo","author" : "bar"}
-
-- Build again the same object { "project" : "foo", "author" : "bar" }
-  using a hash table:
-
-    : scheme@(guile-user)> (scm->json (alist->hash-table '((project . foo) (author . bar))))
-    : {"project" : "foo","author" : "bar"}
+    : > (scm->json (alist->hash-table '((project . foo) (author . bar))))
+    : {"project":"foo","author":"bar"}
 
 - Build the object { "values" : [ 234, 98.56 ] }:
 
-    : scheme@(guile-user)> (scm->json '(("values" 234 98.56)))
-    : {"values" : [234, 98.56]}
+    : > (scm->json (alist->hash-table '(("values" 234 98.56))))
+    : {"values":[234,98.56]}
 
 - Build the object { "values" : [ 234, 98.56 ] } again, this time using
   a variable:
 
-    : scheme@(guile-user)> (define values '(234 98.56))
-    : scheme@(guile-user)> (scm->json `(("values" ,@values)))
-    : {"values" : [234, 98.56]}
+    : > (define values '(234 98.56))
+    : > (scm->json (alist->hash-table `(("values" ,@values))))
+    : {"values":[234,98.56]}
 
 
 * License
