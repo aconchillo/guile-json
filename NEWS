@@ -1,5 +1,13 @@
 
 
+* Version 2.0.0 (Dec 12, 2018)
+
+  - This is a breaking change release. It is not possible anymore to specify a
+    JSON object using alists. Instead alist->hash-table needs to be explicitly
+    used. This makes the bidirectional mapping between Guile hash-tables and
+    JSON objects consistent.
+
+
 * Version 1.3.2 (Dec 2, 2018)
 
   - Don't use GUILE_SITE and GUILE_SITE_CCACHE, build them as before. Print a
