@@ -169,8 +169,7 @@
       (else (throw 'json-invalid parser))))))
 
 (define (read-object parser)
-  (let loop ((c (parser-peek-char parser))
-             (pairs (make-hash-table)))
+  (let loop ((c (parser-peek-char parser)) (pairs '()))
     (case c
       ;; Skip whitespaces
       ((#\ht #\vt #\lf #\cr #\sp)
@@ -183,8 +182,7 @@
       ;; Read one pair and continue
       ((#\")
        (let ((pair (read-pair parser)))
-         (hash-set! pairs (car pair) (cdr pair))
-         (loop (parser-peek-char parser) pairs)))
+         (loop (parser-peek-char parser) (cons pair pairs))))
       ;; Skip comma and read more pairs
       ((#\,)
        (parser-read-char parser)
@@ -206,7 +204,7 @@
       ;; end of array
       ((#\])
        (parser-read-char parser)
-       values)
+       (list->vector values))
       ;; this can be any json object
       (else
        (let ((value (json-read parser)))

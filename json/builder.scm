@@ -27,6 +27,7 @@
 (define-module (json builder)
   #:use-module (ice-9 format)
   #:use-module (srfi srfi-1)
+  #:use-module (srfi srfi-43)
   #:use-module (rnrs bytevectors)
   #:export (scm->json
             scm->json-string))
@@ -149,12 +150,11 @@
 (define (json-build-array scm port escape pretty level)
   (display "[" port)
   (unless (null? scm)
-    (json-build (car scm) port escape pretty (+ level 1))
-    (for-each (lambda (v)
-                (display "," port)
-                (build-space port pretty)
-                (json-build v port escape pretty (+ level 1)))
-              (cdr scm)))
+    (vector-for-each (lambda (i v)
+                       (if (> i 0) (display "," port))
+                       (build-space port pretty)
+                       (json-build v port escape pretty (+ level 1)))
+                     scm))
   (display "]" port))
 
 (define (json-build-object scm port escape pretty level)
@@ -180,9 +180,8 @@
    ((number? scm) (json-build-number scm port))
    ((symbol? scm) (json-build-string (symbol->string scm) port escape))
    ((string? scm) (json-build-string scm port escape))
-   ((list? scm) (json-build-array scm port escape pretty level))
-   ((hash-table? scm)
-    (json-build-object (hash-map->list cons scm) port escape pretty level))
+   ((vector? scm) (json-build-array scm port escape pretty level))
+   ((pair? scm) (json-build-object scm port escape pretty level))
    (else (throw 'json-invalid))))
 
 ;;
