@@ -31,20 +31,28 @@ dist-hook:
         # '' is to make OS X happy
 	sed -i '' "s/%VERSION%/$(PKG_LIST_VERSION)/g" $(top_distdir)/pkg-list.scm
 
+GOBJECTS = $(SOURCES:%.scm=%.go)
+
 moddir=$(datadir)/guile/site/$(GUILE_EFFECTIVE_VERSION)
 objdir=$(libdir)/guile/$(GUILE_EFFECTIVE_VERSION)/site-ccache
 
-SOURCES = json.scm
-GOBJECTS = $(SOURCES:%.scm=%.go)
-
 nobase_mod_DATA = $(SOURCES) $(NOCOMP_SOURCES)
 nobase_nodist_obj_DATA = $(GOBJECTS)
-
-EXTRA_DIST = $(SOURCES) $(NOCOMP_SOURCES)
-
-CLEANFILES = $(GOBJECTS)
 
 GUILE_WARNINGS = -Wunbound-variable -Warity-mismatch -Wformat
 SUFFIXES = .scm .go
 .scm.go:
 	$(top_builddir)/env $(GUILD) compile $(GUILE_WARNINGS) -o "$@" "$<"
+
+SOURCES = json.scm
+
+TESTS = tests/test-builder.scm tests/test-parser.scm
+
+TEST_EXTENSIONS = .scm
+
+SCM_LOG_COMPILER = $(GUILE)
+AM_SCM_LOG_FLAGS = --no-auto-compile -L $(top_srcdir)
+
+CLEANFILES = $(GOBJECTS) $(TESTS:tests/%.scm=%.log)
+
+EXTRA_DIST = $(SOURCES) $(NOCOMP_SOURCES) $(TESTS)
