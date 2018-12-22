@@ -77,76 +77,85 @@
 
 (define (read-exp-part parser)
   (let ((c (parser-peek-char parser)) (s ""))
-    (case c
-      ;; Stop parsing if whitespace found.
-      ((#\ht #\vt #\lf #\cr #\sp) s)
-      ;; We might be in an array or object, so stop here too.
-      ((#\, #\] #\}) s)
-      ;; We might have the exponential part
-      ((#\e #\E)
-       (let ((ch (parser-read-char parser)) ; current char
-             (sign (read-sign parser))
-             (digits (read-digits parser)))
-         ;; If we don't have sign or digits, we have an invalid
-         ;; number.
-         (if (not (and (string-null? sign)
-                       (string-null? digits)))
-             (string-append s (string ch) sign digits)
-             #f)))
-      ;; If we have a character different than e or E, we have an
-      ;; invalid number.
-      (else #f))))
+    (cond
+     ((eof-object? c) s)
+     (else
+      (case c
+        ;; Stop parsing if whitespace found.
+        ((#\ht #\vt #\lf #\cr #\sp) s)
+        ;; We might be in an array or object, so stop here too.
+        ((#\, #\] #\}) s)
+        ;; We might have the exponential part
+        ((#\e #\E)
+         (let ((ch (parser-read-char parser)) ; current char
+               (sign (read-sign parser))
+               (digits (read-digits parser)))
+           ;; If we don't have sign or digits, we have an invalid
+           ;; number.
+           (if (not (and (string-null? sign)
+                         (string-null? digits)))
+               (string-append s (string ch) sign digits)
+               #f)))
+        ;; If we have a character different than e or E, we have an
+        ;; invalid number.
+        (else #f))))))
 
 (define (read-real-part parser)
   (let ((c (parser-peek-char parser)) (s ""))
-    (case c
-      ;; Stop parsing if whitespace found.
-      ((#\ht #\vt #\lf #\cr #\sp) s)
-      ;; We might be in an array or object, so stop here too.
-      ((#\, #\] #\}) s)
-      ;; If we read . we might have a real number
-      ((#\.)
-       (let ((ch (parser-read-char parser))
-             (digits (read-digits parser)))
-         ;; If we have digits, try to read the exponential part,
-         ;; otherwise we have an invalid number.
-         (cond
-          ((not (string-null? digits))
-           (let ((exp (read-exp-part parser)))
-             (cond
-              (exp (string-append s (string ch) digits exp))
-              (else #f))))
-          (else #f))))
-      ;; If we have a character different than . we might continue
-      ;; processing.
-      (else #f))))
+    (cond
+     ((eof-object? c) s)
+     (else
+      (case c
+        ;; Stop parsing if whitespace found.
+        ((#\ht #\vt #\lf #\cr #\sp) s)
+        ;; We might be in an array or object, so stop here too.
+        ((#\, #\] #\}) s)
+        ;; If we read . we might have a real number
+        ((#\.)
+         (let ((ch (parser-read-char parser))
+               (digits (read-digits parser)))
+           ;; If we have digits, try to read the exponential part,
+           ;; otherwise we have an invalid number.
+           (cond
+            ((not (string-null? digits))
+             (let ((exp (read-exp-part parser)))
+               (cond
+                (exp (string-append s (string ch) digits exp))
+                (else #f))))
+            (else #f))))
+        ;; If we have a character different than . we might continue
+        ;; processing.
+        (else #f))))))
 
 (define (read-number parser)
   (let loop ((c (parser-peek-char parser)) (s ""))
-    (case c
-      ;; Stop parsing if whitespace found.
-      ((#\ht #\vt #\lf #\cr #\sp) s)
-      ;; We might be in an array or object, so stop here too.
-      ((#\, #\] #\}) s)
-      ((#\-)
-       (let ((ch (parser-read-char parser)))
-         (loop (parser-peek-char parser)
-               (string-append s (string ch)))))
-      ((#\0)
-       (let ((ch (parser-read-char parser)))
-         (string-append s
-                        (string ch)
-                        (or (read-real-part parser)
-                            (throw 'json-invalid parser)))))
-      ((#\1 #\2 #\3 #\4 #\5 #\6 #\7 #\8 #\9)
-       (let ((ch (parser-read-char parser)))
-         (string-append s
-                        (string ch)
-                        (read-digits parser)
-                        (or (read-real-part parser)
-                            (read-exp-part parser)
-                            (throw 'json-invalid parser)))))
-      (else (throw 'json-invalid parser)))))
+    (cond
+     ((eof-object? c) s)
+     (else
+      (case c
+        ;; Stop parsing if whitespace found.
+        ((#\ht #\vt #\lf #\cr #\sp) s)
+        ;; We might be in an array or object, so stop here too.
+        ((#\, #\] #\}) s)
+        ((#\-)
+         (let ((ch (parser-read-char parser)))
+           (loop (parser-peek-char parser)
+                 (string-append s (string ch)))))
+        ((#\0)
+         (let ((ch (parser-read-char parser)))
+           (string-append s
+                          (string ch)
+                          (or (read-real-part parser)
+                              (throw 'json-invalid parser)))))
+        ((#\1 #\2 #\3 #\4 #\5 #\6 #\7 #\8 #\9)
+         (let ((ch (parser-read-char parser)))
+           (string-append s
+                          (string ch)
+                          (read-digits parser)
+                          (or (read-real-part parser)
+                              (read-exp-part parser)
+                              (throw 'json-invalid parser)))))
+        (else (throw 'json-invalid parser)))))))
 
 ;;
 ;; Object parsing helpers
