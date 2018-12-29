@@ -65,4 +65,6 @@
 
 (test-end "test-builder")
 
+(exit (if (eqv? 0 (test-runner-fail-count (test-runner-current))) 0 1))
+
 ;;; (tests test-builder) ends here

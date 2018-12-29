@@ -19,7 +19,7 @@
 
 ;;; Commentary:
 
-;; Unit tests the JSON builder
+;; Unit tests the JSON parser
 
 ;;; Code:
 
@@ -67,5 +67,7 @@
 (test-equal 29.99 (assoc-ref book "price"))
 
 (test-end "test-parser")
+
+(exit (if (eqv? 0 (test-runner-fail-count (test-runner-current))) 0 1))
 
 ;;; (tests test-parser) ends here

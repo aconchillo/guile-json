@@ -19,7 +19,7 @@
 # along with guile-json. If not, see https://www.gnu.org/licenses/.
 #
 
-SUBDIRS = json
+SUBDIRS = json tests
 
 ACLOCAL_AMFLAGS = -I build-aux
 
@@ -46,13 +46,6 @@ SUFFIXES = .scm .go
 
 SOURCES = json.scm
 
-TESTS = tests/test-builder.scm tests/test-parser.scm
+CLEANFILES = $(GOBJECTS)
 
-TEST_EXTENSIONS = .scm
-
-SCM_LOG_COMPILER = $(GUILE)
-AM_SCM_LOG_FLAGS = --no-auto-compile -L $(top_srcdir)
-
-CLEANFILES = $(GOBJECTS) $(TESTS:tests/%.scm=%.log)
-
-EXTRA_DIST = $(SOURCES) $(NOCOMP_SOURCES) $(TESTS)
+EXTRA_DIST = $(SOURCES) $(NOCOMP_SOURCES)
