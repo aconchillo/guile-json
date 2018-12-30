@@ -1,5 +1,20 @@
 
 
+* Version 3.0.0 (Dec 29, 2018)
+
+  - This is another breaking change release.
+
+  - JSON objects are now defined as alists (instead of hash tables) and JSON
+    arrays are now defined as vectors (instead of lists). Both of these
+    changes are mainly to use types that have read syntax. This will simplify
+    things for the user when defining JSON objects which is probably the most
+    common case.
+
+  - Fixed and issue when parsing only JSON numbers.
+
+  - Added unit tests.
+
+
 * Version 2.0.0 (Dec 12, 2018)
 
   - This is a breaking change release. It is not possible anymore to specify a

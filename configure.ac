@@ -19,7 +19,7 @@
 # along with guile-json. If not, see https://www.gnu.org/licenses/.
 #
 
-AC_INIT([guile-json], [2.0.0], [aconchillo@gmail.com])
+AC_INIT([guile-json], [3.0.0], [aconchillo@gmail.com])
 AC_CONFIG_MACRO_DIRS([m4])
 AC_CONFIG_SRCDIR(json.scm)
 AC_CONFIG_AUX_DIR([build-aux])
