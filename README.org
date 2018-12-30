@@ -35,7 +35,7 @@ If everything installed successfully you should be up and running:
 
     : $ guile
     : scheme@(guile-user)> (use-modules (json))
-    : scheme@(guile-user)> (scm->json '(1 2 3))
+    : scheme@(guile-user)> (scm->json #(1 2 3))
     : [1,2,3]
 
 It might be that you installed guile-json somewhere differently than
@@ -54,15 +54,15 @@ guile-json provides a few procedures to parse and build a JSON
 document. A JSON document is transformed into or from native Guile
 values according to the following table:
 
-| JSON   | Guile      |
-|--------+------------|
-| string | string     |
-| number | number     |
-| object | hash-table |
-| array  | list       |
-| true   | #t         |
-| false  | #f         |
-| null   | #nil       |
+| JSON   | Guile  |
+|--------+--------|
+| string | string |
+| number | number |
+| object | alist  |
+| array  | vector |
+| true   | #t     |
+| false  | #f     |
+| null   | #nil   |
 
 To start using guile-json procedures and macros you first need to load
 the module:
@@ -120,31 +120,25 @@ port (calling /port-line/ or /port-column/ on the port).
 
 - Build the [1, 2, 3] array:
 
-    : > (scm->json '(1 2 3))
+    : > (scm->json #(1 2 3))
     : [1,2,3]
 
-- Build the [1, 2, 3, 4] array using unquote-splicing:
+- Build the object { "project" : "foo", "author" : "bar" } using an alist. See
+  how symbols can also be used:
 
-    : > (define values '(2 3))
-    : > (scm->json `(1 ,@values 4))
-    : [1,2,3,4]
-
-- Build the object { "project" : "foo", "author" : "bar" } using a hash table
-  (needs (ice-9 hash-table) module). See how symbols can also be used:
-
-    : > (scm->json (alist->hash-table '((project . foo) (author . bar))))
+    : > (scm->json '((project . foo) (author . bar)))
     : {"project":"foo","author":"bar"}
 
 - Build the object { "values" : [ 234, 98.56 ] }:
 
-    : > (scm->json (alist->hash-table '(("values" 234 98.56))))
+    : > (scm->json '(("values" . #(234 98.56))))
     : {"values":[234,98.56]}
 
 - Build the object { "values" : [ 234, 98.56 ] } again, this time using
   a variable:
 
-    : > (define values '(234 98.56))
-    : > (scm->json (alist->hash-table `(("values" ,@values))))
+    : > (define values #(234 98.56))
+    : > (scm->json `(("values" . ,values)))
     : {"values":[234,98.56]}
 
 

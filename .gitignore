@@ -1,7 +1,6 @@
 
 /autom4te.cache
-/build-aux/install-sh
-/build-aux/missing
+/build-aux/
 
 /aclocal.m4
 /config.log
@@ -12,5 +11,7 @@
 Makefile
 Makefile.in
 *.go
+*.log
+*.trs
 
 guile-json-*

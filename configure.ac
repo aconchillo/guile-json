@@ -42,7 +42,7 @@ GUILE_LIBDIR=`$PKG_CONFIG --print-errors --variable=libdir guile-$GUILE_EFFECTIV
 AC_SUBST(GUILE_PREFIX)
 AC_SUBST(GUILE_LIBDIR)
 
-AC_CONFIG_FILES([Makefile json/Makefile])
+AC_CONFIG_FILES([Makefile json/Makefile tests/Makefile])
 AC_CONFIG_FILES([env], [chmod +x env])
 
 AC_OUTPUT

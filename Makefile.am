@@ -19,7 +19,7 @@
 # along with guile-json. If not, see https://www.gnu.org/licenses/.
 #
 
-SUBDIRS = json
+SUBDIRS = json tests
 
 ACLOCAL_AMFLAGS = -I build-aux
 
@@ -31,20 +31,21 @@ dist-hook:
         # '' is to make OS X happy
 	sed -i '' "s/%VERSION%/$(PKG_LIST_VERSION)/g" $(top_distdir)/pkg-list.scm
 
+GOBJECTS = $(SOURCES:%.scm=%.go)
+
 moddir=$(datadir)/guile/site/$(GUILE_EFFECTIVE_VERSION)
 objdir=$(libdir)/guile/$(GUILE_EFFECTIVE_VERSION)/site-ccache
 
-SOURCES = json.scm
-GOBJECTS = $(SOURCES:%.scm=%.go)
-
 nobase_mod_DATA = $(SOURCES) $(NOCOMP_SOURCES)
 nobase_nodist_obj_DATA = $(GOBJECTS)
-
-EXTRA_DIST = $(SOURCES) $(NOCOMP_SOURCES)
-
-CLEANFILES = $(GOBJECTS)
 
 GUILE_WARNINGS = -Wunbound-variable -Warity-mismatch -Wformat
 SUFFIXES = .scm .go
 .scm.go:
 	$(top_builddir)/env $(GUILD) compile $(GUILE_WARNINGS) -o "$@" "$<"
+
+SOURCES = json.scm
+
+CLEANFILES = $(GOBJECTS)
+
+EXTRA_DIST = $(SOURCES) $(NOCOMP_SOURCES)
