@@ -28,4 +28,4 @@ AM_SCM_LOG_FLAGS = --no-auto-compile -L $(top_srcdir)
 
 CLEANFILES = $(TESTS:%.scm=%.log)
 
-EXTRA_DIST = $(TESTS)
+EXTRA_DIST = $(TESTS) runner.scm
