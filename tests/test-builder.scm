@@ -25,7 +25,10 @@
 
 (define-module (tests test-builder)
   #:use-module (srfi srfi-64)
-  #:use-module (json))
+  #:use-module (json)
+  #:use-module (tests runner))
+
+(test-runner-factory json:test-runner)
 
 (test-begin "test-builder")
 
@@ -63,8 +66,6 @@
                       (author . "An author")
                       (price . 29.99))))
 
-(test-end "test-builder")
-
-(exit (if (eqv? 0 (test-runner-fail-count (test-runner-current))) 0 1))
+(exit (if (test-end "test-builder") 0 1))
 
 ;;; (tests test-builder) ends here

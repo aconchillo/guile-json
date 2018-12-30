@@ -25,7 +25,10 @@
 
 (define-module (tests test-parser)
   #:use-module (srfi srfi-64)
-  #:use-module (json))
+  #:use-module (json)
+  #:use-module (tests runner))
+
+(test-runner-factory json:test-runner)
 
 (test-begin "test-parser")
 
@@ -66,8 +69,6 @@
 (test-equal "An author" (assoc-ref book "author"))
 (test-equal 29.99 (assoc-ref book "price"))
 
-(test-end "test-parser")
-
-(exit (if (eqv? 0 (test-runner-fail-count (test-runner-current))) 0 1))
+(exit (if (test-end "test-parser") 0 1))
 
 ;;; (tests test-parser) ends here
