@@ -87,12 +87,14 @@ the module:
 
   - /port/ : it defaults to the current output port.
   - /escape/ : if true, the slash (/ solidus) character will be escaped.
+  - /unicode/ : if true, unicode characters will be escaped when needed.
   - /pretty/ : if true, the JSON document will be pretty printed.
 
 - (*scm->json-string* native #:key escape pretty) : Creates a JSON
   document from the given native Guile value into a string.
 
   - /escape/ : if true, the slash (/ solidus) character will be escaped.
+  - /unicode/ : if true, unicode characters will be escaped when needed.
   - /pretty/ : if true, the JSON document will be pretty printed.
 
 
