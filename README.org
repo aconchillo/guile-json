@@ -80,19 +80,21 @@ the module:
 - (*json-string->scm* str) : Reads a JSON document from the given
   string.
 
-- (*scm->json* native #:optional port #:key escape pretty) : Creates a
+- (*scm->json* native #:optional port #:key escape unicode pretty) : Creates a
   JSON document from the given native Guile value. The JSON document is
   written into the given port, or to the current output port if non is
   given.
 
   - /port/ : it defaults to the current output port.
   - /escape/ : if true, the slash (/ solidus) character will be escaped.
+  - /unicode/ : if true, unicode characters will be escaped when needed.
   - /pretty/ : if true, the JSON document will be pretty printed.
 
-- (*scm->json-string* native #:key escape pretty) : Creates a JSON
+- (*scm->json-string* native #:key escape unicode pretty) : Creates a JSON
   document from the given native Guile value into a string.
 
   - /escape/ : if true, the slash (/ solidus) character will be escaped.
+  - /unicode/ : if true, unicode characters will be escaped when needed.
   - /pretty/ : if true, the JSON document will be pretty printed.
 
 

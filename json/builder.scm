@@ -86,13 +86,13 @@
 ;; Object builder functions
 ;;
 
-(define (build-object-pair p port escape pretty level)
+(define (build-object-pair p port escape unicode pretty level)
   (display (indent-string pretty level) port)
-  (json-build-string (car p) port escape)
+  (json-build-string (car p) port escape unicode)
   (build-space port pretty)
   (display ":" port)
   (build-space port pretty)
-  (json-build (cdr p) port escape pretty level))
+  (json-build (cdr p) port escape unicode pretty level))
 
 (define (build-newline port pretty)
   (cond (pretty (newline port))))
@@ -127,7 +127,7 @@
 (define (atom? x)
   (or (char? x) (number? x) (string? x) (symbol? x)))
 
-(define (json-build-string scm port escape)
+(define (json-build-string scm port escape unicode)
   (display "\"" port)
   (display
    (list->string
@@ -142,46 +142,46 @@
                      ((#\cr) '(#\\ #\r))
                      ((#\ht) '(#\\ #\t))
                      ((#\/) (if escape `(#\\ ,c) (list c)))
-                     (else (string->list (build-char-string c)))))
+                     (else (if unicode (string->list (build-char-string c)) (list c)))))
                  (string->list (->string scm)))))
    port)
   (display "\"" port))
 
-(define (json-build-array scm port escape pretty level)
+(define (json-build-array scm port escape unicode pretty level)
   (display "[" port)
   (unless (null? scm)
     (vector-for-each (lambda (i v)
                        (if (> i 0) (display "," port))
                        (build-space port pretty)
-                       (json-build v port escape pretty (+ level 1)))
+                       (json-build v port escape unicode pretty (+ level 1)))
                      scm))
   (display "]" port))
 
-(define (json-build-object scm port escape pretty level)
+(define (json-build-object scm port escape unicode pretty level)
   (cond ((> level 0)
          (build-newline port pretty)))
   (simple-format port "~A{" (indent-string pretty level))
   (build-newline port pretty)
   (let ((pairs scm))
     (unless (null? pairs)
-      (build-object-pair (car pairs) port escape pretty (+ level 1))
+      (build-object-pair (car pairs) port escape unicode pretty (+ level 1))
       (for-each (lambda (p)
                   (display "," port)
                   (build-newline port pretty)
-                  (build-object-pair p port escape pretty (+ level 1)))
+                  (build-object-pair p port escape unicode pretty (+ level 1)))
                 (cdr pairs))))
   (build-newline port pretty)
   (simple-format port "~A}" (indent-string pretty level)))
 
-(define (json-build scm port escape pretty level)
+(define (json-build scm port escape unicode pretty level)
   (cond
    ((eq? scm #nil) (json-build-null port))
    ((boolean? scm) (json-build-boolean scm port))
    ((number? scm) (json-build-number scm port))
-   ((symbol? scm) (json-build-string (symbol->string scm) port escape))
-   ((string? scm) (json-build-string scm port escape))
-   ((vector? scm) (json-build-array scm port escape pretty level))
-   ((pair? scm) (json-build-object scm port escape pretty level))
+   ((symbol? scm) (json-build-string (symbol->string scm) port escape unicode))
+   ((string? scm) (json-build-string scm port escape unicode))
+   ((vector? scm) (json-build-array scm port escape unicode pretty level))
+   ((pair? scm) (json-build-object scm port escape unicode pretty level))
    (else (throw 'json-invalid))))
 
 ;;
@@ -190,18 +190,18 @@
 
 (define* (scm->json scm
                     #:optional (port (current-output-port))
-                    #:key (escape #f) (pretty #f))
+                    #:key (escape #f) (unicode #f) (pretty #f))
   "Creates a JSON document from native. The argument @var{scm} contains
 the native value of the JSON document. Takes one optional argument,
 @var{port}, which defaults to the current output port where the JSON
 document will be written."
-  (json-build scm port escape pretty 0))
+  (json-build scm port escape unicode pretty 0))
 
-(define* (scm->json-string scm #:key (escape #f) (pretty #f))
+(define* (scm->json-string scm #:key (escape #f) (unicode #f) (pretty #f))
   "Creates a JSON document from native into a string. The argument
 @var{scm} contains the native value of the JSON document."
   (call-with-output-string
    (lambda (p)
-     (scm->json scm p #:escape escape #:pretty pretty))))
+     (scm->json scm p #:escape escape #:unicode unicode #:pretty pretty))))
 
 ;;; (json builder) ends here
