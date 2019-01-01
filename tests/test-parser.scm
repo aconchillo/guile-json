@@ -41,6 +41,8 @@
 
 ;; Strings
 (test-equal "hello guile!" (json-string->scm "\"hello guile!\""))
+(test-equal "你好 guile!" (json-string->scm "\"你好 guile!\""))
+(test-equal "你好 guile!" (json-string->scm "\"\\u4f60\\u597d guile!\""))
 
 ;; Boolean
 (test-equal #t (json-string->scm "true"))

@@ -41,6 +41,10 @@
 
 ;; Strings
 (test-equal "\"hello guile!\"" (scm->json-string "hello guile!"))
+(test-equal "\"你好 guile!\"" (scm->json-string "你好 guile!"))
+(test-equal "\"\\u4f60\\u597d guile!\"" (scm->json-string "你好 guile!" #:unicode #t))
+(test-equal "\"</script>\"" (scm->json-string "</script>"))
+(test-equal "\"<\\/script>\"" (scm->json-string "</script>" #:escape #t))
 
 ;; Boolean
 (test-equal "true" (scm->json-string #t))
