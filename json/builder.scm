@@ -1,6 +1,6 @@
 ;;; (json builder) --- Guile JSON implementation.
 
-;; Copyright (C) 2013-2018 Aleix Conchillo Flaque <aconchillo@gmail.com>
+;; Copyright (C) 2013-2019 Aleix Conchillo Flaque <aconchillo@gmail.com>
 ;; Copyright (C) 2015,2016 Jan Nieuwenhuizen <janneke@gnu.org>
 ;;
 ;; This file is part of guile-json.
@@ -124,9 +124,6 @@
         ((symbol? x) (symbol->string x))
         (else x)))
 
-(define (atom? x)
-  (or (char? x) (number? x) (string? x) (symbol? x)))
-
 (define (json-build-string scm port escape unicode)
   (display "\"" port)
   (display
@@ -173,11 +170,14 @@
   (build-newline port pretty)
   (simple-format port "~A}" (indent-string pretty level)))
 
+(define (json-number? number)
+  (and (number? number) (eqv? (imag-part number) 0) (finite? number)))
+
 (define (json-build scm port escape unicode pretty level)
   (cond
    ((eq? scm #nil) (json-build-null port))
    ((boolean? scm) (json-build-boolean scm port))
-   ((number? scm) (json-build-number scm port))
+   ((json-number? scm) (json-build-number scm port))
    ((symbol? scm) (json-build-string (symbol->string scm) port escape unicode))
    ((string? scm) (json-build-string scm port escape unicode))
    ((vector? scm) (json-build-array scm port escape unicode pretty level))

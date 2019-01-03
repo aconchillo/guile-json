@@ -1,5 +1,12 @@
 
 
+* Version ?? (??)
+
+  - Complex numbers, inf and nan are not allowed anymore as valid numbers when
+    building JSON.
+    (Fixes #32)
+
+
 * Version 3.1.0 (Dec 31, 2018)
 
   - scm->json and scm->json-string now support an additional key argument
