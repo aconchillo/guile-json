@@ -1,6 +1,6 @@
 ;;; (tests test-builder) --- Guile JSON implementation.
 
-;; Copyright (C) 2018 Aleix Conchillo Flaque <aconchillo@gmail.com>
+;; Copyright (C) 2018, 2019 Aleix Conchillo Flaque <aconchillo@gmail.com>
 ;;
 ;; This file is part of guile-json.
 ;;
@@ -38,6 +38,13 @@
 (test-equal "-54.897" (scm->json-string -54.897))
 (test-equal "1000.0" (scm->json-string 1e3))
 (test-equal "0.001" (scm->json-string 1e-3))
+(test-equal "0.5" (scm->json-string 1/2))
+(test-equal "0.75" (scm->json-string 3/4))
+(test-error #t (scm->json-string 1+2i))
+(test-error #t (scm->json-string +inf.0))
+(test-error #t (scm->json-string -inf.0))
+(test-error #t (scm->json-string +nan.0))
+
 
 ;; Strings
 (test-equal "\"hello guile!\"" (scm->json-string "hello guile!"))
