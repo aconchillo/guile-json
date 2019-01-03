@@ -191,15 +191,22 @@
 (define* (scm->json scm
                     #:optional (port (current-output-port))
                     #:key (escape #f) (unicode #f) (pretty #f))
-  "Creates a JSON document from native. The argument @var{scm} contains
-the native value of the JSON document. Takes one optional argument,
-@var{port}, which defaults to the current output port where the JSON
-document will be written."
+  "Creates a JSON document from native. The argument @var{scm} contains the
+native value of the JSON document. Takes one optional argument, @var{port},
+which defaults to the current output port where the JSON document will be
+written. It also takes a few key arguments: @var{escape}: if true, the
+slash (/ solidus) character will be escaped, @{unicode} : if true, unicode
+characters will be escaped when needed and @{pretty}: if true, the JSON
+document will be pretty printed.
+
+Note that when using alists to build JSON objects, symbols or numbers might be
+used as keys and they both will be converted to strings.
+"
   (json-build scm port escape unicode pretty 0))
 
 (define* (scm->json-string scm #:key (escape #f) (unicode #f) (pretty #f))
-  "Creates a JSON document from native into a string. The argument
-@var{scm} contains the native value of the JSON document."
+  "Creates a JSON document from native into a string. The argument @var{scm}
+contains the native value of the JSON document."
   (call-with-output-string
    (lambda (p)
      (scm->json scm p #:escape escape #:unicode unicode #:pretty pretty))))
