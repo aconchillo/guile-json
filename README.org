@@ -97,6 +97,9 @@ the module:
   - /unicode/ : if true, unicode characters will be escaped when needed.
   - /pretty/ : if true, the JSON document will be pretty printed.
 
+  Note that when using alists to build JSON objects, symbols or numbers might
+  be used as keys and they both will be converted to strings.
+
 
 ** Exceptions
 
