@@ -80,7 +80,7 @@
          (unicode->string (+ (ash (bytevector-u8-ref bv4 2) 8)
                              (bytevector-u8-ref bv4 3))))))
      ;; Anything else should wrong, hopefully.
-     (else (throw 'json-invalid)))))
+     (else (throw 'json-invalid bv)))))
 
 ;;
 ;; Object builder functions
@@ -182,7 +182,7 @@
    ((string? scm) (json-build-string scm port escape unicode))
    ((vector? scm) (json-build-array scm port escape unicode pretty level))
    ((pair? scm) (json-build-object scm port escape unicode pretty level))
-   (else (throw 'json-invalid))))
+   (else (throw 'json-invalid scm))))
 
 ;;
 ;; Public procedures
