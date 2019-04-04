@@ -185,6 +185,29 @@
     (json-build-object scm port escape unicode pretty level))
    (else (throw 'json-invalid))))
 
+(define (json-key? scm)
+  (or (symbol? scm)
+      (string? scm)
+      ;(character? scm)
+      ))
+
+(define (json-valid? scm)
+  (cond
+   ((eq? scm #nil) #t)
+   ((boolean? scm) #t)
+   ((json-number? scm) #t)
+   ((symbol? scm) #t)
+   ((string? scm) #t)
+   ((vector? scm)
+    (vector-every json-valid? scm))
+   ((pair? scm)
+    (every (lambda (entry)
+	     (and (pair? entry)
+		  (json-key? (car entry))
+		  (json-valid? (cdr entry))))
+	   scm))
+   (else #f)))
+
 ;;
 ;; Public procedures
 ;;
@@ -203,7 +226,9 @@ document will be pretty printed.
 Note that when using alists to build JSON objects, symbols or numbers might be
 used as keys and they both will be converted to strings.
 "
-  (json-build scm port escape unicode pretty 0))
+  (if (json-valid? scm)
+      (json-build scm port escape unicode pretty 0)
+      (throw 'json-invalid)))
 
 (define* (scm->json-string scm #:key (escape #f) (unicode #f) (pretty #f))
   "Creates a JSON document from native into a string. The argument @var{scm}
