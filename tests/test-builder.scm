@@ -76,6 +76,10 @@
   (scm->json-string '((title . "A book")
                       (author . "An author")
                       (price . 29.99))))
+;; Empty objects
+(test-equal "{}" (scm->json-string '()))
+(test-equal "{\"top-level\":{\"second-level\":{}}}"
+  (scm->json-string '(("top-level" ("second-level")))))
 
 (exit (if (test-end "test-builder") 0 1))
 
