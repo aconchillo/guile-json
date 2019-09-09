@@ -181,8 +181,8 @@
    ((symbol? scm) (json-build-string (symbol->string scm) port escape unicode))
    ((string? scm) (json-build-string scm port escape unicode))
    ((vector? scm) (json-build-array scm port escape unicode pretty level))
-   ((pair? scm) (json-build-object scm port escape unicode pretty level))
-   ((null? scm) (json-build-object scm port escape unicode pretty level))
+   ((or (pair? scm) (null? scm))
+    (json-build-object scm port escape unicode pretty level))
    (else (throw 'json-invalid))))
 
 ;;
