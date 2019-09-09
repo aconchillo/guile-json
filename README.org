@@ -16,7 +16,7 @@ specification.
 
 Download the latest tarball and untar it:
 
-- [[http://download.savannah.gnu.org/releases/guile-json/guile-json-3.1.0.tar.gz][guile-json-3.1.0.tar.gz]]
+- [[http://download.savannah.gnu.org/releases/guile-json/guile-json-3.2.0.tar.gz][guile-json-3.2.0.tar.gz]]
 
 If you are cloning the repository make sure you run this first:
 
