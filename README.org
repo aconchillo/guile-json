@@ -116,7 +116,7 @@ port (calling /port-line/ or /port-column/ on the port).
   from.
 
 Also, the /json-invalid/ exception is also thrown (without arguments) if an
-invalid scheme type is given when building a JSON document.
+invalid scheme type (see table above) is given when building a JSON document.
 
 ** Examples
 
