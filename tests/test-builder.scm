@@ -81,6 +81,12 @@
 (test-equal "{\"top-level\":{\"second-level\":{}}}"
   (scm->json-string '(("top-level" ("second-level")))))
 
+;; Invalid objects
+(test-error #t (scm->json (vector 1 2 3 #u8(1 2 3))))
+(test-error #t (scm->json #u8(1 2 3)))
+(test-error #t (scm->json #(1 +inf.0 3)))
+(test-error #t (scm->json '((foo . +nan.0))))
+
 (exit (if (test-end "test-builder") 0 1))
 
 ;;; (tests test-builder) ends here

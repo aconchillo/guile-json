@@ -115,6 +115,8 @@ port (calling /port-line/ or /port-column/ on the port).
 - (*json-parser-port* parser) : Get the port that the parser was reading
   from.
 
+Also, the /json-invalid/ exception is also thrown (without arguments) if an
+invalid scheme type is given when building a JSON document.
 
 ** Examples
 
