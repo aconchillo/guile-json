@@ -1,6 +1,6 @@
 ;;; (tests test-parser) --- Guile JSON implementation.
 
-;; Copyright (C) 2018 Aleix Conchillo Flaque <aconchillo@gmail.com>
+;; Copyright (C) 2018, 2019 Aleix Conchillo Flaque <aconchillo@gmail.com>
 ;;
 ;; This file is part of guile-json.
 ;;
@@ -56,6 +56,11 @@
 (test-equal #(1 2 3 4) (json-string->scm "[1,2,3,4]"))
 (test-equal #(1 2 #(3 4) #(5 6 #(7 8))) (json-string->scm "[1,2,[3,4],[5,6,[7,8]]]" ))
 (test-equal #(1 "two" 3 "four") (json-string->scm "[1,\"two\",3,\"four\"]"))
+(test-equal 1 (vector-ref (json-string->scm "[1,2,,,5]") 0))
+(test-equal 2 (vector-ref (json-string->scm "[1,2,,,5]") 1))
+(test-equal #t (unspecified? (vector-ref (json-string->scm "[1,2,,,5]") 2)))
+(test-equal #t (unspecified? (vector-ref (json-string->scm "[1,2,,,5]") 3)))
+(test-equal 5 (vector-ref (json-string->scm "[1,2,,,5]") 4))
 
 ;; Objects
 (test-equal '(("foo" . "bar")) (json-string->scm "{\"foo\":\"bar\"}"))

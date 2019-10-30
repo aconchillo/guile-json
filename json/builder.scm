@@ -183,6 +183,8 @@
    ((vector? scm) (json-build-array scm port escape unicode pretty level))
    ((or (pair? scm) (null? scm))
     (json-build-object scm port escape unicode pretty level))
+   ;; unspecified is only valid inside vectors.
+   ((unspecified? scm) #t)
    (else (throw 'json-invalid))))
 
 (define (json-key? scm)
@@ -195,7 +197,11 @@
    ((json-number? scm) #t)
    ((symbol? scm) #t)
    ((string? scm) #t)
-   ((vector? scm) (vector-every json-valid? scm))
+   ((vector? scm)
+    (vector-every (lambda (entry)
+                    (or (unspecified? entry)
+                        (json-valid? entry)))
+                  scm))
    ((pair? scm)
     (every (lambda (entry)
 	     (and (pair? entry)

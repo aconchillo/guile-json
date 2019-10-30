@@ -1,6 +1,6 @@
 ;;; (json parser) --- Guile JSON implementation.
 
-;; Copyright (C) 2013-2018 Aleix Conchillo Flaque <aconchillo@gmail.com>
+;; Copyright (C) 2013-2019 Aleix Conchillo Flaque <aconchillo@gmail.com>
 ;;
 ;; This file is part of guile-json.
 ;;
@@ -204,12 +204,16 @@
 ;;
 
 (define (read-array parser)
-  (let loop ((c (parser-peek-char parser)) (values '()))
+  (let loop ((c (parser-peek-char parser))
+             (values '())
+             (added #f))
     (case c
       ;; Skip whitespace and comma
       ((#\ht #\vt #\lf #\cr #\sp #\,)
        (parser-read-char parser)
-       (loop (parser-peek-char parser) values))
+       (loop (parser-peek-char parser)
+             (if added values (append values (list *unspecified*)))
+             #f))
       ;; end of array
       ((#\])
        (parser-read-char parser)
@@ -218,7 +222,8 @@
       (else
        (let ((value (json-read parser)))
          (loop (parser-peek-char parser)
-               (append values (list value))))))))
+               (append values (list value))
+               #t))))))
 
 ;;
 ;; String parsing helpers

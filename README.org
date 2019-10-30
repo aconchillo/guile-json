@@ -130,6 +130,12 @@ invalid scheme type is given when building a JSON document.
     : > (scm->json #(1 2 3))
     : [1,2,3]
 
+- Parse the [1, 2, , , 5] array. Note how empty slots are filled with
+  /*unspecified*/ (use /(unspecified? value)/ to check for /*unspecified*/):
+
+    : > (json-string->scm "[1, 2, , , 5]")
+    : #(0 1 2 #<unspecified> #<unspecified> 5)
+
 - Build the object { "project" : "foo", "author" : "bar" } using an alist. See
   how symbols can also be used:
 
