@@ -186,10 +186,7 @@
    (else (throw 'json-invalid))))
 
 (define (json-key? scm)
-  (or (symbol? scm)
-      (string? scm)
-      ;(character? scm)
-      ))
+  (or (symbol? scm) (string? scm)))
 
 (define (json-valid? scm)
   (cond
@@ -198,14 +195,14 @@
    ((json-number? scm) #t)
    ((symbol? scm) #t)
    ((string? scm) #t)
-   ((vector? scm)
-    (vector-every json-valid? scm))
+   ((vector? scm) (vector-every json-valid? scm))
    ((pair? scm)
     (every (lambda (entry)
 	     (and (pair? entry)
 		  (json-key? (car entry))
 		  (json-valid? (cdr entry))))
 	   scm))
+   ((null? scm) #t)
    (else #f)))
 
 ;;
