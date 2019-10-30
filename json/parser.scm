@@ -204,12 +204,21 @@
 ;;
 
 (define (read-array parser)
-  (let loop ((c (parser-peek-char parser)) (values '()))
+  (let loop ((c (parser-peek-char parser))
+             (values '())
+             (added #f))
     (case c
-      ;; Skip whitespace and comma
-      ((#\ht #\vt #\lf #\cr #\sp #\,)
+      ;; Skip whitespace
+      ((#\ht #\vt #\lf #\cr #\sp)
        (parser-read-char parser)
-       (loop (parser-peek-char parser) values))
+       (loop (parser-peek-char parser) values #f))
+      ;; Handle comma. Throw exception if no value was added.
+      ((#\,)
+       (cond
+        (added
+         (parser-read-char parser)
+         (loop (parser-peek-char parser) values #f))
+        (else (throw 'json-invalid parser))))
       ;; end of array
       ((#\])
        (parser-read-char parser)
@@ -218,7 +227,8 @@
       (else
        (let ((value (json-read parser)))
          (loop (parser-peek-char parser)
-               (append values (list value))))))))
+               (append values (list value))
+               #t))))))
 
 ;;
 ;; String parsing helpers
@@ -227,8 +237,8 @@
 (define (expect parser expected)
   (let ((ch (parser-read-char parser)))
     (if (not (char=? ch expected))
-      (throw 'json-invalid parser)
-      ch)))
+        (throw 'json-invalid parser)
+        ch)))
 
 (define (expect-string parser expected)
   (list->string

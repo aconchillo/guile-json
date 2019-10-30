@@ -1,6 +1,8 @@
 
-
 * Version 3.3.0 (??, 2019)
+
+  - Empty array slots are now considered invalid and a json-invalid exception
+    will be thrown (e.g. "[1,2,,4,5]").
 
   - Validate scheme object before writing output.
     (Fixes #36)
