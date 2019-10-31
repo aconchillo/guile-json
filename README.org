@@ -80,22 +80,26 @@ the module:
 - (*json-string->scm* str) : Reads a JSON document from the given
   string.
 
-- (*scm->json* native #:optional port #:key escape unicode pretty) : Creates a
-  JSON document from the given native Guile value. The JSON document is
-  written into the given port, or to the current output port if non is
+- (*scm->json* native #:optional port #:key escape unicode pretty validate) :
+  Creates a JSON document from the given native Guile value. The JSON document
+  is written into the given port, or to the current output port if non is
   given.
 
   - /port/ : it defaults to the current output port.
   - /escape/ : if true, the slash (/ solidus) character will be escaped.
   - /unicode/ : if true, unicode characters will be escaped when needed.
   - /pretty/ : if true, the JSON document will be pretty printed.
+  - /validate/ : if true, the native value will be validated before starting
+    to print the JSON document (defaults to true).
 
-- (*scm->json-string* native #:key escape unicode pretty) : Creates a JSON
-  document from the given native Guile value into a string.
+- (*scm->json-string* native #:key escape unicode pretty validate) : Creates a
+  JSON document from the given native Guile value into a string.
 
   - /escape/ : if true, the slash (/ solidus) character will be escaped.
   - /unicode/ : if true, unicode characters will be escaped when needed.
-  - /pretty/ : if true, the JSON document will be pretty printed.
+  - /pretty/ : if true, the JSON document will be pretty printed
+  - /validate/ : if true, the native value will be validated before starting
+    to print the JSON document (defaults to true).
 
   Note that when using alists to build JSON objects, symbols or numbers might
   be used as keys and they both will be converted to strings.
@@ -115,8 +119,9 @@ port (calling /port-line/ or /port-column/ on the port).
 - (*json-parser-port* parser) : Get the port that the parser was reading
   from.
 
-Also, the /json-invalid/ exception is also thrown (without arguments) if an
-invalid scheme type (see table above) is given when building a JSON document.
+When building a JSON document from a native type a /json-invalid/ exception
+might be thrown with the offending value as an argument (see table above for
+supported types).
 
 ** Examples
 
