@@ -80,7 +80,7 @@
          (unicode->string (+ (ash (bytevector-u8-ref bv4 2) 8)
                              (bytevector-u8-ref bv4 3))))))
      ;; Anything else should wrong, hopefully.
-     (else (throw 'json-invalid bv)))))
+     (else (throw 'json-invalid (string c))))))
 
 ;;
 ;; Object builder functions
