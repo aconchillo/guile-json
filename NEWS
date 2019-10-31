@@ -1,6 +1,13 @@
 
 * Version 3.3.0 (??, 2019)
 
+  - When building a JSON document from a native value a json-invalid expcetion
+    will be thrown with the offending value as an argument.
+
+  - Add an additional key argument (#:validate) to (scm->json) and
+    (scm->json-string) to avoid native value validation. This could improve
+    performance with big native values that we are certain they are correct.
+
   - Empty array slots are now considered invalid and a json-invalid exception
     will be thrown (e.g. "[1,2,,4,5]").
 

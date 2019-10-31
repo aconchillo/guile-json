@@ -203,7 +203,7 @@
 		  (json-valid? (cdr entry))))
 	   scm))
    ((null? scm) #t)
-   (else #f)))
+   (else (throw 'json-invalid scm))))
 
 ;;
 ;; Public procedures
@@ -211,7 +211,7 @@
 
 (define* (scm->json scm
                     #:optional (port (current-output-port))
-                    #:key (escape #f) (unicode #f) (pretty #f))
+                    #:key (escape #f) (unicode #f) (pretty #f) (validate #t))
   "Creates a JSON document from native. The argument @var{scm} contains the
 native value of the JSON document. Takes one optional argument, @var{port},
 which defaults to the current output port where the JSON document will be
@@ -223,15 +223,21 @@ document will be pretty printed.
 Note that when using alists to build JSON objects, symbols or numbers might be
 used as keys and they both will be converted to strings.
 "
-  (if (json-valid? scm)
-      (json-build scm port escape unicode pretty 0)
-      (throw 'json-invalid)))
+  (cond
+   ((and validate (json-valid? scm))
+    (json-build scm port escape unicode pretty 0))
+   (else
+    (json-build scm port escape unicode pretty 0))))
 
-(define* (scm->json-string scm #:key (escape #f) (unicode #f) (pretty #f))
+(define* (scm->json-string scm #:key
+                           (escape #f) (unicode #f)
+                           (pretty #f) (validate #f))
   "Creates a JSON document from native into a string. The argument @var{scm}
 contains the native value of the JSON document."
   (call-with-output-string
    (lambda (p)
-     (scm->json scm p #:escape escape #:unicode unicode #:pretty pretty))))
+     (scm->json scm p
+                #:escape escape #:unicode unicode
+                #:pretty pretty #:validate validate))))
 
 ;;; (json builder) ends here
