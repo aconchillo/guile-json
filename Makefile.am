@@ -42,7 +42,7 @@ nobase_nodist_obj_DATA = $(GOBJECTS)
 GUILE_WARNINGS = -Wunbound-variable -Warity-mismatch -Wformat
 SUFFIXES = .scm .go
 .scm.go:
-	$(top_builddir)/env $(GUILD) compile $(GUILE_WARNINGS) -o "$@" "$<"
+	$(top_builddir)/env $(GUILD) compile $(GUILE_TARGET) $(GUILE_WARNINGS) -o "$@" "$<"
 
 SOURCES = json.scm
 
