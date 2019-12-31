@@ -45,6 +45,11 @@ AC_SUBST(GUILE_LIBDIR)
 AC_CONFIG_FILES([Makefile json/Makefile tests/Makefile])
 AC_CONFIG_FILES([env], [chmod +x env])
 
+if test "$cross_compiling" != no; then
+   GUILE_TARGET="--target=$host_alias"
+   AC_SUBST([GUILE_TARGET])
+fi
+
 AC_OUTPUT
 
 dnl This is just for printing $libdir below.
