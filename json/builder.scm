@@ -122,7 +122,7 @@
   (cond ((char? x) (make-string 1 x))
         ((number? x) (number->string x))
         ((symbol? x) (symbol->string x))
-        (else x)))
+        (else (format #f "~a" x))))
 
 (define (json-build-string scm port escape unicode)
   (display "\"" port)
