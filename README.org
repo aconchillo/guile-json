@@ -16,7 +16,7 @@ specification.
 
 Download the latest tarball and untar it:
 
-- [[http://download.savannah.gnu.org/releases/guile-json/guile-json-3.3.0.tar.gz][guile-json-3.3.0.tar.gz]]
+- [[http://download.savannah.gnu.org/releases/guile-json/guile-json-3.4.0.tar.gz][guile-json-3.4.0.tar.gz]]
 
 If you are cloning the repository make sure you run this first:
 
@@ -156,7 +156,7 @@ supported types).
 
 * License
 
-Copyright (C) 2013-2018 Aleix Conchillo Flaque <aconchillo@gmail.com>
+Copyright (C) 2013-2020 Aleix Conchillo Flaque <aconchillo@gmail.com>
 
 guile-json is free software: you can redistribute it and/or modify it
 under the terms of the GNU General Public License as published by the

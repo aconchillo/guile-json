@@ -1,4 +1,12 @@
 
+* Version 3.4.0 (Apr 11, 2020)
+
+  - Fix parsing 0 with an exponent.
+    (Fixes #55)
+
+  - Fix cross compilation.
+    (thanks to Jan Nieuwenhuizen)
+
 * Version 3.3.0 (Oct 31, 2019)
 
   - When building a JSON document from a native value a json-invalid exception
