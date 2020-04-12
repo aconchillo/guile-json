@@ -146,6 +146,7 @@
            (string-append s
                           (string ch)
                           (or (read-real-part parser)
+                              (read-exp-part parser)
                               (throw 'json-invalid parser)))))
         ((#\1 #\2 #\3 #\4 #\5 #\6 #\7 #\8 #\9)
          (let ((ch (parser-read-char parser)))

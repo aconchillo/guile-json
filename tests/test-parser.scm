@@ -1,6 +1,6 @@
 ;;; (tests test-parser) --- Guile JSON implementation.
 
-;; Copyright (C) 2018 Aleix Conchillo Flaque <aconchillo@gmail.com>
+;; Copyright (C) 2018-2020 Aleix Conchillo Flaque <aconchillo@gmail.com>
 ;;
 ;; This file is part of guile-json.
 ;;
@@ -36,6 +36,7 @@
 (test-equal 1234 (json-string->scm "1234"))
 (test-equal -1234 (json-string->scm "-1234"))
 (test-equal -54.897 (json-string->scm "-54.897"))
+(test-equal 0.0 (json-string->scm "0e0"))
 (test-equal 1000.0 (json-string->scm "1e3"))
 (test-equal 0.001 (json-string->scm "1E-3"))
 
