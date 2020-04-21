@@ -1,5 +1,5 @@
 
-* Version 3.5.0 (??)
+* Version 3.5.0 (Apr 21, 2020)
 
   - Simplify parser by using `match`. Idea taken from Chickadee's JSON parser
     (https://dthompson.us/projects/chickadee.html). This also made it easier
