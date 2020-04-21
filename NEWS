@@ -1,4 +1,19 @@
 
+* Version 3.5.0 (??)
+
+  - Simplify parser by using `match`. Idea taken from Chickadee's JSON parser
+    (https://dthompson.us/projects/chickadee.html). This also made it easier
+    to clean up some functions.
+
+  - Better handling of invalid numbers.
+
+  - Improve handling of EOF. Most parsing functions were not taking care of
+    it.
+
+  - Fix error when parsing objects with commas and no following elements are
+    found.
+
+
 * Version 3.4.0 (Apr 11, 2020)
 
   - Fix parsing 0 with an exponent.
@@ -6,6 +21,7 @@
 
   - Fix cross compilation.
     (thanks to Jan Nieuwenhuizen)
+
 
 * Version 3.3.0 (Oct 31, 2019)
 
