@@ -1,6 +1,6 @@
 ;;; (json builder) --- Guile JSON implementation.
 
-;; Copyright (C) 2013-2019 Aleix Conchillo Flaque <aconchillo@gmail.com>
+;; Copyright (C) 2013-2020 Aleix Conchillo Flaque <aconchillo@gmail.com>
 ;; Copyright (C) 2015,2016 Jan Nieuwenhuizen <janneke@gnu.org>
 ;;
 ;; This file is part of guile-json.
@@ -26,6 +26,7 @@
 
 (define-module (json builder)
   #:use-module (ice-9 format)
+  #:use-module (ice-9 textual-ports)
   #:use-module (srfi srfi-1)
   #:use-module (srfi srfi-43)
   #:use-module (rnrs bytevectors)
@@ -87,10 +88,10 @@
 ;;
 
 (define (build-object-pair p port escape unicode pretty level)
-  (display (indent-string pretty level) port)
+  (put-string port (indent-string pretty level))
   (json-build-string (car p) port escape unicode)
   (build-space port pretty)
-  (display ":" port)
+  (put-string port ":")
   (build-space port pretty)
   (json-build (cdr p) port escape unicode pretty level))
 
@@ -98,7 +99,7 @@
   (cond (pretty (newline port))))
 
 (define (build-space port pretty)
-  (cond (pretty (display " " port))))
+  (cond (pretty (put-string port " "))))
 
 (define (indent-string pretty level)
   (if pretty (format #f "~v_" (* 2 level)) ""))
@@ -108,15 +109,15 @@
 ;;
 
 (define (json-build-null port)
-  (display "null" port))
+  (put-string port "null"))
 
 (define (json-build-boolean scm port)
-  (display (if scm "true" "false") port))
+  (put-string port (if scm "true" "false")))
 
 (define (json-build-number scm port)
   (if (and (rational? scm) (not (integer? scm)))
-      (display (number->string (exact->inexact scm)) port)
-      (display (number->string scm) port)))
+      (put-string port (number->string (exact->inexact scm)))
+      (put-string port (number->string scm))))
 
 (define (->string x)
   (cond ((char? x) (make-string 1 x))
@@ -125,8 +126,9 @@
         (else x)))
 
 (define (json-build-string scm port escape unicode)
-  (display "\"" port)
-  (display
+  (put-string port "\"")
+  (put-string
+   port
    (list->string
     (fold-right append '()
                 (map
@@ -140,19 +142,18 @@
                      ((#\ht) '(#\\ #\t))
                      ((#\/) (if escape `(#\\ ,c) (list c)))
                      (else (if unicode (string->list (build-char-string c)) (list c)))))
-                 (string->list (->string scm)))))
-   port)
-  (display "\"" port))
+                 (string->list (->string scm))))))
+  (put-string port "\""))
 
 (define (json-build-array scm port escape unicode pretty level)
-  (display "[" port)
+  (put-string port "[")
   (unless (null? scm)
     (vector-for-each (lambda (i v)
-                       (if (> i 0) (display "," port))
+                       (if (> i 0) (put-string port ","))
                        (build-space port pretty)
                        (json-build v port escape unicode pretty (+ level 1)))
                      scm))
-  (display "]" port))
+  (put-string port "]"))
 
 (define (json-build-object scm port escape unicode pretty level)
   (cond ((> level 0)
@@ -163,7 +164,7 @@
     (unless (null? pairs)
       (build-object-pair (car pairs) port escape unicode pretty (+ level 1))
       (for-each (lambda (p)
-                  (display "," port)
+                  (put-string port ",")
                   (build-newline port pretty)
                   (build-object-pair p port escape unicode pretty (+ level 1)))
                 (cdr pairs))))
