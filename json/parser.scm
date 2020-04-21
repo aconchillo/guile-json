@@ -26,6 +26,7 @@
 (define-module (json parser)
   #:use-module (ice-9 match)
   #:use-module (ice-9 rdelim)
+  #:use-module (ice-9 textual-ports)
   #:use-module (rnrs bytevectors)
   #:use-module (srfi srfi-9)
   #:export (json->scm
@@ -88,56 +89,62 @@
 ;;
 
 ;; Read + or -. If something different is found, return empty string.
-(define (read-sign parser)
+(define (read-sign parser string-port)
   (match (parser-peek-char parser)
-    ((or #\+ #\-) (string (parser-read-char parser)))
-    (_ "")))
+    ((or #\+ #\-) (put-char string-port (parser-read-char parser)))
+    (_ *unspecified*)))
 
 ;; Read digits [0..9].
-(define (read-digits parser)
-  (let loop ((digits ""))
-    (match (parser-peek-char parser)
-      ((? eof-object?) digits)
-      ((? digit?)
-       (loop (string-append digits (string (parser-read-char parser)))))
-      (_ digits))))
+(define (read-digits parser string-port)
+  (match (parser-peek-char parser)
+    ((? eof-object?) *unspecified*)
+    ((? digit?)
+     (put-char string-port (parser-read-char parser))
+     (read-digits parser string-port))
+    (_ *unspecified*)))
 
-(define (read-exponent parser)
+(define (read-exponent parser string-port)
   (match (parser-peek-char parser)
     ((or #\e #\E)
      (parser-read-char parser)
-     (string-append "e" (read-sign parser) (read-digits parser)))
-    (_ "")))
+     (put-char string-port #\e)
+     (read-sign parser string-port)
+     (read-digits parser string-port))
+    (_ *unspecified*)))
 
-(define (read-fraction parser)
+(define (read-fraction parser string-port)
   (match (parser-peek-char parser)
     (#\.
      (parser-read-char parser)
-     (string-append "." (read-digits parser)))
-    (_ "")))
+     (put-char string-port #\.)
+     (read-digits parser string-port))
+    (_ *unspecified*)))
 
-(define (read-positive-number parser)
-  (string-append (read-digits parser)
-                 (read-fraction parser)
-                 (read-exponent parser)))
+(define (read-positive-number parser string-port)
+  (read-digits parser string-port)
+  (read-fraction parser string-port)
+  (read-exponent parser string-port))
 
-(define (read-number parser)
+(define (read-number parser string-port)
   (match (parser-peek-char parser)
     ((? eof-object?) (json-exception parser))
     (#\-
      (parser-read-char parser)
-     (string-append "-" (read-positive-number parser)))
+     (put-char string-port #\-)
+     (read-positive-number parser string-port))
     (#\0
      (parser-read-char parser)
-     (string-append "0"
-                    (read-fraction parser)
-                    (read-exponent parser)))
+     (put-char string-port #\0)
+     (read-fraction parser string-port)
+     (read-exponent parser string-port))
     ((? digit?)
-     (read-positive-number parser))
+     (read-positive-number parser string-port))
     (_ (json-exception parser))))
 
 (define (json-read-number parser)
-  (string->number (read-number parser)))
+  (string->number
+   (call-with-output-string
+     (lambda (string-port) (read-number parser string-port)))))
 
 ;;
 ;; Object parsing helpers
@@ -239,15 +246,22 @@
        (utf16->string utf)))
     (_ (json-exception parser))))
 
+(define (read-string-char parser string-port)
+  (match (parser-read-char parser)
+    ((? eof-object?) (json-exception parser))
+    (#\" *unspecified*)
+    (#\\
+     (put-string string-port (read-control-char parser))
+     (read-string-char parser string-port))
+    (ch
+     (put-char string-port ch)
+     (read-string-char parser string-port))))
+
 (define (json-read-string parser)
   (expect-delimiter parser #\")
   ;; Read characters until \ or " are found.
-  (let loop ((result ""))
-    (match (parser-read-char parser)
-      ((? eof-object?) (json-exception parser))
-      (#\" result)
-      (#\\ (loop (string-append result (read-control-char parser))))
-      (ch (loop (string-append result (string ch)))))))
+  (call-with-output-string
+    (lambda (string-port) (read-string-char parser string-port))))
 
 ;;
 ;; Booleans and null parsing helpers

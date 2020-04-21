@@ -1,4 +1,10 @@
 
+* Version 3.6.0 (??, 2020)
+
+  - Speed up performance by using string ports instead of appending strings.
+    (suggested by Linus Björnstam)
+
+
 * Version 3.5.0 (Apr 21, 2020)
 
   - Simplify parser by using `match`. Idea taken from Chickadee's JSON parser
