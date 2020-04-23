@@ -43,10 +43,10 @@
   json-parser?
   (port json-parser-port))
 
-(define (parser-peek-char parser)
+(define-syntax-rule (parser-peek-char parser)
   (peek-char (json-parser-port parser)))
 
-(define (parser-read-char parser)
+(define-syntax-rule (parser-read-char parser)
   (read-char (json-parser-port parser)))
 
 ;;

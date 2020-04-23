@@ -4,7 +4,10 @@
   - Speed up performance by using string ports instead of appending strings.
     (suggested by Linus Björnstam)
 
-  - Replace `display` with `put-string`.
+  - Increase performance by defining (parser-peek-char) and (parser-read-char)
+    as macros.
+
+  - Replace `display` with `put-string` on JSON builder.
 
 
 * Version 3.5.0 (Apr 21, 2020)
