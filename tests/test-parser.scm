@@ -51,6 +51,7 @@
 (test-equal "hello guile!" (json-string->scm "\"hello guile!\""))
 (test-equal "你好 guile!" (json-string->scm "\"你好 guile!\""))
 (test-equal "你好 guile!" (json-string->scm "\"\\u4f60\\u597d guile!\""))
+(test-equal "你好 guile!" (json-string->scm "\"\\u4F60\\u597D guile!\""))
 (test-equal "hello quoted \"guile\"!" (json-string->scm "\"hello quoted \\\"guile\\\"!\""))
 
 ;; Boolean
