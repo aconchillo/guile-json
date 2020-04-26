@@ -57,10 +57,14 @@
   (throw 'json-invalid parser))
 
 (define (digit? c)
-  (char-set-contains? char-set:digit c))
+  (case c
+    ((#\0 #\1 #\2 #\3 #\4 #\5 #\6 #\7 #\8 #\9) #t)
+    (else #f)))
 
 (define (whitespace? c)
-  (char-set-contains? char-set:whitespace c))
+  (case c
+    ((#\ht #\lf #\cr #\sp) #t)
+    (else #f)))
 
 (define (skip-whitespaces parser)
   (match (parser-peek-char parser)

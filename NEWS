@@ -1,7 +1,12 @@
 
 * Version 3.6.0 (??, 2020)
 
-  - Speed up performance by using string ports instead of appending strings.
+  - Don't need to use character-sets to detect whitespaces. JSON only defines
+    four possible types of whitespaces: space, linefeed, carriage return and
+    horizontal tab.
+
+  - Initial performance speed up by using string ports instead of appending
+    strings.
     (suggested by Linus Björnstam)
 
   - Increase performance by defining (parser-peek-char) and (parser-read-char)
