@@ -218,32 +218,50 @@
 ;; String parsing helpers
 ;;
 
-(define (read-hex-digit parser)
-  (let ((c (parser-read-char parser)))
-    (case c
-      ((#\0 #\1 #\2 #\3 #\4 #\5 #\6 #\7 #\8 #\9
-        #\A #\B #\C #\D #\E #\F #\a #\b #\c #\d #\e #\f) c)
-      (else (json-exception parser)))))
+(define (read-hex-digit->integer parser)
+  (match (parser-read-char parser)
+    (#\0 0)
+    (#\1 1)
+    (#\2 2)
+    (#\3 3)
+    (#\4 4)
+    (#\5 5)
+    (#\6 6)
+    (#\7 7)
+    (#\8 8)
+    (#\9 9)
+    ((or #\A #\a) 10)
+    ((or #\B #\b) 11)
+    ((or #\C #\c) 12)
+    ((or #\D #\d) 13)
+    ((or #\E #\e) 14)
+    ((or #\F #\f) 15)
+    (_ (json-exception parser))))
+
+;; Characters in Guile match the JSON representation so we just need to parse
+;; the hexadecimal values into an integer.
+;;
+;;     codepoint = 16^3 * ch + 16^2 * ch + 16 * ch + ch
+;;
+;; https://www.gnu.org/software/guile/manual/html_node/Characters.html
+(define (read-unicode-char parser)
+  (integer->char
+   (+ (* 4096 (read-hex-digit->integer parser))
+      (* 256 (read-hex-digit->integer parser))
+      (* 16 (read-hex-digit->integer parser))
+      (read-hex-digit->integer parser))))
 
 (define (read-control-char parser)
   (match (parser-read-char parser)
-    (#\" (string #\"))
-    (#\\ (string #\\))
-    (#\/ (string #\/))
-    (#\b (string #\bs))
-    (#\f (string #\ff))
-    (#\n (string #\lf))
-    (#\r (string #\cr))
-    (#\t (string #\ht))
-    (#\u
-     (let* ((utf1 (string (read-hex-digit parser)
-                          (read-hex-digit parser)))
-            (utf2 (string (read-hex-digit parser)
-                          (read-hex-digit parser)))
-            (vu8 (list (string->number utf1 16)
-                       (string->number utf2 16)))
-            (utf (u8-list->bytevector vu8)))
-       (utf16->string utf)))
+    (#\" #\")
+    (#\\ #\\)
+    (#\/ #\/)
+    (#\b #\bs)
+    (#\f #\ff)
+    (#\n #\lf)
+    (#\r #\cr)
+    (#\t #\ht)
+    (#\u (read-unicode-char parser))
     (_ (json-exception parser))))
 
 (define (read-string-char parser string-port)
@@ -251,7 +269,7 @@
     ((? eof-object?) (json-exception parser))
     (#\" *unspecified*)
     (#\\
-     (put-string string-port (read-control-char parser))
+     (put-char string-port (read-control-char parser))
      (read-string-char parser string-port))
     (ch
      (put-char string-port ch)
