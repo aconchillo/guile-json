@@ -1,6 +1,9 @@
 
 * Version 3.6.0 (??, 2020)
 
+  - Don't use string ports when reading string. Instead just use a plain old
+    list. This is also has significant improvements.
+
   - Don't need to use character-sets to detect whitespaces. JSON only defines
     four possible types of whitespaces: space, linefeed, carriage return and
     horizontal tab.

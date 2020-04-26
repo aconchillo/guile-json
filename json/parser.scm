@@ -268,22 +268,14 @@
     (#\u (read-unicode-char parser))
     (_ (json-exception parser))))
 
-(define (read-string-char parser string-port)
-  (match (parser-read-char parser)
-    ((? eof-object?) (json-exception parser))
-    (#\" *unspecified*)
-    (#\\
-     (put-char string-port (read-control-char parser))
-     (read-string-char parser string-port))
-    (ch
-     (put-char string-port ch)
-     (read-string-char parser string-port))))
-
 (define (json-read-string parser)
   (expect-delimiter parser #\")
-  ;; Read characters until \ or " are found.
-  (call-with-output-string
-    (lambda (string-port) (read-string-char parser string-port))))
+  (let loop ((chars '()))
+    (match (parser-read-char parser)
+      ((? eof-object?) (json-exception parser))
+      (#\" (reverse-list->string chars))
+      (#\\ (loop (cons (read-control-char parser) chars)))
+      (ch (loop (cons ch chars))))))
 
 ;;
 ;; Booleans and null parsing helpers
