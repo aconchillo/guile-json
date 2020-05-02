@@ -1,6 +1,6 @@
 ;;; (tests test-builder) --- Guile JSON implementation.
 
-;; Copyright (C) 2018, 2019 Aleix Conchillo Flaque <aconchillo@gmail.com>
+;; Copyright (C) 2018-2020 Aleix Conchillo Flaque <aconchillo@gmail.com>
 ;;
 ;; This file is part of guile-json.
 ;;
@@ -50,6 +50,7 @@
 (test-equal "\"hello guile!\"" (scm->json-string "hello guile!"))
 (test-equal "\"你好 guile!\"" (scm->json-string "你好 guile!"))
 (test-equal "\"\\u4f60\\u597d guile!\"" (scm->json-string "你好 guile!" #:unicode #t))
+(test-equal "\"guile powers music \\ud834\\udd1e!\"" (scm->json-string "guile powers music 𝄞!" #:unicode #t))
 (test-equal "\"</script>\"" (scm->json-string "</script>"))
 (test-equal "\"<\\/script>\"" (scm->json-string "</script>" #:escape #t))
 
