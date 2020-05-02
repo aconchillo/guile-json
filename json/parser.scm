@@ -25,9 +25,7 @@
 
 (define-module (json parser)
   #:use-module (ice-9 match)
-  #:use-module (ice-9 rdelim)
   #:use-module (ice-9 textual-ports)
-  #:use-module (rnrs bytevectors)
   #:use-module (srfi srfi-9)
   #:export (json->scm
             json-string->scm
