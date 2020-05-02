@@ -28,31 +28,14 @@
   #:use-module (ice-9 textual-ports)
   #:use-module (srfi srfi-9)
   #:export (json->scm
-            json-string->scm
-            json-parser?
-            json-parser-port))
-
-;;
-;; Parser record and read helpers
-;;
-
-(define-record-type json-parser
-  (make-json-parser port)
-  json-parser?
-  (port json-parser-port))
-
-(define-syntax-rule (parser-peek-char parser)
-  (peek-char (json-parser-port parser)))
-
-(define-syntax-rule (parser-read-char parser)
-  (read-char (json-parser-port parser)))
+            json-string->scm))
 
 ;;
 ;; Miscellaneuos helpers
 ;;
 
-(define (json-exception parser)
-  (throw 'json-invalid parser))
+(define (json-exception port)
+  (throw 'json-invalid port))
 
 (define (digit? c)
   (case c
@@ -64,163 +47,163 @@
     ((#\ht #\lf #\cr #\sp) #t)
     (else #f)))
 
-(define (skip-whitespaces parser)
-  (match (parser-peek-char parser)
+(define (skip-whitespaces port)
+  (match (peek-char port)
     ((? eof-object?) *unspecified*)
     ((? whitespace?)
-     (parser-read-char parser)
-     (skip-whitespaces parser))
+     (read-char port)
+     (skip-whitespaces port))
     (_ *unspecified*)))
 
-(define (expect-string parser expected return)
+(define (expect-string port expected return)
   (let loop ((n 0))
     (cond
      ((= n (string-length expected)) return)
-     ((eqv? (parser-read-char parser) (string-ref expected n))
+     ((eqv? (read-char port) (string-ref expected n))
       (loop (+ n 1)))
-     (else (json-exception parser)))))
+     (else (json-exception port)))))
 
-(define (expect-delimiter parser delimiter)
-  (match (parser-read-char parser)
-    ((? eof-object?) (json-exception parser))
-    (ch (unless (eqv? ch delimiter) (json-exception parser)))))
+(define (expect-delimiter port delimiter)
+  (match (read-char port)
+    ((? eof-object?) (json-exception port))
+    (ch (unless (eqv? ch delimiter) (json-exception port)))))
 
 ;;
 ;; Number parsing helpers
 ;;
 
 ;; Read + or -. If something different is found, return empty string.
-(define (read-sign parser string-port)
-  (match (parser-peek-char parser)
-    ((or #\+ #\-) (put-char string-port (parser-read-char parser)))
+(define (read-sign port string-port)
+  (match (peek-char port)
+    ((or #\+ #\-) (put-char string-port (read-char port)))
     (_ *unspecified*)))
 
 ;; Read digits [0..9].
-(define (read-digits parser string-port)
-  (match (parser-peek-char parser)
+(define (read-digits port string-port)
+  (match (peek-char port)
     ((? eof-object?) *unspecified*)
     ((? digit?)
-     (put-char string-port (parser-read-char parser))
-     (read-digits parser string-port))
+     (put-char string-port (read-char port))
+     (read-digits port string-port))
     (_ *unspecified*)))
 
-(define (read-exponent parser string-port)
-  (match (parser-peek-char parser)
+(define (read-exponent port string-port)
+  (match (peek-char port)
     ((or #\e #\E)
-     (parser-read-char parser)
+     (read-char port)
      (put-char string-port #\e)
-     (read-sign parser string-port)
-     (read-digits parser string-port))
+     (read-sign port string-port)
+     (read-digits port string-port))
     (_ *unspecified*)))
 
-(define (read-fraction parser string-port)
-  (match (parser-peek-char parser)
+(define (read-fraction port string-port)
+  (match (peek-char port)
     (#\.
-     (parser-read-char parser)
+     (read-char port)
      (put-char string-port #\.)
-     (read-digits parser string-port))
+     (read-digits port string-port))
     (_ *unspecified*)))
 
-(define (read-positive-number parser string-port)
-  (read-digits parser string-port)
-  (read-fraction parser string-port)
-  (read-exponent parser string-port))
+(define (read-positive-number port string-port)
+  (read-digits port string-port)
+  (read-fraction port string-port)
+  (read-exponent port string-port))
 
-(define (read-number parser string-port)
-  (match (parser-peek-char parser)
-    ((? eof-object?) (json-exception parser))
+(define (read-number port string-port)
+  (match (peek-char port)
+    ((? eof-object?) (json-exception port))
     (#\-
-     (parser-read-char parser)
+     (read-char port)
      (put-char string-port #\-)
-     (read-positive-number parser string-port))
+     (read-positive-number port string-port))
     (#\0
-     (parser-read-char parser)
+     (read-char port)
      (put-char string-port #\0)
-     (read-fraction parser string-port)
-     (read-exponent parser string-port))
+     (read-fraction port string-port)
+     (read-exponent port string-port))
     ((? digit?)
-     (read-positive-number parser string-port))
-    (_ (json-exception parser))))
+     (read-positive-number port string-port))
+    (_ (json-exception port))))
 
-(define (json-read-number parser)
+(define (json-read-number port)
   (string->number
    (call-with-output-string
-     (lambda (string-port) (read-number parser string-port)))))
+     (lambda (string-port) (read-number port string-port)))))
 
 ;;
 ;; Object parsing helpers
 ;;
 
-(define (read-pair parser)
+(define (read-pair port)
   ;; Read key.
-  (let ((key (json-read-string parser)))
-    (skip-whitespaces parser)
-    (match (parser-peek-char parser)
-      ((? eof-object?) (json-exception parser))
+  (let ((key (json-read-string port)))
+    (skip-whitespaces port)
+    (match (peek-char port)
+      ((? eof-object?) (json-exception port))
       ;; Skip colon and read value.
       (#\:
-       (parser-read-char parser)
-       (cons key (json-read parser)))
-      (_ (json-exception parser)))))
+       (read-char port)
+       (cons key (json-read port)))
+      (_ (json-exception port)))))
 
-(define (json-read-object parser)
-  (expect-delimiter parser #\{)
+(define (json-read-object port)
+  (expect-delimiter port #\{)
   (let loop ((pairs '()) (added #t))
-    (skip-whitespaces parser)
-    (match (parser-peek-char parser)
-      ((? eof-object?) (json-exception parser))
+    (skip-whitespaces port)
+    (match (peek-char port)
+      ((? eof-object?) (json-exception port))
       ;; End of object.
       (#\}
-       (parser-read-char parser)
+       (read-char port)
        (cond
         (added pairs)
-        (else (json-exception parser))))
+        (else (json-exception port))))
       ;; Read one pair and continue.
       (#\"
-       (let ((pair (read-pair parser)))
+       (let ((pair (read-pair port)))
          (loop (cons pair pairs) #t)))
       ;; Skip comma and read more pairs.
       (#\,
-       (parser-read-char parser)
+       (read-char port)
        (cond
         (added (loop pairs #f))
-        (else (json-exception parser))))
+        (else (json-exception port))))
       ;; Invalid object.
-      (_ (json-exception parser)))))
+      (_ (json-exception port)))))
 
 ;;
 ;; Array parsing helpers
 ;;
 
-(define (json-read-array parser)
-  (expect-delimiter parser #\[)
+(define (json-read-array port)
+  (expect-delimiter port #\[)
   (let loop ((values '()) (added #t))
-    (skip-whitespaces parser)
-    (match (parser-peek-char parser)
-      ((? eof-object?) (json-exception parser))
+    (skip-whitespaces port)
+    (match (peek-char port)
+      ((? eof-object?) (json-exception port))
       ;; Handle comma (make sure we added an element).
       (#\,
-       (parser-read-char parser)
+       (read-char port)
        (cond
         (added (loop values #f))
-        (else (json-exception parser))))
+        (else (json-exception port))))
       ;; End of array (make sure we added an element).
       (#\]
-       (parser-read-char parser)
+       (read-char port)
        (cond
         (added (list->vector values))
-        (else (json-exception parser))))
+        (else (json-exception port))))
       ;; This can be any JSON object.
       (_
-       (let ((value (json-read parser)))
+       (let ((value (json-read port)))
          (loop (append values (list value)) #t))))))
 
 ;;
 ;; String parsing helpers
 ;;
 
-(define (read-hex-digit->integer parser)
-  (match (parser-read-char parser)
+(define (read-hex-digit->integer port)
+  (match (read-char port)
     (#\0 0)
     (#\1 1)
     (#\2 2)
@@ -237,7 +220,7 @@
     ((or #\D #\d) 13)
     ((or #\E #\e) 14)
     ((or #\F #\f) 15)
-    (_ (json-exception parser))))
+    (_ (json-exception port))))
 
 ;; Characters in Guile match the JSON representation so we just need to parse
 ;; the hexadecimal values into an integer.
@@ -245,15 +228,15 @@
 ;;     codepoint = 16^3 * ch + 16^2 * ch + 16 * ch + ch
 ;;
 ;; https://www.gnu.org/software/guile/manual/html_node/Characters.html
-(define (read-unicode-char parser)
+(define (read-unicode-char port)
   (integer->char
-   (+ (* 4096 (read-hex-digit->integer parser))
-      (* 256 (read-hex-digit->integer parser))
-      (* 16 (read-hex-digit->integer parser))
-      (read-hex-digit->integer parser))))
+   (+ (* 4096 (read-hex-digit->integer port))
+      (* 256 (read-hex-digit->integer port))
+      (* 16 (read-hex-digit->integer port))
+      (read-hex-digit->integer port))))
 
-(define (read-control-char parser)
-  (match (parser-read-char parser)
+(define (read-control-char port)
+  (match (read-char port)
     (#\" #\")
     (#\\ #\\)
     (#\/ #\/)
@@ -262,49 +245,49 @@
     (#\n #\lf)
     (#\r #\cr)
     (#\t #\ht)
-    (#\u (read-unicode-char parser))
-    (_ (json-exception parser))))
+    (#\u (read-unicode-char port))
+    (_ (json-exception port))))
 
-(define (json-read-string parser)
-  (expect-delimiter parser #\")
+(define (json-read-string port)
+  (expect-delimiter port #\")
   (let loop ((chars '()))
-    (match (parser-read-char parser)
-      ((? eof-object?) (json-exception parser))
+    (match (read-char port)
+      ((? eof-object?) (json-exception port))
       (#\" (reverse-list->string chars))
-      (#\\ (loop (cons (read-control-char parser) chars)))
+      (#\\ (loop (cons (read-control-char port) chars)))
       (ch (loop (cons ch chars))))))
 
 ;;
 ;; Booleans and null parsing helpers
 ;;
 
-(define (json-read-true parser)
-  (expect-string parser "true" #t))
+(define (json-read-true port)
+  (expect-string port "true" #t))
 
-(define (json-read-false parser)
-  (expect-string parser "false" #f))
+(define (json-read-false port)
+  (expect-string port "false" #f))
 
-(define (json-read-null parser)
-  (expect-string parser "null" #nil))
+(define (json-read-null port)
+  (expect-string port "null" #nil))
 
 ;;
 ;; Main parser functions
 ;;
 
-(define (json-read parser)
-  (skip-whitespaces parser)
-  (match (parser-peek-char parser)
+(define (json-read port)
+  (skip-whitespaces port)
+  (match (peek-char port)
     ;; If we reach the end we might have an incomplete document.
-    ((? eof-object?) (json-exception parser))
+    ((? eof-object?) (json-exception port))
     ;; Read JSON values.
-    (#\t (json-read-true parser))
-    (#\f (json-read-false parser))
-    (#\n (json-read-null parser))
-    (#\{ (json-read-object parser))
-    (#\[ (json-read-array parser))
-    (#\" (json-read-string parser))
+    (#\t (json-read-true port))
+    (#\f (json-read-false port))
+    (#\n (json-read-null port))
+    (#\{ (json-read-object port))
+    (#\[ (json-read-array port))
+    (#\" (json-read-string port))
     ;; Anything else should be a number.
-    (_ (json-read-number parser))))
+    (_ (json-read-number port))))
 
 ;;
 ;; Public procedures
@@ -314,15 +297,14 @@
   "Parse a JSON document into native. Takes one optional argument,
 @var{port}, which defaults to the current input port from where the JSON
 document is read."
-  (let* ((parser (make-json-parser port))
-         (value (json-read parser)))
+  (let ((value (json-read port)))
     ;; Skip any trailing whitespaces.
-    (skip-whitespaces parser)
+    (skip-whitespaces port)
     (cond
      ;; If we reach the end the parsing succeeded.
-     ((eof-object? (parser-peek-char parser)) value)
+     ((eof-object? (peek-char port)) value)
      ;; If there's anything else other than the end, parser fails.
-     (else (json-exception parser)))))
+     (else (json-exception port)))))
 
 (define* (json-string->scm str)
   "Parse a JSON document into native. Takes a string argument,

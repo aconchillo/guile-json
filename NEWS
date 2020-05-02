@@ -1,5 +1,9 @@
 
-* Version 3.6.0 (??, 2020)
+* Version 4.0.0 (??, 2020)
+
+  - The json-parser record type has been removed as the record only contained
+    the port. Removing the need to access records also had a lsight
+    performance increase.
 
   - Don't use map to parse expected string, simply use (string-ref).
     (thanks to Linus Björnstam)
