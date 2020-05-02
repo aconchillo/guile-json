@@ -1,15 +1,16 @@
 
 * Version 3.6.0 (??, 2020)
 
-  - Don't use string ports when reading string. Instead just use a plain old
-    list. This is also has significant improvements.
+  - Don't use map to parse expected string, simply use (string-ref).
+    (thanks to Linus Björnstam)
+
+  - Don't use string ports when reading string, just use a plain old list
+    instead. The initial initial iteration was by using string ports instead
+    of appending strings, this one suggested by Linus Björnstam.
 
   - Don't need to use character-sets to detect whitespaces. JSON only defines
     four possible types of whitespaces: space, linefeed, carriage return and
     horizontal tab.
-
-  - Initial performance speed up by using string ports instead of appending
-    strings.
     (suggested by Linus Björnstam)
 
   - Increase performance by defining (parser-peek-char) and (parser-read-char)

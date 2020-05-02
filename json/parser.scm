@@ -74,14 +74,13 @@
      (skip-whitespaces parser))
     (_ *unspecified*)))
 
-(define (expect parser expected)
-  (let ((ch (parser-read-char parser)))
-    (if (not (char=? ch expected)) (json-exception parser) ch)))
-
-(define (expect-string parser expected)
-  (list->string
-   (map (lambda (ch) (expect parser ch))
-        (string->list expected))))
+(define (expect-string parser expected return)
+  (let loop ((n 0))
+    (cond
+     ((= n (string-length expected)) return)
+     ((eqv? (parser-read-char parser) (string-ref expected n))
+      (loop (+ n 1)))
+     (else (json-exception parser)))))
 
 (define (expect-delimiter parser delimiter)
   (match (parser-read-char parser)
@@ -282,16 +281,13 @@
 ;;
 
 (define (json-read-true parser)
-  (expect-string parser "true")
-  #t)
+  (expect-string parser "true" #t))
 
 (define (json-read-false parser)
-  (expect-string parser "false")
-  #f)
+  (expect-string parser "false" #f))
 
 (define (json-read-null parser)
-  (expect-string parser "null")
-  #nil)
+  (expect-string parser "null" #nil))
 
 ;;
 ;; Main parser functions
