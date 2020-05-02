@@ -5,8 +5,8 @@
     (thanks to Linus Björnstam)
 
   - Don't use string ports when reading string, just use a plain old list
-    instead. The initial initial iteration was by using string ports instead
-    of appending strings, this one suggested by Linus Björnstam.
+    instead. The initial iteration used string ports instead of appending
+    strings, this was suggested by Linus Björnstam.
 
   - Don't need to use character-sets to detect whitespaces. JSON only defines
     four possible types of whitespaces: space, linefeed, carriage return and
