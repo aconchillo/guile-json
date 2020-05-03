@@ -1,24 +1,25 @@
 
 * Version 4.0.0 (??, 2020)
 
+  - Go back to using (cond) instead of (match) since (match) reduces
+    performance.
+
   - The json-parser record type has been removed as the record only contained
-    the port. Removing the need to access records also had a lsight
+    the port. Removing the need to access records also had a slight
     performance increase.
 
   - Don't use map to parse expected string, simply use (string-ref).
     (thanks to Linus Björnstam)
 
-  - Don't use string ports when reading string, just use a plain old list
-    instead. The initial iteration used string ports instead of appending
-    strings, this was suggested by Linus Björnstam.
+  - Use a plain list to read strings.
+
+  - Use string ports to parse numbers.
+    (suggested by Linus Björnstam)
 
   - Don't need to use character-sets to detect whitespaces. JSON only defines
     four possible types of whitespaces: space, linefeed, carriage return and
     horizontal tab.
     (suggested by Linus Björnstam)
-
-  - Increase performance by defining (parser-peek-char) and (parser-read-char)
-    as macros.
 
   - Replace `display` with `put-string` on JSON builder.
 
