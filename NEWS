@@ -1,6 +1,9 @@
 
 * Version 4.0.0 (??, 2020)
 
+  - Build array list with (cons) and (reverse). Big performance increase.
+    (suggested by Linus Björnstam)
+
   - Go back to using (cond) instead of (match) since (match) reduces
     performance.
 

@@ -200,12 +200,12 @@
        ((eqv? ch #\])
         (read-char port)
         (cond
-         (added (list->vector values))
+         (added (list->vector (reverse values)))
          (else (json-exception port))))
        ;; This can be any JSON object.
        (else
         (let ((value (json-read port)))
-          (loop (append values (list value)) #t)))))))
+          (loop (cons value values) #t)))))))
 
 ;;
 ;; String parsing helpers
