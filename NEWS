@@ -11,7 +11,8 @@
   - Don't use map to parse expected string, simply use (string-ref).
     (thanks to Linus Björnstam)
 
-  - Use a plain list to read strings.
+  - Use a plain list to read strings which brings significant speed
+    improvements.
 
   - Use string ports to parse numbers.
     (suggested by Linus Björnstam)
