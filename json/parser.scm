@@ -48,7 +48,6 @@
 (define (skip-whitespaces port)
   (let ((ch (peek-char port)))
     (cond
-     ((eof-object? ch) *unspecified*)
      ((whitespace? ch)
       (read-char port)
       (skip-whitespaces port))
@@ -57,16 +56,20 @@
 (define (expect-string port expected return)
   (let loop ((n 0))
     (cond
+     ;; All characters match.
      ((= n (string-length expected)) return)
+     ;; Go to next characters.
      ((eqv? (read-char port) (string-ref expected n))
       (loop (+ n 1)))
+     ;; Anything else is an error.
      (else (json-exception port)))))
 
 (define (expect-delimiter port delimiter)
   (let ((ch (read-char port)))
     (cond
-     ((eof-object? ch) (json-exception port))
-     ((not (eqv? ch delimiter)) (json-exception port)))))
+     ((not (eqv? ch delimiter)) (json-exception port))
+     ;; Unexpected EOF.
+     ((eof-object? ch) (json-exception port)))))
 
 ;;
 ;; Number parsing helpers
@@ -84,7 +87,6 @@
 (define (read-digits port string-port)
   (let ((ch (peek-char port)))
     (cond
-     ((eof-object? ch) *unspecified*)
      ((digit? ch)
       (put-char string-port (read-char port))
       (read-digits port string-port))
@@ -117,18 +119,21 @@
 (define (read-number port string-port)
   (let ((ch (peek-char port)))
     (cond
-     ((eof-object? ch) (json-exception port))
+     ;; Negative numbers.
      ((eqv? ch #\-)
       (read-char port)
       (put-char string-port #\-)
       (read-positive-number port string-port))
+     ;; Numbers starting with 0.
      ((eqv? ch #\0)
       (read-char port)
       (put-char string-port #\0)
       (read-fraction port string-port)
       (read-exponent port string-port))
+     ;; Positive numbers.
      ((digit? ch)
       (read-positive-number port string-port))
+     ;; Anything else is an error.
      (else (json-exception port)))))
 
 (define (json-read-number port)
@@ -146,11 +151,11 @@
     (skip-whitespaces port)
     (let ((ch (peek-char port)))
       (cond
-       ((eof-object? ch) (json-exception port))
        ;; Skip colon and read value.
        ((eqv? ch #\:)
         (read-char port)
         (cons key (json-read port)))
+       ;; Anything other than colon is an error.
        (else (json-exception port))))))
 
 (define (json-read-object port)
@@ -159,7 +164,6 @@
     (skip-whitespaces port)
     (let ((ch (peek-char port)))
       (cond
-       ((eof-object? ch) (json-exception port))
        ;; End of object.
        ((eqv? ch #\})
         (read-char port)
@@ -189,6 +193,7 @@
     (skip-whitespaces port)
     (let ((ch (peek-char port)))
       (cond
+       ;; Unexpected EOF.
        ((eof-object? ch) (json-exception port))
        ;; Handle comma (make sure we added an element).
        ((eqv? ch #\,)
@@ -263,12 +268,16 @@
   (expect-delimiter port #\")
   (let loop ((chars '()) (ch (read-char port)))
     (cond
+     ;; Unexpected EOF.
      ((eof-object? ch) (json-exception port))
-      ((eqv? ch #\") (reverse-list->string chars))
-      ((eqv? ch #\\)
-       (loop (cons (read-control-char port) chars) (read-char port)))
-      (else
-       (loop (cons ch chars) (read-char port))))))
+     ;; End of string.
+     ((eqv? ch #\") (reverse-list->string chars))
+     ;; Escaped characters.
+     ((eqv? ch #\\)
+      (loop (cons (read-control-char port) chars) (read-char port)))
+     ;; All other characters.
+     (else
+      (loop (cons ch chars) (read-char port))))))
 
 ;;
 ;; Booleans and null parsing helpers
@@ -291,7 +300,7 @@
   (skip-whitespaces port)
   (let ((ch (peek-char port)))
     (cond
-     ;; If we reach the end we might have an incomplete document.
+     ;; Unexpected EOF.
      ((eof-object? ch) (json-exception port))
      ;; Read JSON values.
      ((eqv? ch #\t) (json-read-true port))
