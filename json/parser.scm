@@ -42,7 +42,7 @@
 
 (define (whitespace? c)
   (case c
-    ((#\ht #\lf #\cr #\sp) #t)
+    ((#\sp #\ht #\lf #\cr) #t)
     (else #f)))
 
 (define (skip-whitespaces port)
