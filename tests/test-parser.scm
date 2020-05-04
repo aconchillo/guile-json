@@ -41,6 +41,7 @@
 (test-equal 0.0 (json-string->scm "0e0"))
 (test-equal 1000.0 (json-string->scm "1e3"))
 (test-equal 0.001 (json-string->scm "1E-3"))
+(test-error #t (json-string->scm "+"))
 (test-error #t (json-string->scm "00"))
 (test-error #t (json-string->scm "12a34"))
 (test-error #t (json-string->scm "1k-3"))
@@ -53,6 +54,7 @@
 (test-equal "你好 guile!" (json-string->scm "\"\\u4f60\\u597d guile!\""))
 (test-equal "你好 guile!" (json-string->scm "\"\\u4F60\\u597D guile!\""))
 (test-equal "hello quoted \"guile\"!" (json-string->scm "\"hello quoted \\\"guile\\\"!\""))
+(test-error #t (json-string->scm "\"unfinished hello"))
 
 ;; Boolean
 (test-equal #t (json-string->scm "true"))
@@ -68,6 +70,7 @@
 (test-equal #(1 2 #(3 4) #(5 6 #(7 8))) (json-string->scm "[1,2,[3,4],[5,6,[7,8]]]" ))
 (test-equal #(1 "two" 3 "four") (json-string->scm "[1,\"two\",3,\"four\"]"))
 (test-error #t (json-string->scm "[1,2,,,5]"))
+(test-error #t (json-string->scm "[1,2"))
 
 ;; Objects
 (test-equal '() (json-string->scm "{}"))
@@ -76,7 +79,9 @@
 (test-equal '(("foo" . (("bar" . #(1 2 3))))) (json-string->scm "{\"foo\"   :{\"bar\":  [1,2,3]}}"))
 (test-equal '(("foo" . #(1 (("two" . "three"))))) (json-string->scm "{\"foo\":[1,{\"two\":\"three\"}]}"))
 (test-error #t (json-string->scm "{\"foo\":\"bar\",}"))
+(test-error #t (json-string->scm "{\"foo\":}"))
 (test-error #t (json-string->scm "{,}"))
+(test-error #t (json-string->scm "{"))
 
 ;; Since the following JSON object contains more than one key-value pair, we
 ;; can't use "test-equal" directly since the output could be unordered.
