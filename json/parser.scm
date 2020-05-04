@@ -137,9 +137,11 @@
      (else (json-exception port)))))
 
 (define (json-read-number port)
-  (string->number
-   (call-with-output-string
-     (lambda (string-port) (read-number port string-port)))))
+  (or (string->number
+       (call-with-output-string
+         (lambda (string-port) (read-number port string-port))))
+      ;; Looks like an invalid number.
+      (json-exception port)))
 
 ;;
 ;; Object parsing helpers

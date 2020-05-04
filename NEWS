@@ -1,8 +1,7 @@
 
 * Version 4.0.0 (??, 2020)
 
-  - Build array list with (cons) and (reverse). Big performance increase.
-    (suggested by Linus Björnstam)
+  - Fix parsing of invalid numbers (e.g. "-").
 
   - Go back to using (cond) instead of (match) since (match) reduces
     performance.
@@ -11,11 +10,20 @@
     the port. Removing the need to access records also had a slight
     performance increase.
 
+  - Use a plain list to read strings which brings significant speed
+    improvements.
+
+  - Replace `display` with `put-string` on JSON builder.
+
   - Don't use map to parse expected string, simply use (string-ref).
     (thanks to Linus Björnstam)
 
-  - Use a plain list to read strings which brings significant speed
-    improvements.
+  - Build array list with (cons) and (reverse). Big performance increase.
+    (suggested by Linus Björnstam)
+
+  - Check (eof-object?) last instead of first. This avoids unnecessary checks
+    which is the regular use-case.
+    (suggested by Linus Björnstam)
 
   - Use string ports to parse numbers.
     (suggested by Linus Björnstam)
@@ -24,8 +32,6 @@
     four possible types of whitespaces: space, linefeed, carriage return and
     horizontal tab.
     (suggested by Linus Björnstam)
-
-  - Replace `display` with `put-string` on JSON builder.
 
 
 * Version 3.5.0 (Apr 21, 2020)

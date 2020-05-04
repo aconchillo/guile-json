@@ -42,6 +42,7 @@
 (test-equal 1000.0 (json-string->scm "1e3"))
 (test-equal 0.001 (json-string->scm "1E-3"))
 (test-error #t (json-string->scm "+"))
+(test-error #t (json-string->scm "-"))
 (test-error #t (json-string->scm "00"))
 (test-error #t (json-string->scm "12a34"))
 (test-error #t (json-string->scm "1k-3"))
