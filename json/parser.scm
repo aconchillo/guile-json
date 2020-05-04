@@ -200,7 +200,7 @@
        ((eqv? ch #\])
         (read-char port)
         (cond
-         (added (list->vector (reverse values)))
+         (added (list->vector (reverse! values)))
          (else (json-exception port))))
        ;; This can be any JSON object.
        (else
