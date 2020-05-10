@@ -52,14 +52,15 @@
 (test-equal "\"\\u4f60\\u597d guile!\"" (scm->json-string "你好 guile!" #:unicode #t))
 (test-equal "\"guile powers music \\ud834\\udd1e!\"" (scm->json-string "guile powers music 𝄞!" #:unicode #t))
 (test-equal "\"</script>\"" (scm->json-string "</script>"))
-(test-equal "\"<\\/script>\"" (scm->json-string "</script>" #:escape #t))
+(test-equal "\"<\\/script>\"" (scm->json-string "</script>" #:solidus #t))
 
 ;; Boolean
 (test-equal "true" (scm->json-string #t))
 (test-equal "false" (scm->json-string #f))
 
 ;; Null
-(test-equal "null" (scm->json-string #nil))
+(test-equal "null" (scm->json-string 'null))
+(test-equal "null" (scm->json-string #nil #:null #nil))
 
 ;; Arrays
 (test-equal "[]" (scm->json-string #()))

@@ -62,7 +62,8 @@
 (test-equal #f (json-string->scm "false"))
 
 ;; Null
-(test-equal #nil (json-string->scm "null"))
+(test-equal 'null (json-string->scm "null"))
+(test-equal #nil (json-string->scm "null" #:null #nil))
 
 ;; Arrays
 (test-equal #() (json-string->scm "[]"))
