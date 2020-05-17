@@ -105,26 +105,38 @@ the module:
 
   Keyword arguments:
 
-  - /solidus/ : if true, the slash (/ solidus) character will be escaped.
+  - /solidus/ : if true, the slash (/ solidus) character will be escaped
+    (defaults to false).
+
   - /unicode/ : if true, additional to control characters, non-ASCII
-    characters will be escaped as well.
-  - /pretty/ : if true, the JSON document will be pretty printed.
+    characters will be escaped as well (defaults to false).
+
+  - /null/ : value for JSON's null (defaults to the 'null symbol).
+
   - /validate/ : if true, the native value will be validated before starting
     to print the JSON document (defaults to true).
-  - /null/ : value for JSON's null, it defaults to the 'null symbol.
+
+  - /pretty/ : if true, the JSON document will be pretty printed (defaults to
+    false).
 
 - *(scm->json-string native #:key escape unicode pretty validate)* : Creates a
   JSON document from the given native Guile value into a string.
 
   Keyword arguments:
 
-  - /escape/ : if true, the slash (/ solidus) character will be escaped.
+  - /solidus/ : if true, the slash (/ solidus) character will be escaped
+    (defaults to false).
+
   - /unicode/ : if true, additional to control characters, non-ASCII
-    characters will be escaped as well.
-  - /pretty/ : if true, the JSON document will be pretty printed
+    characters will be escaped as well (defaults to false).
+
+  - /null/ : value for JSON's null (defaults to the 'null symbol).
+
   - /validate/ : if true, the native value will be validated before starting
     to print the JSON document (defaults to true).
-  - /null/ : value for JSON's null, it defaults to the 'null symbol.
+
+  - /pretty/ : if true, the JSON document will be pretty printed (defaults to
+    false).
 
   Note that when using alists to build JSON objects, symbols or numbers might
   be used as keys and they both will be converted to strings.

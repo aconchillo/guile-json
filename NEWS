@@ -1,4 +1,10 @@
 
+* Version 4.0.1 (May 17, 2020)
+
+  - (scm->json-string) #:validate keyword argument should default to true as
+    stated in the documentation.
+
+
 * Version 4.0.0 (May 16, 2020)
 
 Breaking changes:

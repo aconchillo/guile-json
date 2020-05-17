@@ -227,15 +227,17 @@
                     #:optional (port (current-output-port))
                     #:key
                     (solidus #f) (unicode #f) (null 'null)
-                    (pretty #f) (validate #t))
+                    (validate #t) (pretty #f))
   "Creates a JSON document from native. The argument @var{scm} contains the
 native value of the JSON document. Takes one optional argument, @var{port},
 which defaults to the current output port where the JSON document will be
 written. It also takes a few keyword arguments: @{solidus}: if true, the
-slash (/ solidus) character will be escaped, @{unicode}: if true, unicode
-characters will be escaped when needed, @{null}: value for JSON's null, it
-defaults to the 'null symbol and @{pretty}: if true, the JSON document will be
-pretty printed.
+slash (/ solidus) character will be escaped (defaults to false), @{unicode}:
+if true, unicode characters will be escaped when needed (defaults to false),
+@{null}: value for JSON's null (defaults to the 'null symbol), @{validate} :
+if true, the native value will be validated before starting to print the JSON
+document (defaults to true) and @{pretty}: if true, the JSON document will be
+pretty printed (defaults to false).
 
 Note that when using alists to build JSON objects, symbols or numbers might be
 used as keys and they both will be converted to strings.
@@ -248,13 +250,20 @@ used as keys and they both will be converted to strings.
 
 (define* (scm->json-string scm #:key
                            (solidus #f) (unicode #f) (null 'null)
-                           (pretty #f) (validate #f))
+                           (validate #t) (pretty #f))
   "Creates a JSON document from native into a string. The argument @var{scm}
 contains the native value of the JSON document. It also takes a few keyword
 arguments: @{solidus}: if true, the slash (/ solidus) character will be
-escaped, @{unicode}: if true, unicode characters will be escaped when needed,
-@{null}: value for JSON's null, it defaults to the 'null symbol and @{pretty}:
-if true, the JSON document will be pretty printed."
+escaped (defaults to false), @{unicode}: if true, unicode characters will be
+escaped when needed (defaults to false), @{null}: value for JSON's
+null (defaults to the 'null symbol), @{validate} : if true, the native value
+will be validated before starting to print the JSON document (defaults to
+true) and @{pretty}: if true, the JSON document will be pretty
+printed (defaults to false).
+
+Note that when using alists to build JSON objects, symbols or numbers might be
+used as keys and they both will be converted to strings.
+"
   (call-with-output-string
    (lambda (p)
      (scm->json scm p
