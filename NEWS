@@ -1,5 +1,15 @@
 
-* Version 4.0.0 (??, 2020)
+* Version 4.0.0 (May 16, 2020)
+
+Breaking changes:
+
+  - (scm->json) and (scm->json-string) #:espace keyword argument has been
+    renamed to #:solidus.
+
+  - JSON null now defaults to the null symbol. This can be changed in all
+    public functions with the #:null keyword argument.
+
+Bug fixes and improvements:
 
   - Fix parsing of invalid numbers (e.g. "-").
 

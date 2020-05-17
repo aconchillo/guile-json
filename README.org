@@ -15,7 +15,7 @@ documents according to the http://json.org specification.
 
 Download the latest tarball and untar it:
 
-- [[http://download.savannah.gnu.org/releases/guile-json/guile-json-3.5.0.tar.gz][guile-json-3.5.0.tar.gz]]
+- [[http://download.savannah.gnu.org/releases/guile-json/guile-json-4.0.0.tar.gz][guile-json-4.0.0.tar.gz]]
 
 If you are cloning the repository make sure you run this first:
 
@@ -76,7 +76,7 @@ the module:
 
 ** Procedures
 
-- (*json->scm* #:optional port #:key null) : Reads a JSON document from the
+- *(json->scm #:optional port #:key null)* : Reads a JSON document from the
   given port, or from the current input port if none is given.
 
   Optional arguments:
@@ -87,14 +87,14 @@ the module:
 
   - /null/ : value for JSON's null, it defaults to the 'null symbol.
 
-- (*json-string->scm* str  #:key null) : Reads a JSON document from the given
+- *(json-string->scm str  #:key null)* : Reads a JSON document from the given
   string.
 
   Keyword arguments:
 
   - /null/ : value for JSON's null, it defaults to the 'null symbol.
 
-- (*scm->json* native #:optional port #:key escape unicode pretty validate null) :
+- *(scm->json native #:optional port #:key escape unicode pretty validate null)* :
   Creates a JSON document from the given native Guile value. The JSON document
   is written into the given port, or to the current output port if non is
   given.
@@ -113,7 +113,7 @@ the module:
     to print the JSON document (defaults to true).
   - /null/ : value for JSON's null, it defaults to the 'null symbol.
 
-- (*scm->json-string* native #:key escape unicode pretty validate) : Creates a
+- *(scm->json-string native #:key escape unicode pretty validate)* : Creates a
   JSON document from the given native Guile value into a string.
 
   Keyword arguments:
