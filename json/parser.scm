@@ -147,7 +147,7 @@
 ;; Object parsing helpers
 ;;
 
-(define (read-pair port)
+(define (read-pair port null)
   ;; Read key.
   (let ((key (json-read-string port)))
     (skip-whitespaces port)
@@ -156,11 +156,11 @@
        ;; Skip colon and read value.
        ((eqv? ch #\:)
         (read-char port)
-        (cons key (json-read port)))
+        (cons key (json-read port null)))
        ;; Anything other than colon is an error.
        (else (json-exception port))))))
 
-(define (json-read-object port)
+(define (json-read-object port null)
   (expect-delimiter port #\{)
   (let loop ((pairs '()) (added #t))
     (skip-whitespaces port)
@@ -174,7 +174,7 @@
          (else (json-exception port))))
        ;; Read one pair and continue.
        ((eqv? ch #\")
-        (let ((pair (read-pair port)))
+        (let ((pair (read-pair port null)))
           (loop (cons pair pairs) #t)))
        ;; Skip comma and read more pairs.
        ((eqv? ch #\,)
@@ -189,7 +189,7 @@
 ;; Array parsing helpers
 ;;
 
-(define (json-read-array port)
+(define (json-read-array port null)
   (expect-delimiter port #\[)
   (let loop ((values '()) (added #t))
     (skip-whitespaces port)
@@ -211,7 +211,7 @@
          (else (json-exception port))))
        ;; This can be any JSON object.
        (else
-        (let ((value (json-read port)))
+        (let ((value (json-read port null)))
           (loop (cons value values) #t)))))))
 
 ;;
@@ -291,14 +291,14 @@
 (define (json-read-false port)
   (expect-string port "false" #f))
 
-(define (json-read-null port)
-  (expect-string port "null" #nil))
+(define (json-read-null port null)
+  (expect-string port "null" null))
 
 ;;
 ;; Main parser functions
 ;;
 
-(define (json-read port)
+(define (json-read port null)
   (skip-whitespaces port)
   (let ((ch (peek-char port)))
     (cond
@@ -307,9 +307,9 @@
      ;; Read JSON values.
      ((eqv? ch #\t) (json-read-true port))
      ((eqv? ch #\f) (json-read-false port))
-     ((eqv? ch #\n) (json-read-null port))
-     ((eqv? ch #\{) (json-read-object port))
-     ((eqv? ch #\[) (json-read-array port))
+     ((eqv? ch #\n) (json-read-null port null))
+     ((eqv? ch #\{) (json-read-object port null))
+     ((eqv? ch #\[) (json-read-array port null))
      ((eqv? ch #\") (json-read-string port))
      ;; Anything else should be a number.
      (else (json-read-number port)))))
@@ -318,11 +318,13 @@
 ;; Public procedures
 ;;
 
-(define* (json->scm #:optional (port (current-input-port)))
+(define* (json->scm #:optional (port (current-input-port))
+                    #:key (null 'null))
   "Parse a JSON document into native. Takes one optional argument,
 @var{port}, which defaults to the current input port from where the JSON
-document is read."
-  (let ((value (json-read port)))
+document is read. It also takes a keyword argument: @{null}: value for JSON's
+null, it defaults to the 'null symbol."
+  (let ((value (json-read port null)))
     ;; Skip any trailing whitespaces.
     (skip-whitespaces port)
     (cond
@@ -331,9 +333,10 @@ document is read."
      ;; If there's anything else other than the end, parser fails.
      (else (json-exception port)))))
 
-(define* (json-string->scm str)
+(define* (json-string->scm str #:key (null 'null))
   "Parse a JSON document into native. Takes a string argument,
-@var{str}, that contains the JSON document."
-  (call-with-input-string str (lambda (p) (json->scm p))))
+@var{str}, that contains the JSON document. It also takes a keyword argument:
+@{null}: value for JSON's null, it defaults to the 'null symbol "
+  (call-with-input-string str (lambda (p) (json->scm p #:null null))))
 
 ;;; (json parser) ends here
