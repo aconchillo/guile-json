@@ -146,7 +146,15 @@
      (else 0))))
 
 (define (read-positive-number port)
-  (let* ((number (read-digits port))
+  (let* ((number
+          (let ((ch (peek-char port)))
+            (cond
+             ;; Numbers that start with 0 must be a fraction.
+             ((eqv? ch #\0)
+              (read-char port)
+              0)
+             ;; Otherwise read more digits.
+             (else (read-digits port)))))
          (fraction (read-fraction port))
          (exponent (read-exponent port))
          (result (* (+ number fraction) exponent)))
@@ -162,15 +170,6 @@
       (read-char port)
       (expect-digit port)
       (* -1 (read-positive-number port)))
-     ;; Numbers starting with 0.
-     ((eqv? ch #\0)
-      (read-char port)
-      (let* ((fraction (read-fraction port))
-             (exponent (read-exponent port))
-             (result (* fraction exponent)))
-        (if (and (zero? fraction) (>= exponent 1))
-            result
-            (exact->inexact result))))
      ;; Positive numbers.
      ((digit? ch)
       (read-positive-number port))
