@@ -3,6 +3,8 @@
 
   - Speed up number parsing by a 2x factor by avoiding using textual ports.
 
+  - Simplify unicode string builder.
+
 
 * Version 4.0.1 (May 17, 2020)
 

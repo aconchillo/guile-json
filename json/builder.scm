@@ -29,7 +29,6 @@
   #:use-module (ice-9 textual-ports)
   #:use-module (srfi srfi-1)
   #:use-module (srfi srfi-43)
-  #:use-module (rnrs bytevectors)
   #:export (scm->json
             scm->json-string))
 
@@ -45,50 +44,27 @@
 ;; String builder helpers
 ;;
 
-(define (unicode->string unicode)
+(define (unicode->json-string unicode)
   (format #f "\\u~4,'0x" unicode))
 
-(define (char->unicode-string c)
-  (let ((unicode (char->integer c)))
-    (if (< unicode 32)
-        (unicode->string unicode)
-        (string c))))
+(define (unicode->json-surrogate-pair unicode)
+  (let* ((u (- unicode #x10000))
+         (w1 (+ #xD800 (ash u -10)))
+         (w2 (+ #xDC00 (logand u #x3ff))))
+    (string-append (unicode->json-string w1)
+                   (unicode->json-string w2))))
 
-(define (u8v-2->unicode bv)
-  (let ((bv0 (bytevector-u8-ref bv 0))
-        (bv1 (bytevector-u8-ref bv 1)))
-    (+ (ash (logand bv0 #b00011111) 6)
-       (logand bv1 #b00111111))))
-
-(define (u8v-3->unicode bv)
-  (let ((bv0 (bytevector-u8-ref bv 0))
-        (bv1 (bytevector-u8-ref bv 1))
-        (bv2 (bytevector-u8-ref bv 2)))
-    (+ (ash (logand bv0 #b00001111) 12)
-       (ash (logand bv1 #b00111111) 6)
-       (logand bv2 #b00111111))))
-
-(define (build-char-string c)
-  (let* ((bv (string->utf8 (string c)))
-         (len (bytevector-length bv)))
+(define (build-json-unicode c)
+  (let* ((value (char->integer c)))
     (cond
-     ;; A single byte UTF-8
-     ((eq? len 1) (char->unicode-string c))
-     ;; If we have a 2 or 3 byte UTF-8 we need to output it as \uHHHH
-     ((or (eq? len 2) (eq? len 3))
-      (let ((unicode (if (eq? len 2)
-                         (u8v-2->unicode bv)
-                         (u8v-3->unicode bv))))
-        (unicode->string unicode)))
-     ;; A 4 byte UTF-8 needs to output as \uHHHH\uHHHH
-     ((eq? len 4)
-      (let ((bv4 (string->utf16 (string c))))
-        (string-append
-         (unicode->string (+ (ash (bytevector-u8-ref bv4 0) 8)
-                             (bytevector-u8-ref bv4 1)))
-         (unicode->string (+ (ash (bytevector-u8-ref bv4 2) 8)
-                             (bytevector-u8-ref bv4 3))))))
-     ;; Anything else should wrong, hopefully.
+     ((< value 32)
+      (unicode->json-string value))
+     ((<= value 255)
+      (string c))
+     ((<= value #xFFFF)
+      (unicode->json-string value))
+     ((<= value #x10FFFF)
+      (unicode->json-surrogate-pair value))
      (else (throw 'json-invalid (string c))))))
 
 (define (->string x)
@@ -113,7 +89,7 @@
                      ((#\cr) '(#\\ #\r))
                      ((#\ht) '(#\\ #\t))
                      ((#\/) (if solidus `(#\\ ,c) (list c)))
-                     (else (if unicode (string->list (build-char-string c)) (list c)))))
+                     (else (if unicode (string->list (build-json-unicode c)) (list c)))))
                  (string->list (->string scm))))))
   (put-string port "\""))
 
@@ -138,7 +114,7 @@
 (define (json-build-object scm port solidus unicode null pretty level)
   (cond ((> level 0)
          (build-newline port pretty)))
-  (simple-format port "~A{" (indent-string pretty level))
+  (format port "~A{" (indent-string pretty level))
   (build-newline port pretty)
   (let ((pairs scm))
     (unless (null? pairs)
@@ -149,7 +125,7 @@
                   (build-object-pair p port solidus unicode null pretty (+ level 1)))
                 (cdr pairs))))
   (build-newline port pretty)
-  (simple-format port "~A}" (indent-string pretty level)))
+  (format port "~A}" (indent-string pretty level)))
 
 ;;
 ;; Array builder functions
