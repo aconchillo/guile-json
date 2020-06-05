@@ -1,4 +1,9 @@
 
+* Version 4.1.0 (??, 2020)
+
+  - Speed up number parsing by a 2x factor by avoiding using textual ports.
+
+
 * Version 4.0.1 (May 17, 2020)
 
   - (scm->json-string) #:validate keyword argument should default to true as

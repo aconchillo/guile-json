@@ -24,7 +24,6 @@
 ;;; Code:
 
 (define-module (json parser)
-  #:use-module (ice-9 textual-ports)
   #:export (json->scm
             json-string->scm))
 
@@ -75,73 +74,108 @@
 ;; Number parsing helpers
 ;;
 
-;; Read + or -. If something different is found, return empty string.
-(define (read-sign port string-port)
+(define (expect-digit port)
   (let ((ch (peek-char port)))
     (cond
-     ((or (eqv? ch #\+) (eqv? ch #\-))
-      (put-char string-port (read-char port)))
-     (else *unspecified*))))
+     ((not (digit? ch)) (json-exception port))
+     ;; Unexpected EOF.
+     ((eof-object? ch) (json-exception port)))))
+
+;; Read + or -, and return 1 or -1 respectively. If something different is
+;; found, return 1.
+(define (read-sign port)
+  (let ((ch (peek-char port)))
+    (cond
+     ((eqv? ch #\+)
+      (read-char port)
+      1)
+     ((eqv? ch #\-)
+      (read-char port)
+      -1)
+     (else 1))))
+
+(define (read-digit-value port)
+  (let ((ch (read-char port)))
+    (cond
+     ((eqv? ch #\0) 0)
+     ((eqv? ch #\1) 1)
+     ((eqv? ch #\2) 2)
+     ((eqv? ch #\3) 3)
+     ((eqv? ch #\4) 4)
+     ((eqv? ch #\5) 5)
+     ((eqv? ch #\6) 6)
+     ((eqv? ch #\7) 7)
+     ((eqv? ch #\8) 8)
+     ((eqv? ch #\9) 9)
+     (else (json-exception port)))))
 
 ;; Read digits [0..9].
-(define (read-digits port string-port)
-  (let ((ch (peek-char port)))
+(define (read-digits port)
+  (expect-digit port)
+  (let loop ((ch (peek-char port)) (number 0))
     (cond
      ((digit? ch)
-      (put-char string-port (read-char port))
-      (read-digits port string-port))
-     (else *unspecified*))))
+      (let ((value (read-digit-value port)))
+        (loop (peek-char port) (+ (* number 10) value))))
+     (else number))))
 
-(define (read-exponent port string-port)
+(define (read-digits-fraction port)
+  (expect-digit port)
+  (let loop ((ch (peek-char port)) (number 0) (length 0))
+    (cond
+     ((digit? ch)
+      (let ((value (read-digit-value port)))
+        (loop (peek-char port) (+ (* number 10) value) (+ length 1))))
+     (else
+      (/ number (expt 10 length))))))
+
+(define (read-exponent port)
   (let ((ch (peek-char port)))
     (cond
      ((or (eqv? ch #\e) (eqv? ch #\E))
       (read-char port)
-      (put-char string-port #\e)
-      (read-sign port string-port)
-      (read-digits port string-port))
-     (else *unspecified*))))
+      (expt 10 (* (read-sign port) (read-digits port))))
+     (else 1))))
 
-(define (read-fraction port string-port)
+(define (read-fraction port)
   (let ((ch (peek-char port)))
     (cond
      ((eqv? ch #\.)
       (read-char port)
-      (put-char string-port #\.)
-      (read-digits port string-port))
-     (else *unspecified*))))
+      (read-digits-fraction port))
+     (else 0))))
 
-(define (read-positive-number port string-port)
-  (read-digits port string-port)
-  (read-fraction port string-port)
-  (read-exponent port string-port))
+(define (read-positive-number port)
+  (let* ((number (read-digits port))
+         (fraction (read-fraction port))
+         (exponent (read-exponent port))
+         (result (* (+ number fraction) exponent)))
+    (if (and (zero? fraction) (>= exponent 1))
+        result
+        (exact->inexact result))))
 
-(define (read-number port string-port)
+(define (json-read-number port)
   (let ((ch (peek-char port)))
     (cond
      ;; Negative numbers.
      ((eqv? ch #\-)
       (read-char port)
-      (put-char string-port #\-)
-      (read-positive-number port string-port))
+      (expect-digit port)
+      (* -1 (read-positive-number port)))
      ;; Numbers starting with 0.
      ((eqv? ch #\0)
       (read-char port)
-      (put-char string-port #\0)
-      (read-fraction port string-port)
-      (read-exponent port string-port))
+      (let* ((fraction (read-fraction port))
+             (exponent (read-exponent port))
+             (result (* fraction exponent)))
+        (if (and (zero? fraction) (>= exponent 1))
+            result
+            (exact->inexact result))))
      ;; Positive numbers.
      ((digit? ch)
-      (read-positive-number port string-port))
+      (read-positive-number port))
      ;; Anything else is an error.
      (else (json-exception port)))))
-
-(define (json-read-number port)
-  (or (string->number
-       (call-with-output-string
-         (lambda (string-port) (read-number port string-port))))
-      ;; Looks like an invalid number.
-      (json-exception port)))
 
 ;;
 ;; Object parsing helpers
