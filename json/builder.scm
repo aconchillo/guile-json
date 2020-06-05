@@ -73,24 +73,25 @@
         ((symbol? x) (symbol->string x))
         (else x)))
 
+(define (build-string c port solidus unicode)
+  (case c
+    ((#\" #\\) (format port "\\~c" c))
+    ((#\bs) (put-string port "\\b"))
+    ((#\ff) (put-string port "\\f"))
+    ((#\lf) (put-string port "\\n"))
+    ((#\cr) (put-string port "\\r"))
+    ((#\ht) (put-string port "\\t"))
+    ((#\/) (if solidus
+               (put-string port "\\/")
+               (put-char port c)))
+    (else (if unicode
+              (put-string port (build-json-unicode c))
+              (put-char port c)))))
+
 (define (json-build-string scm port solidus unicode)
   (put-string port "\"")
-  (put-string
-   port
-   (list->string
-    (fold-right append '()
-                (map
-                 (lambda (c)
-                   (case c
-                     ((#\" #\\) `(#\\ ,c))
-                     ((#\bs) '(#\\ #\b))
-                     ((#\ff) '(#\\ #\f))
-                     ((#\lf) '(#\\ #\n))
-                     ((#\cr) '(#\\ #\r))
-                     ((#\ht) '(#\\ #\t))
-                     ((#\/) (if solidus `(#\\ ,c) (list c)))
-                     (else (if unicode (string->list (build-json-unicode c)) (list c)))))
-                 (string->list (->string scm))))))
+  (for-each (lambda (c) (build-string c port solidus unicode))
+            (string->list (->string scm)))
   (put-string port "\""))
 
 ;;

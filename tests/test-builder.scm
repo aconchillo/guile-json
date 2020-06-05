@@ -45,7 +45,6 @@
 (test-error #t (scm->json-string -inf.0))
 (test-error #t (scm->json-string +nan.0))
 
-
 ;; Strings
 (test-equal "\"hello guile!\"" (scm->json-string "hello guile!"))
 (test-equal "\"你好 guile!\"" (scm->json-string "你好 guile!"))
