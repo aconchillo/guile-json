@@ -1,12 +1,12 @@
 
-* Version 4.1.0 (??, 2020)
+* Version 4.1.0 (Jun 6, 2020)
 
   - Speed up number parsing by a 2x factor by avoiding using textual ports.
 
   - Simplify unicode string builder.
 
-  - Improve performance of string builder by not going back and forth with
-    lists, strings and characters.
+  - Improve string builder performance by not going back and forth with lists,
+    strings and characters.
 
 
 * Version 4.0.1 (May 17, 2020)
