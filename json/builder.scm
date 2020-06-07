@@ -90,8 +90,8 @@
 
 (define (json-build-string scm port solidus unicode)
   (put-string port "\"")
-  (for-each (lambda (c) (build-string c port solidus unicode))
-            (string->list (->string scm)))
+  (string-for-each (lambda (c) (build-string c port solidus unicode))
+                   (->string scm))
   (put-string port "\""))
 
 ;;

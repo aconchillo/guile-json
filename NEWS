@@ -1,4 +1,11 @@
 
+
+* Version 4.y.z (??, 2020)
+
+  - Use (string-for-each) instead of (string->list) and (for-each).
+    (suggested by Christopher Lam)
+
+
 * Version 4.1.0 (Jun 6, 2020)
 
   - Speed up number parsing by a 2x factor by avoiding using textual ports.
