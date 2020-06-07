@@ -53,6 +53,18 @@
 (test-equal "\"</script>\"" (scm->json-string "</script>"))
 (test-equal "\"<\\/script>\"" (scm->json-string "</script>" #:solidus #t))
 
+;; Strings (special characters)
+(test-equal "\"quotation mark:\\\"\"" (scm->json-string "quotation mark:\""))
+(test-equal "\"reverse solidus:\\\\\"" (scm->json-string "reverse solidus:\\"))
+(test-equal "\"solidus:/\"" (scm->json-string "solidus:/"))
+(test-equal "\"solidus:\\/\"" (scm->json-string "solidus:/" #:solidus #t))
+(test-equal "\"backspace:\\b\"" (scm->json-string "backspace:"))
+(test-equal "\"form feed:\\f\"" (scm->json-string "form feed:"))
+(test-equal "\"line feed:\\n\"" (scm->json-string "line feed:
+"))
+(test-equal "\"carriage return:\\r\"" (scm->json-string "carriage return:"))
+(test-equal "\"horizontal tab:\\t\"" (scm->json-string "horizontal tab:	"))
+
 ;; Boolean
 (test-equal "true" (scm->json-string #t))
 (test-equal "false" (scm->json-string #f))
