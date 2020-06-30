@@ -2,7 +2,7 @@
 * Version 4.2.0 (Jun 30, 2020)
 
   - Introduce (define-json-mapping) which allows converting a JSON object into
-    a record type and viceversa. The initial code for this feature was copied
+    a record type and vice versa. The initial code for this feature was copied
     from the GNU Guix project.
 
 

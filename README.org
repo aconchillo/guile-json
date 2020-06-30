@@ -157,7 +157,7 @@ supported types).
 ** JSON Objects and Records
 
 guile-json 4.2.0 introduces a new feature to allow converting a JSON object
-into a record type and viceversa. This feature works very well, for example,
+into a record type and vice versa. This feature works very well, for example,
 when creating REST APIs.
 
 - *(define-json-mapping rtd ctor pred json->record record->json
