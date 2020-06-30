@@ -1,5 +1,5 @@
 
-* Version 4.2.0 (??, 2020)
+* Version 4.2.0 (Jun 30, 2020)
 
   - Introduce (define-json-mapping) which allows converting a JSON object into
     a record type and viceversa. The initial code for this feature was copied
