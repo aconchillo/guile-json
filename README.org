@@ -154,6 +154,81 @@ might be thrown with the offending value as an argument (see table above for
 supported types).
 
 
+** JSON Objects and Records
+
+guile-json 4.2.0 introduces a new feature to allow converting a JSON object
+into a record type and viceversa. This feature works very well, for example,
+when creating REST APIs.
+
+- *(define-json-mapping rtd ctor pred json->record record->json
+                        (field getter spec ...) ...)* :
+  Define a new mapping between a JSON object and a record type, à la SRFI-9.
+
+  - /rtd/ : the name of the record type.
+
+  - /ctor/ : the name for the record constructor procedure.
+
+  - /pred/ : a predicate procedure to check if a given argument holds a record
+    of this type.
+
+  - /json->record/ : the name of the procedure to convert a JSON object into a
+    record of this type.
+
+  - /record->json/ : the name of the procedure to convert a record of this
+    type to JSON object.
+
+  - /((field getter spec ...) ...)/ : a series of field specifications.
+
+    - /field/ : the name of a JSON object field.
+
+    - /getter/ : the name of the procedure to get the value of this field
+      given a record of this type.
+
+    - /spec/ : a different name for the field of this JSON object. If given,
+      this name will be used instead of field.
+
+    - /json->value/ : an optional procedure that will be used to convert the
+      JSON value to the value contained in the record.
+
+    - /value->json/ : an optional procedure that will be used to convert the
+      the value contained in the record to the JSON value.
+
+*** Example
+
+- A simple example that defines an account type with two fields: /id/ and
+  /username/:
+
+    : > (define-json-mapping <account>
+    :     make-account
+    :     account?
+    :     json->account
+    :     account->json
+    :     (id       account-id)
+    :     (username account-username))
+
+- We can create a new account and check its contents as with regular records:
+
+    : > (define my-account (make-account "11111" "user-one"))
+    : > (account-id my-account)
+    : "11111"
+    : > (account-username my-account)
+    : "user-one"
+
+- Now we can convert it to a JSON object:
+
+    : > (account->json my-account)
+    : "{\"id\":\"11111\",\"username\":\"user-one\"}"
+
+- Or, given a JSON object we can create a new record:
+
+    : > (define json-account "{\"id\":\"22222\",\"username\":\"user-two\"}")
+    : > (define my-other-account (json->account json-account))
+    : > (account-id my-other-account)
+    : "22222"
+    : > (account-username my-other-account)
+    : "user-two"
+
+
 ** Examples
 
 - Build the string "hello world":
