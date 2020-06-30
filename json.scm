@@ -1,6 +1,6 @@
 ;;; (json) --- Guile JSON implementation.
 
-;; Copyright (C) 2013-2018 Aleix Conchillo Flaque <aconchillo@gmail.com>
+;; Copyright (C) 2013-2020 Aleix Conchillo Flaque <aconchillo@gmail.com>
 ;;
 ;; This file is part of guile-json.
 ;;
@@ -25,7 +25,8 @@
 
 (define-module (json)
   #:use-module (json builder)
-  #:use-module (json parser))
+  #:use-module (json parser)
+  #:use-module (json record))
 
 (define-syntax re-export-modules
   (syntax-rules ()
@@ -36,6 +37,7 @@
        ...))))
 
 (re-export-modules (json builder)
-                   (json parser))
+                   (json parser)
+                   (json record))
 
 ;;; (json) ends here

@@ -1,4 +1,11 @@
 
+* Version 4.2.0 (??, 2020)
+
+  - Introduce (define-json-mapping) which allows converting a JSON object into
+    a record type and viceversa. The initial code for this feature was copied
+    from the GNU Guix project.
+
+
 * Version 4.1.0 (Jun 6, 2020)
 
   - Speed up number parsing by a 2x factor by avoiding using textual ports.

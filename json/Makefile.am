@@ -1,7 +1,7 @@
 #
 # Makefile.am
 #
-# Copyright (C) 2013-2018 Aleix Conchillo Flaque <aconchillo@gmail.com>
+# Copyright (C) 2013-2020 Aleix Conchillo Flaque <aconchillo@gmail.com>
 #
 # This file is part of guile-json.
 #
@@ -22,7 +22,7 @@
 moddir=$(datadir)/guile/site/$(GUILE_EFFECTIVE_VERSION)/json
 objdir=$(libdir)/guile/$(GUILE_EFFECTIVE_VERSION)/site-ccache/json
 
-SOURCES = builder.scm parser.scm
+SOURCES = builder.scm parser.scm record.scm
 
 GOBJECTS = $(SOURCES:%.scm=%.go)
 

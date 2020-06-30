@@ -1,7 +1,7 @@
 #
 # Makefile.am
 #
-# Copyright (C) 2018 Aleix Conchillo Flaque <aconchillo@gmail.com>
+# Copyright (C) 2018-2020 Aleix Conchillo Flaque <aconchillo@gmail.com>
 #
 # This file is part of guile-json.
 #
@@ -19,7 +19,7 @@
 # along with guile-json. If not, see https://www.gnu.org/licenses/.
 #
 
-TESTS = test-builder.scm test-parser.scm
+TESTS = test-builder.scm test-parser.scm test-record.scm
 
 TEST_EXTENSIONS = .scm
 
