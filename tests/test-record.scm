@@ -32,17 +32,31 @@
 
 (test-begin "test-record")
 
-;; Record WITHOUT specific field names.
+;; Record (only JSON->RECORD).
 (define-json-mapping <account>
   make-account
   account?
   json->account
-  account->json
   (id       account-id)
   (username account-username))
 
-(test-equal "{\"id\":\"11111\",\"username\":\"aleix\"}"
-  (account->json (make-account "11111" "aleix")))
+(define test-json-account
+  "{\"id\":\"11111\",\"username\":\"jane\"}")
+(define test-account (json->account test-json-account))
+
+(test-equal "11111" (account-id test-account))
+(test-equal "jane" (account-username test-account))
+
+;; Record WITHOUT specific field names.
+(define-json-mapping <account>
+  make-account
+  account?
+  json->account <=> account->json
+  (id       account-id)
+  (username account-username))
+
+(test-equal "{\"id\":\"11111\",\"username\":\"jane\"}"
+  (account->json (make-account "11111" "jane")))
 
 (define test-json-account
   "{\"id\":\"22222\",\"username\":\"john\"}")
@@ -55,8 +69,7 @@
 (define-json-mapping <account>
   make-account
   account?
-  json->account
-  account->json
+  json->account <=> account->json
   (id       account-id "account_id")
   (username account-username "account_username"))
 
@@ -67,15 +80,14 @@
 (define-json-mapping <account>
   make-account
   account?
-  json->account
-  account->json
+  json->account <=> account->json
   (id       account-id)
   (username account-username "username"
             (lambda (u) (string-upcase u)) ;; json->value
             (lambda (u) (string-downcase u)))) ;; value->json
 
-(test-equal "{\"id\":\"11111\",\"username\":\"aleix\"}"
-  (account->json (make-account "11111" "ALEIX")))
+(test-equal "{\"id\":\"11111\",\"username\":\"jane\"}"
+  (account->json (make-account "11111" "JANE")))
 
 (define test-json-account
   "{\"id\":\"22222\",\"username\":\"john\"}")

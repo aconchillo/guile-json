@@ -1,4 +1,9 @@
 
+* Version 4.3.0 (Jul 3, 2020)
+
+  - Make RECORD->JSON optional in (define-json-mapping).
+
+
 * Version 4.2.0 (Jun 30, 2020)
 
   - Introduce (define-json-mapping) which allows converting a JSON object into

@@ -29,7 +29,9 @@
 
 (define-module (json record)
   #:use-module (srfi srfi-9)
-  #:export (define-json-mapping))
+  #:export (<=> define-json-mapping))
+
+(define <=> '<=>)
 
 (define-syntax-rule (define-json-reader json->record ctor spec ...)
   "Define JSON->RECORD as a procedure that converts a JSON representation,
@@ -68,21 +70,32 @@ representation following SPEC, a series of field specifications."
                                    (cons (symbol->string 'field) (getter record))))))
       (scm->json-string `(,(extract-field spec) ...)))))
 
-(define-syntax-rule (define-json-mapping rtd ctor pred json->record record->json
-                      (field getter spec ...) ...)
-  "Define RTD as a record type with the given FIELDs and GETTERs, à la SRFI-9,
-and define JSON->RECORD as a conversion from JSON to a record of this type and
-RECORD->JSON as a conversion from a record of this type to JSON."
-  (begin
-    (define-record-type rtd
-      (ctor field ...)
-      pred
-      (field getter) ...)
+(define-syntax define-json-mapping
+  (syntax-rules (<=>)
+    "Define RTD as a record type with the given FIELDs and GETTERs, à la SRFI-9,
+and define JSON->RECORD as a conversion from JSON to a record of this
+type. Optionall, define RECORD->JSON as a conversion from a record of this
+type to JSON."
+    ((_ rtd ctor pred json->record (field getter spec ...) ...)
+     (begin
+       (define-record-type rtd
+         (ctor field ...)
+         pred
+         (field getter) ...)
 
-    (define-json-reader json->record ctor
-      (field spec ...) ...)
+       (define-json-reader json->record ctor
+         (field spec ...) ...)))
+    ((_ rtd ctor pred json->record <=> record->json (field getter spec ...) ...)
+     (begin
+       (define-record-type rtd
+         (ctor field ...)
+         pred
+         (field getter) ...)
 
-    (define-json-writer record->json
-      (field getter spec ...) ...)))
+       (define-json-reader json->record ctor
+         (field spec ...) ...)
+
+       (define-json-writer record->json
+         (field getter spec ...) ...)))))
 
 ;;; (json record) ends here
