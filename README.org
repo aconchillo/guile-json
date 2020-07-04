@@ -160,7 +160,7 @@ guile-json 4.2.0 introduces a new feature to allow converting a JSON object
 into a record type and vice versa. This feature works very well, for example,
 when creating REST APIs.
 
-- *(define-json-mapping rtd ctor pred json->record record->json
+- *(define-json-mapping rtd ctor pred json->record [<=> record->json]
                         (field getter spec ...) ...)* :
   Define a new mapping between a JSON object and a record type, à la SRFI-9.
 
@@ -174,8 +174,8 @@ when creating REST APIs.
   - /json->record/ : the name of the procedure to convert a JSON object into a
     record of this type.
 
-  - /record->json/ : the name of the procedure to convert a record of this
-    type to JSON object.
+  - /<=> record->json/ : optional name of the procedure to convert a record of
+    this type to JSON object.
 
   - /((field getter spec ...) ...)/ : a series of field specifications.
 
