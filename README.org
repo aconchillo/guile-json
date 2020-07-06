@@ -201,8 +201,7 @@ when creating REST APIs.
     : > (define-json-mapping <account>
     :     make-account
     :     account?
-    :     json->account
-    :     account->json
+    :     json->account <=> account->json
     :     (id       account-id)
     :     (username account-username))
 
