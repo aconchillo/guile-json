@@ -55,12 +55,16 @@
 (test-equal "你好 guile!" (json-string->scm "\"\\u4f60\\u597d guile!\""))
 (test-equal "你好 guile!" (json-string->scm "\"\\u4F60\\u597D guile!\""))
 (test-equal "hello quoted \"guile\"!" (json-string->scm "\"hello quoted \\\"guile\\\"!\""))
-(test-equal "👍" (json-string->scm "\"\\uD83D\\uDC4D\""))
-(test-equal "guile smiles 😃" (json-string->scm "\"guile smiles \\uD83D\\uDE03\""))
+
+(test-equal "" (json-string->scm "\"\\uE389\"")) ;; between E000-FFFF
+(test-equal "" (json-string->scm "\"\\uF101\"")) ;; between E000-FFFF
+
+(test-equal "👍" (json-string->scm "\"\\uD83D\\uDC4D\"")) ;; surrogate pair
+(test-equal "guile smiles 😃" (json-string->scm "\"guile smiles \\uD83D\\uDE03\"")) ;; surrogate pair
 
 (test-error #t (json-string->scm "\"\\uD800\"")) ;; missing low surrogate
-(test-error #t (json-string->scm "\"\\uDC01\"")) ;; this is a low surrogate
-(test-error #t (json-string->scm "\"\\uDFFF\"")) ;; also a low surrogate
+(test-error #t (json-string->scm "\"\\uDC01\"")) ;; missing high surrogate (this is a low surrogate)
+(test-error #t (json-string->scm "\"\\uDFFF\"")) ;; missing high surrogate (this is a low surrogate)
 (test-error #t (json-string->scm "\"unfinished hello"))
 
 ;; Boolean
