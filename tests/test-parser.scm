@@ -58,6 +58,9 @@
 (test-equal "👍" (json-string->scm "\"\\uD83D\\uDC4D\""))
 (test-equal "guile smiles 😃" (json-string->scm "\"guile smiles \\uD83D\\uDE03\""))
 
+(test-error #t (json-string->scm "\"\\uD800\"")) ;; missing low surrogate
+(test-error #t (json-string->scm "\"\\uDC01\"")) ;; this is a low surrogate
+(test-error #t (json-string->scm "\"\\uDFFF\"")) ;; also a low surrogate
 (test-error #t (json-string->scm "\"unfinished hello"))
 
 ;; Boolean

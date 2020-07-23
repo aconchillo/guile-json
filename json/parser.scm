@@ -290,7 +290,6 @@
 (define (read-unicode-char port)
   (let ((codepoint (read-unicode-value port)))
     (cond
-     ((<= codepoint #xD7FF) (integer->char codepoint))
      ;; Surrogate pairs. `codepoint` already contains the higher surrogate
      ;; (between D800 and DC00) . At this point we are expecting another
      ;; \uXXXX that holds the lower surrogate (between DC00 and DFFF).
@@ -300,8 +299,11 @@
         (if (and (>= low-surrogate #xDC00) (< low-surrogate #xE000))
             (integer->char (json-surrogate-pair->unicode codepoint low-surrogate))
             (json-exception port))))
+     ;; Reserved for surrogates (we just need to check starting from the low
+     ;; surrogates).
      ((and (>= codepoint #xDC00) (< codepoint #xE000))
-      (json-exception port)))))
+      (json-exception port))
+     (else (integer->char codepoint)))))
 
 (define (read-control-char port)
   (let ((ch (read-char port)))
