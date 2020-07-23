@@ -1,4 +1,10 @@
 
+* Version 4.3.1 (Jul 22, 2020)
+
+  - Fix unicode codepoint with surrogate pairs.
+    (thanks to pkill9 and RhodiumToad on #guile)
+
+
 * Version 4.3.0 (Jul 3, 2020)
 
   - Make RECORD->JSON optional in (define-json-mapping).

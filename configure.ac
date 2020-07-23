@@ -19,7 +19,7 @@
 # along with guile-json. If not, see https://www.gnu.org/licenses/.
 #
 
-AC_INIT([guile-json], [4.3.0], [aconchillo@gmail.com])
+AC_INIT([guile-json], [4.3.1], [aconchillo@gmail.com])
 AC_CONFIG_MACRO_DIRS([m4])
 AC_CONFIG_SRCDIR(json.scm)
 AC_CONFIG_AUX_DIR([build-aux])
@@ -42,13 +42,13 @@ GUILE_LIBDIR=`$PKG_CONFIG --print-errors --variable=libdir guile-$GUILE_EFFECTIV
 AC_SUBST(GUILE_PREFIX)
 AC_SUBST(GUILE_LIBDIR)
 
-AC_CONFIG_FILES([Makefile json/Makefile tests/Makefile])
-AC_CONFIG_FILES([env], [chmod +x env])
-
 if test "$cross_compiling" != no; then
    GUILE_TARGET="--target=$host_alias"
    AC_SUBST([GUILE_TARGET])
 fi
+
+AC_CONFIG_FILES([Makefile json/Makefile tests/Makefile])
+AC_CONFIG_FILES([env], [chmod +x env])
 
 AC_OUTPUT
 
