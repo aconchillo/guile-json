@@ -272,18 +272,36 @@
      ((or (eqv? ch #\F) (eqv? ch #\f)) 15)
      (else (json-exception port)))))
 
-;; Characters in Guile match the JSON representation so we just need to parse
-;; the hexadecimal values into an integer.
-;;
-;;     codepoint = 16^3 * ch + 16^2 * ch + 16 * ch + ch
-;;
-;; https://www.gnu.org/software/guile/manual/html_node/Characters.html
-(define (read-unicode-char port)
-  (integer->char
-   (+ (* 4096 (read-hex-digit->integer port))
+(define (read-unicode-value port)
+  (+ (* 4096 (read-hex-digit->integer port))
       (* 256 (read-hex-digit->integer port))
       (* 16 (read-hex-digit->integer port))
-      (read-hex-digit->integer port))))
+      (read-hex-digit->integer port)))
+
+;; Unicode codepoint with surrogates is:
+;;   10000 + (high - D800) + (low - DC00)
+;; which is equivalent to:
+;;  (high << 10) + low - 35FDC00
+;; see
+;;   https://github.com/aconchillo/guile-json/issues/58#issuecomment-662744070
+(define (json-surrogate-pair->unicode high low)
+  (+ (* high #x400) low #x-35FDC00))
+
+(define (read-unicode-char port)
+  (let ((codepoint (read-unicode-value port)))
+    (cond
+     ((<= codepoint #xD7FF) (integer->char codepoint))
+     ;; Surrogate pairs. `codepoint` already contains the higher surrogate
+     ;; (between D800 and DC00) . At this point we are expecting another
+     ;; \uXXXX that holds the lower surrogate (between DC00 and DFFF).
+     ((and (>= codepoint #xD800) (< codepoint #xDC00))
+      (expect-string port "\\u" #f)
+      (let ((low-surrogate (read-unicode-value port)))
+        (if (and (>= low-surrogate #xDC00) (< low-surrogate #xE000))
+            (integer->char (json-surrogate-pair->unicode codepoint low-surrogate))
+            (json-exception port))))
+     ((and (>= codepoint #xDC00) (< codepoint #xE000))
+      (json-exception port)))))
 
 (define (read-control-char port)
   (let ((ch (read-char port)))

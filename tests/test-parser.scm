@@ -55,6 +55,9 @@
 (test-equal "你好 guile!" (json-string->scm "\"\\u4f60\\u597d guile!\""))
 (test-equal "你好 guile!" (json-string->scm "\"\\u4F60\\u597D guile!\""))
 (test-equal "hello quoted \"guile\"!" (json-string->scm "\"hello quoted \\\"guile\\\"!\""))
+(test-equal "👍" (json-string->scm "\"\\uD83D\\uDC4D\""))
+(test-equal "guile smiles 😃" (json-string->scm "\"guile smiles \\uD83D\\uDE03\""))
+
 (test-error #t (json-string->scm "\"unfinished hello"))
 
 ;; Boolean
