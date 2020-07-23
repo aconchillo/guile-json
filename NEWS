@@ -1,8 +1,14 @@
 
+* Version 4.3.2 (Jul 23, 2020)
+
+  - Fix unicode for values from E000 and upwards.
+    (thanks again to pkill9 and RhodiumToad from #guile)
+
+
 * Version 4.3.1 (Jul 22, 2020)
 
   - Fix unicode codepoint with surrogate pairs.
-    (thanks to pkill9 and RhodiumToad on #guile)
+    (thanks to pkill9 and RhodiumToad from #guile)
 
 
 * Version 4.3.0 (Jul 3, 2020)
