@@ -63,6 +63,10 @@ following table:
 | false  | #f     |
 | null   | 'null  |
 
+Why are JSON arrays converted to vectors and JSON objects to alists? See this
+[[https://lists.gnu.org/archive/html/guile-user/2018-12/msg00039.html][discussion]]
+for details.
+
 By default the value of JSON "null" is mapped to the symbol 'null. However,
 all guile-json functions allow changing the default null value by specifying
 the #:null keyword argument with another value. This other value needs to be
