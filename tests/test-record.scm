@@ -42,8 +42,8 @@
 
 (define test-json-account
   "{\"id\":\"11111\",\"username\":\"jane\"}")
-(define test-account (json->account test-json-account))
 
+(define test-account (json->account test-json-account))
 (test-equal "11111" (account-id test-account))
 (test-equal "jane" (account-username test-account))
 
@@ -60,8 +60,8 @@
 
 (define test-json-account
   "{\"id\":\"22222\",\"username\":\"john\"}")
-(define test-account (json->account test-json-account))
 
+(define test-account (json->account test-json-account))
 (test-equal "22222" (account-id test-account))
 (test-equal "john" (account-username test-account))
 
@@ -91,10 +91,32 @@
 
 (define test-json-account
   "{\"id\":\"22222\",\"username\":\"john\"}")
-(define test-account (json->account test-json-account))
 
+(define test-account (json->account test-json-account))
 (test-equal "22222" (account-id test-account))
 (test-equal "JOHN" (account-username test-account))
+
+;; Record WITH conversion functions and *unspecified* values.
+(define-json-mapping <account>
+  make-account
+  account?
+  json->account <=> account->json
+  (id       account-id)
+  (username account-username)
+  (omitted  account-omitted))
+
+(define test-json-account
+  "{\"id\":\"11111\",\"username\":\"jane\"}")
+
+(define test-account (json->account test-json-account))
+(test-equal "11111" (account-id test-account))
+(test-equal "jane" (account-username test-account))
+(test-equal *unspecified* (account-omitted test-account))
+
+(define test-account-idem (json->account (account->json test-account)))
+(test-equal "11111" (account-id test-account-idem))
+(test-equal "jane" (account-username test-account-idem))
+(test-equal *unspecified* (account-omitted test-account-idem))
 
 (exit (if (test-end "test-record") 0 1))
 
