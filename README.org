@@ -197,6 +197,9 @@ when creating REST APIs.
     - /value->json/ : an optional procedure that will be used to convert the
       the value contained in the record to the JSON value.
 
+When serializing a record to JSON it is possible to set a field to the
+=*unspecified*= value in order to omit it from serialization.
+
 *** Example
 
 - A simple example that defines an account type with two fields: /id/ and
