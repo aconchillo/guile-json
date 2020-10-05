@@ -132,7 +132,7 @@
 
 (define (json-build-array scm port solidus unicode null pretty level)
   (put-string port "[")
-  (unless (zero? (vector-length scm))
+  (unless (or (null? scm) (zero? (vector-length scm)))
     (build-newline port pretty)
     (vector-for-each (lambda (i v)
                        (cond
