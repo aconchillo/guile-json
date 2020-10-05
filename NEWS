@@ -1,4 +1,10 @@
 
+* Version 4.4.0 (??, 2020)
+
+  - Improve pretty printing.
+    (thanks to Jonas Schürmann)
+
+
 * Version 4.3.2 (Jul 23, 2020)
 
   - Fix unicode for values from E000 and upwards.
