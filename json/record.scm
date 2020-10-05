@@ -53,7 +53,7 @@ following SPEC, a series of field specifications."
                                      (assoc-ref table key))
                                     ((_ table (field))
                                      (assoc-ref table (symbol->string 'field))))))
-        (ctor (extract-field table spec) ...)))))
+        (ctor (or (extract-field table spec) *unspecified*) ...)))))
 
 (define-syntax-rule (define-json-writer record->json spec ...)
   "Define RECORD->JSON as a procedure that converts a RECORD into its JSON
@@ -68,7 +68,10 @@ representation following SPEC, a series of field specifications."
                                    (cons key (getter record)))
                                   ((_ (field getter))
                                    (cons (symbol->string 'field) (getter record))))))
-      (scm->json-string `(,(extract-field spec) ...)))))
+      (let* ((full-object `(,(extract-field spec) ...))
+             (object (filter (lambda (p) (not (unspecified? (cdr p))))
+                             full-object)))
+        (scm->json-string object)))))
 
 (define-syntax define-json-mapping
   (syntax-rules (<=>)
