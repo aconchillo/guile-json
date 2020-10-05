@@ -101,7 +101,6 @@
 (define (build-object-pair p port solidus unicode null pretty level)
   (put-string port (indent-string pretty level))
   (json-build-string (car p) port solidus unicode)
-  (build-space port pretty)
   (put-string port ":")
   (build-space port pretty)
   (json-build (cdr p) port solidus unicode null pretty level))
@@ -113,20 +112,19 @@
   (cond (pretty (put-string port " "))))
 
 (define (json-build-object scm port solidus unicode null pretty level)
-  (cond ((> level 0)
-         (build-newline port pretty)))
-  (format port "~A{" (indent-string pretty level))
-  (build-newline port pretty)
+  (put-string port "{")
   (let ((pairs scm))
     (unless (null? pairs)
+      (build-newline port pretty)
       (build-object-pair (car pairs) port solidus unicode null pretty (+ level 1))
       (for-each (lambda (p)
                   (put-string port ",")
                   (build-newline port pretty)
                   (build-object-pair p port solidus unicode null pretty (+ level 1)))
-                (cdr pairs))))
-  (build-newline port pretty)
-  (format port "~A}" (indent-string pretty level)))
+                (cdr pairs))
+      (build-newline port pretty)
+      (put-string port (indent-string pretty level))))
+  (put-string port "}"))
 
 ;;
 ;; Array builder functions
@@ -134,12 +132,18 @@
 
 (define (json-build-array scm port solidus unicode null pretty level)
   (put-string port "[")
-  (unless (null? scm)
+  (unless (or (null? scm) (zero? (vector-length scm)))
+    (build-newline port pretty)
     (vector-for-each (lambda (i v)
-                       (if (> i 0) (put-string port ","))
-                       (build-space port pretty)
+                       (cond
+                         ((> i 0)
+                          (put-string port ",")
+                          (build-newline port pretty)))
+                       (put-string port (indent-string pretty (+ level 1)))
                        (json-build v port solidus unicode null pretty (+ level 1)))
-                     scm))
+                     scm)
+    (build-newline port pretty)
+    (put-string port (indent-string pretty level)))
   (put-string port "]"))
 
 ;;
