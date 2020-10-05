@@ -62,7 +62,7 @@
 (test-equal "\"form feed:\\f\"" (scm->json-string "form feed:"))
 (test-equal "\"line feed:\\n\"" (scm->json-string "line feed:
 "))
-(test-equal "\"carriage return:\\r\"" (scm->json-string "carriage return:"))
+(test-equal "\"carriage return:\\r\"" (scm->json-string "carriage return:\r"))
 (test-equal "\"horizontal tab:\\t\"" (scm->json-string "horizontal tab:	"))
 
 ;; Boolean
@@ -79,6 +79,12 @@
 (test-equal "[1,2,[3,4],[5,6,[7,8]]]" (scm->json-string #(1 2 #(3 4) #(5 6 #(7 8)))))
 (test-equal "[1,\"two\",3,\"four\"]" (scm->json-string #(1 "two" 3 "four")))
 
+;; Arrays (pretty)
+(test-equal "[]" (scm->json-string #() #:pretty #t))
+(test-equal "[\n  1,\n  2,\n  3,\n  4\n]" (scm->json-string #(1 2 3 4) #:pretty #t))
+(test-equal "[\n  1,\n  2,\n  [\n    3,\n    4\n  ],\n  [\n    5,\n    6,\n    [\n      7,\n      8\n    ]\n  ]\n]" (scm->json-string #(1 2 #(3 4) #(5 6 #(7 8))) #:pretty #t))
+(test-equal "[\n  1,\n  \"two\",\n  3,\n  \"four\"\n]" (scm->json-string #(1 "two" 3 "four") #:pretty #t))
+
 ;; Objects
 (test-equal "{\"foo\":\"bar\"}" (scm->json-string '((foo . bar))))
 (test-equal "{\"foo\":\"bar\"}" (scm->json-string '(("foo" . "bar"))))
@@ -93,6 +99,22 @@
 (test-equal "{}" (scm->json-string '()))
 (test-equal "{\"top-level\":{\"second-level\":{}}}"
   (scm->json-string '(("top-level" ("second-level")))))
+
+;; Objects (pretty)
+(test-equal "{\n  \"foo\": \"bar\"\n}" (scm->json-string '((foo . bar)) #:pretty #t))
+(test-equal "{\n  \"foo\": \"bar\"\n}" (scm->json-string '(("foo" . "bar")) #:pretty #t))
+(test-equal "{\n  \"foo\": [\n    1,\n    2,\n    3\n  ]\n}" (scm->json-string '((foo . #(1 2 3))) #:pretty #t))
+(test-equal "{\n  \"foo\": {\n    \"bar\": [\n      1,\n      2,\n      3\n    ]\n  }\n}" (scm->json-string '((foo . ((bar . #(1 2 3))))) #:pretty #t))
+(test-equal "{\n  \"foo\": [\n    1,\n    {\n      \"two\": \"three\"\n    }\n  ]\n}" (scm->json-string '((foo . #(1 (("two" . "three"))))) #:pretty #t))
+(test-equal "{\n  \"title\": \"A book\",\n  \"author\": \"An author\",\n  \"price\": 29.99\n}"
+  (scm->json-string '((title . "A book")
+                      (author . "An author")
+                      (price . 29.99))
+                    #:pretty #t))
+;; Empty objects (pretty)
+(test-equal "{}" (scm->json-string '() #:pretty #t))
+(test-equal "{\n  \"top-level\": {\n    \"second-level\": {}\n  }\n}"
+  (scm->json-string '(("top-level" ("second-level"))) #:pretty #t))
 
 ;; Invalid objects
 (test-error #t (scm->json (vector 1 2 3 #u8(1 2 3))))
