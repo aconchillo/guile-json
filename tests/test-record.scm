@@ -25,6 +25,7 @@
 
 (define-module (tests test-record)
   #:use-module (srfi srfi-64)
+  #:use-module (srfi srfi-43)
   #:use-module (json)
   #:use-module (tests runner))
 
@@ -113,10 +114,43 @@
 (test-equal "jane" (account-username test-account))
 (test-equal *unspecified* (account-omitted test-account))
 
+;; Check idempotence
 (define test-account-idem (json->account (account->json test-account)))
 (test-equal "11111" (account-id test-account-idem))
 (test-equal "jane" (account-username test-account-idem))
 (test-equal *unspecified* (account-omitted test-account-idem))
+
+;; Nested records
+
+(define-json-mapping <link>
+  make-link
+  link?
+  json->link <=> link->json <=> scm->link <=> link->scm
+  (type link-type)
+  (url link-url))
+
+(define-json-mapping <account>
+  make-account
+  account?
+  json->account <=> account->json
+  (id       account-id)
+  (username account-username)
+  (links    account-links "links"
+            (lambda (v) (map scm->link (vector->list v)))
+            (lambda (v) (list->vector (map link->scm v)))))
+
+(define test-account
+  (make-account "11111" "jane" (list (make-link "test" "http://guile.json"))))
+(test-equal "11111" (account-id test-account))
+(test-equal "jane" (account-username test-account))
+(test-equal (make-link "test" "http://guile.json") (car (account-links test-account)))
+
+(test-equal "{\"id\":\"11111\",\"username\":\"jane\",\"links\":[{\"type\":\"test\",\"url\":\"http://guile.json\"}]}"
+  (account->json test-account))
+
+;; Check idempotence
+(test-equal (make-account "11111" "jane" (list (make-link "test" "http://guile.json")))
+  (json->account (account->json test-account)))
 
 (exit (if (test-end "test-record") 0 1))
 

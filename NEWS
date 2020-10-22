@@ -1,6 +1,10 @@
 
 * Version 4.4.0 (??, 2020)
 
+  - Record-JSON mapping now can define another optional procedure record->scm
+    to convert a record to an alist.
+    (Fixes #63)
+
   - Record-JSON mapping now allows using *unspecified* values to indicate a
     field record should not be serialized.
     (Fixes #61)

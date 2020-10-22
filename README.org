@@ -164,7 +164,7 @@ guile-json 4.2.0 introduces a new feature to allow converting a JSON object
 into a record type and vice versa. This feature works very well, for example,
 when creating REST APIs.
 
-- *(define-json-mapping rtd ctor pred json->record [<=> record->json]
+- *(define-json-mapping rtd ctor pred json->record [<=> record->json [<=> scm->record <=> record->scm]]
                         (field getter spec ...) ...)* :
   Define a new mapping between a JSON object and a record type, à la SRFI-9.
 
@@ -181,6 +181,14 @@ when creating REST APIs.
   - /<=> record->json/ : optional name of the procedure to convert a record of
     this type to JSON object.
 
+  - /<=> scm->record/ : optional name of the procedure to convert an alist
+    representation of this record into a record of this type.
+
+  - /<=> record->scm/ : optional name of the procedure to convert a record of
+    this type to a native alist whose values should be compatible with
+    guile-json's supported type. This might be used when record fields contain
+    other records.
+
   - /((field getter spec ...) ...)/ : a series of field specifications.
 
     - /field/ : the name of a JSON object field.
@@ -194,8 +202,9 @@ when creating REST APIs.
     - /json->value/ : an optional procedure that will be used to convert the
       JSON value to the value contained in the record.
 
-    - /value->json/ : an optional procedure that will be used to convert the
-      the value contained in the record to the JSON value.
+    - /value->scm/ : an optional procedure that will be used to convert the
+      value contained in the record to one of the native Guile values
+      supported by guile-json.
 
 When serializing a record to JSON it is possible to set a field to the
 =*unspecified*= value in order to omit it from serialization.
