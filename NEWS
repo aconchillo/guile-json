@@ -1,4 +1,11 @@
 
+* Version 4.4.1 (Nov 29, 2020)
+
+  - Fixed a few parsing issues from JSON Parsing Test Suite
+    (https://github.com/nst/JSONTestSuite).
+    (Fixes #67)
+
+
 * Version 4.4.0 (Oct 22, 2020)
 
   - Record-JSON mapping now can define another optional procedure record->scm
