@@ -44,6 +44,9 @@
     ((#\sp #\ht #\lf #\cr) #t)
     (else #f)))
 
+(define (control-char? ch)
+  (<= (char->integer ch) #x1F))
+
 (define (skip-whitespaces port)
   (let ((ch (peek-char port)))
     (cond
@@ -325,6 +328,8 @@
     (cond
      ;; Unexpected EOF.
      ((eof-object? ch) (json-exception port))
+     ;; Unescaped control characters are not allowed.
+     ((control-char? ch) (json-exception port))
      ;; End of string.
      ((eqv? ch #\") (reverse-list->string chars))
      ;; Escaped characters.
