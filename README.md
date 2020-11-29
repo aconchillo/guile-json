@@ -64,7 +64,7 @@ following table:
 | null   | 'null  |
 
 Why are JSON arrays converted to vectors and JSON objects to alists? See this
-[[https://lists.gnu.org/archive/html/guile-user/2018-12/msg00039.html][discussion]]
+[discussion](https://lists.gnu.org/archive/html/guile-user/2018-12/msg00039.html)
 for details.
 
 By default the value of JSON "null" is mapped to the symbol 'null. However,
@@ -207,7 +207,7 @@ when creating REST APIs.
       supported by guile-json.
 
 When serializing a record to JSON it is possible to set a field to the
-=*unspecified*= value in order to omit it from serialization.
+\*unspecified\* value in order to omit it from serialization.
 
 ### Example
 
