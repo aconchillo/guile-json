@@ -137,7 +137,11 @@
     (cond
      ((or (eqv? ch #\e) (eqv? ch #\E))
       (read-char port)
-      (expt 10 (* (read-sign port) (read-digits port))))
+      (let ((sign (read-sign port))
+            (digits (read-digits port)))
+        (if (<= digits 1000) ;; Some maximum exponent.
+            (expt 10 (* sign digits))
+            (json-exception port))))
      (else 1))))
 
 (define (read-fraction port)
