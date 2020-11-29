@@ -231,28 +231,30 @@
 
 (define (json-read-array port null)
   (expect-delimiter port #\[)
-  (let loop ((values '()) (added #t))
-    (skip-whitespaces port)
-    (let ((ch (peek-char port)))
-      (cond
-       ;; Unexpected EOF.
-       ((eof-object? ch) (json-exception port))
-       ;; Handle comma (make sure we added an element).
-       ((eqv? ch #\,)
-        (read-char port)
+  (skip-whitespaces port)
+  (cond
+   ;; Special case when array is empty.
+   ((eqv? (peek-char port) #\])
+    (read-char port)
+    #())
+   (else
+    ;; Read first element in array.
+    (let loop ((values (list (json-read port null))))
+      (skip-whitespaces port)
+      (let ((ch (peek-char port)))
         (cond
-         (added (loop values #f))
-         (else (json-exception port))))
-       ;; End of array (make sure we added an element).
-       ((eqv? ch #\])
-        (read-char port)
-        (cond
-         (added (list->vector (reverse! values)))
-         (else (json-exception port))))
-       ;; This can be any JSON object.
-       (else
-        (let ((value (json-read port null)))
-          (loop (cons value values) #t)))))))
+         ;; Unexpected EOF.
+         ((eof-object? ch) (json-exception port))
+         ;; Handle comma (if there's a comma there should be another element).
+         ((eqv? ch #\,)
+          (read-char port)
+          (loop (cons (json-read port null) values)))
+         ;; End of array.
+         ((eqv? ch #\])
+          (read-char port)
+          (list->vector (reverse! values)))
+         ;; Anything else other than comma and end of array is wrong.
+         (else (json-exception port))))))))
 
 ;;
 ;; String parsing helpers

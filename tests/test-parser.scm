@@ -81,6 +81,8 @@
 (test-equal #(1 2 3 4) (json-string->scm "   [   1  , 2 , 3,4  ]    "))
 (test-equal #(1 2 #(3 4) #(5 6 #(7 8))) (json-string->scm "[1,2,[3,4],[5,6,[7,8]]]" ))
 (test-equal #(1 "two" 3 "four") (json-string->scm "[1,\"two\",3,\"four\"]"))
+(test-error #t (json-string->scm "[,]"))
+(test-error #t (json-string->scm "[,1]"))
 (test-error #t (json-string->scm "[1,2,,,5]"))
 (test-error #t (json-string->scm "[1,2"))
 
