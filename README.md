@@ -160,13 +160,90 @@ supported types).
 
 ## JSON Objects and Records
 
-guile-json 4.2.0 introduces a new feature to allow converting a JSON object
-into a record type and vice versa. This feature works very well, for example,
-when creating REST APIs.
+guile-json 4.5.0 introduces JSON types, a new feature that allows converting
+JSON objects into record types and vice versa in a very straight forward
+way. This was built on top of *define-json-mapping* which was introduced in
+version 4.2.0.
+
+Let's take a look at an example. Imagine we have the following user account
+information:
+
+```
+{
+  "id": 1234,
+  "username": "jane"
+}
+```
+
+We can easily create a
+[record](https://www.gnu.org/software/guile/manual/html_node/Records.html)
+representing that data with *define-json-type* by simply doing:
+
+```
+> (define-json-type <account>
+    (id)
+    (username))
+```
+
+This will define the record constructor, the predicate and conversion procedures
+like *json->account* or *account->json* (see *define-json-type* for more
+details).
+
+We can now create a new account and check its contents as with regular records:
+
+```
+> (define account (make-account "1234" "jane"))
+> (account-id account)
+"1234"
+> (account-username account)
+"jane"
+```
+
+Or we can use the auto-generated *scm->account* to create the account:
+
+```
+> (define account (scm->account '(("id" . "1234") ("username" . "jane"))))
+```
+
+It is also possible to convert the record to a JSON string:
+
+```
+> (account->json account)
+"{\"id\":\"1234\",\"username\":\"jane\"}"
+```
+
+Or from a JSON string to a new record:
+
+```
+> (define json-account "{\"id\":\"1234\",\"username\":\"jane\"}")
+> (json->account json-account)
+#<<account> id: "1234" username: "jane">
+```
+
+### Macros
+
+- (**define-json-type** rtd (field key type) ...) : Define a new mapping between
+  a JSON object and a record type. This will automatically define the record
+  constructor, the predicate, all field getters and record to/from JSON
+  conversions. For more control use *define-json-mapping*.
+
+  - *rtd* : the name of the record type.
+
+  - *((field key type) ...)* : a series of field specifications.
+
+    - *field* : the name of a JSON object field.
+
+    - *key* : a different name for the field of this JSON object. If given, this
+      name will be used instead of the field name when serializing or
+      deserializing.
+
+    - *type* : indicates that this field contains a record type. It is also
+      possible to indicate that the field contains an array of objects of the
+      same record type by using the vector syntax *#(type)*.
 
 - (**define-json-mapping** rtd ctor pred json->record [<=> record->json [<=>
-  scm->record <=> record->scm]] (field getter spec ...) ...) : Define a new
-  mapping between a JSON object and a record type, à la SRFI-9.
+  scm->record]] (field getter key ...) ...) : Define a new mapping between a
+  JSON object and a record type, à la SRFI-9.
 
   - *rtd* : the name of the record type.
 
@@ -175,81 +252,42 @@ when creating REST APIs.
   - *pred* : a predicate procedure to check if a given argument holds a record
     of this type.
 
-  - *json->record* : the name of the procedure to convert a JSON object into a
-    record of this type.
+  - *json->record* : the name of the procedure to convert a JSON object, read
+    from a port, string, or alist, into a record of this type.
 
   - *<=> record->json* : optional name of the procedure to convert a record of
-    this type to JSON object.
+    this type to a JSON string.
 
-  - *<=> scm->record* : optional name of the procedure to convert an alist
-    representation of this record into a record of this type.
+  - *<=> scm->record* : optional name of the procedure to convert a JSON object,
+    represented as an alist, into a record of this type. This is equivalent to
+    *json->record* when an alist is passed.
 
   - *<=> record->scm* : optional name of the procedure to convert a record of
-    this type to a native alist whose values should be compatible with
-    guile-json's supported type. This might be used when record fields contain
-    other records.
+    this type to a JSON objected represented as an alist.
 
-  - *((field getter spec ...) ...)* : a series of field specifications.
+  - *((field getter ...) ...)* : a series of field specifications.
 
     - *field* : the name of a JSON object field.
 
     - *getter* : the name of the procedure to get the value of this field
       given a record of this type.
 
-    - *spec* : a different name for the field of this JSON object. If given,
-      this name will be used instead of field.
+    - *key* : a different name for the field of this JSON object. If given, this
+      name will be used instead of the field name when serializing or
+      deserializing.
 
-    - *json->value* : an optional procedure that will be used to convert the
-      JSON value to the value contained in the record.
+    - *scm->value* : an optional procedure that will be used to convert native
+      values supported by guile-json to the value contained in the record. Used
+      when reading JSON.
 
     - *value->scm* : an optional procedure that will be used to convert the
-      value contained in the record to one of the native Guile values
-      supported by guile-json.
+      value contained in the record to a native value supported by guile-json
+      Used when writing JSON.
+
+### Records and null fields
 
 When serializing a record to JSON it is possible to set a field to the
 \*unspecified\* value in order to omit it from serialization.
-
-### Example
-
-- A simple example that defines an account type with two fields: *id* and
-  *username*:
-
-```
-> (define-json-mapping <account>
-    make-account
-    account?
-    json->account <=> account->json
-    (id       account-id)
-    (username account-username))
-```
-
-- We can create a new account and check its contents as with regular records:
-
-```
-> (define my-account (make-account "11111" "user-one"))
-> (account-id my-account)
-"11111"
-> (account-username my-account)
-"user-one"
-```
-
-- Now we can convert it to a JSON object:
-
-```
-> (account->json my-account)
-"{\"id\":\"11111\",\"username\":\"user-one\"}"
-```
-
-- Or, given a JSON object we can create a new record:
-
-```
-> (define json-account "{\"id\":\"22222\",\"username\":\"user-two\"}")
-> (define my-other-account (json->account json-account))
-> (account-id my-other-account)
-"22222"
-> (account-username my-other-account)
-"user-two"
-```
 
 
 # Examples
