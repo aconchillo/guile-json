@@ -1,4 +1,10 @@
 
+* Version 4.5.0 (Jan 3, 2020)
+
+  - Introduce (define-json-type) a much simpler way to define JSON objects and
+    record mappings. It makes use of the existing (define-json-mapping).
+
+
 * Version 4.4.1 (Nov 29, 2020)
 
   - Fixed a few parsing issues from JSON Parsing Test Suite

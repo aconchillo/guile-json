@@ -1,6 +1,6 @@
 ;;; (json record) --- Guile JSON implementation.
 
-;; Copyright (C) 2020 Aleix Conchillo Flaque <aconchillo@gmail.com>
+;; Copyright (C) 2020-2021 Aleix Conchillo Flaque <aconchillo@gmail.com>
 ;; Copyright (C) 2018, 2019 Ludovic Courtès <ludo@gnu.org>
 ;;
 ;; This file is part of guile-json.
