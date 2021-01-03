@@ -29,26 +29,27 @@
 
 (define-module (json record)
   #:use-module (srfi srfi-9)
-  #:export (<=> define-json-mapping))
+  #:export (<=> define-json-mapping define-json-type))
 
 (define <=> '<=>)
 
 (define-syntax-rule (define-json-reader json->record ctor spec ...)
   "Define JSON->RECORD as a procedure that converts a JSON representation,
-read from a port, string, or hash table, into a record created by CTOR and
-following SPEC, a series of field specifications."
+read from a port, string, or alist, into a record created by CTOR and following
+SPEC, a series of field specifications."
   (define (json->record input)
     (let ((table (cond ((port? input)
                         (json->scm input))
                        ((string? input)
                         (json-string->scm input))
+                       ;; This allows to pass native values.
                        ((or (null? input) (pair? input))
                         input))))
       (let-syntax ((extract-field (syntax-rules ()
-                                    ((_ table (field key json->value value->scm))
-                                     (json->value (assoc-ref table key)))
-                                    ((_ table (field key json->value))
-                                     (json->value (assoc-ref table key)))
+                                    ((_ table (field key scm->value value->scm))
+                                     (scm->value (assoc-ref table key)))
+                                    ((_ table (field key scm->value))
+                                     (scm->value (assoc-ref table key)))
                                     ((_ table (field key))
                                      (assoc-ref table key))
                                     ((_ table (field))
@@ -60,9 +61,9 @@ following SPEC, a series of field specifications."
 representation following SPEC, a series of field specifications."
   (define (record->json record)
     (let-syntax ((extract-field (syntax-rules ()
-                                  ((_ (field getter key json->value value->scm))
+                                  ((_ (field getter key scm->value value->scm))
                                    (cons key (value->scm (getter record))))
-                                  ((_ (field getter key json->value))
+                                  ((_ (field getter key scm->value))
                                    (cons key (getter record)))
                                   ((_ (field getter key))
                                    (cons key (getter record)))
@@ -78,10 +79,10 @@ representation following SPEC, a series of field specifications."
 created by CTOR and following SPEC, a series of field specifications."
   (define (scm->record table)
     (let-syntax ((extract-field (syntax-rules ()
-                                  ((_ table (field key json->value value->scm))
-                                   (json->value (assoc-ref table key)))
-                                  ((_ table (field key json->value))
-                                   (json->value (assoc-ref table key)))
+                                  ((_ table (field key scm->value value->scm))
+                                   (scm->value (assoc-ref table key)))
+                                  ((_ table (field key scm->value))
+                                   (scm->value (assoc-ref table key)))
                                   ((_ table (field key))
                                    (assoc-ref table key))
                                   ((_ table (field))
@@ -93,9 +94,9 @@ created by CTOR and following SPEC, a series of field specifications."
 representation following SPEC, a series of field specifications."
   (define (record->scm record)
     (let-syntax ((extract-field (syntax-rules ()
-                                  ((_ (field getter key json->value value->scm))
+                                  ((_ (field getter key scm->value value->scm))
                                    (cons key (value->scm (getter record))))
-                                  ((_ (field getter key json->value))
+                                  ((_ (field getter key scm->value))
                                    (cons key (getter record)))
                                   ((_ (field getter key))
                                    (cons key (getter record)))
@@ -107,9 +108,12 @@ representation following SPEC, a series of field specifications."
 (define-syntax define-json-mapping
   (syntax-rules (<=>)
     "Define RTD as a record type with the given FIELDs and GETTERs, à la SRFI-9,
-and define JSON->RECORD as a conversion from JSON to a record of this
-type. Optionall, define RECORD->JSON as a conversion from a record of this
-type to JSON."
+and define JSON->RECORD as a conversion from JSON (from a port, string or alist)
+to a record of this type. Optionally, define RECORD->JSON as a conversion from a
+record of this type to a JSON string. Additionaly, define SCM->RECORD as a
+conversion from an alist to a record of this type (equivalent to JSON->RECORD
+when passing an alist) and RECORD->SCM as a conversion from a record of this
+type to an alist."
     ((_ rtd ctor pred json->record (field getter spec ...) ...)
      (begin
        (define-record-type rtd
@@ -149,5 +153,69 @@ type to JSON."
 
        (define-native-writer record->scm
          (field getter spec ...) ...)))))
+
+(define-syntax define-json-type
+  (lambda (x)
+    "Define RTD as a record type with the given FIELDs. This will automatically
+define a record and its constructor, predicate and fields with their getters as
+they would be defined by define-json-mapping."
+    (define (gen-id template-id . args)
+      (datum->syntax
+       template-id
+       (string->symbol
+        (apply string-append
+               (map (lambda (x)
+                      (if (string? x) x (symbol->string (syntax->datum x))))
+                    args)))))
+    (define (cleanup-single-rtd template-id)
+      (datum->syntax
+       template-id
+       (string->symbol
+        (string-delete
+         (lambda (c) (or (eq? c #\<) (eq? c #\>)))
+         (symbol->string (syntax->datum template-id))))))
+    (define (cleanup-vector-rtd template-id)
+      (cleanup-single-rtd (datum->syntax template-id (vector-ref (syntax->datum template-id) 0))))
+
+    (define (cleanup-rtd template-id)
+      (if (vector? (syntax->datum template-id))
+          (cleanup-vector-rtd template-id)
+          (cleanup-single-rtd template-id)))
+    (syntax-case x (<=>)
+      ((_ rtd field ...)
+       (with-syntax ((mapping-rtd #'rtd)
+                     (constructor (gen-id #'rtd "make-" (cleanup-rtd #'rtd)))
+                     (predicate (gen-id #'rtd (cleanup-rtd #'rtd) "?"))
+                     (json->record (gen-id #'rtd "json->" (cleanup-rtd #'rtd)))
+                     (record->json (gen-id #'rtd (cleanup-rtd #'rtd) "->json"))
+                     (scm->record (gen-id #'rtd "scm->" (cleanup-rtd #'rtd)))
+                     (record->scm (gen-id #'rtd (cleanup-rtd #'rtd) "->scm"))
+                     ((fields ...)
+                      (map
+                       (lambda (f)
+                         (syntax-case f ()
+                           ((name)
+                            #`(name #,(gen-id #'rtd (cleanup-rtd #'rtd) "-" #'name)))
+                           ((name key)
+                            #`(name #,(gen-id #'rtd (cleanup-rtd #'rtd) "-" #'name) key))
+                           ((name key field-rtd)
+                            #`(name
+                               #,(gen-id #'rtd (cleanup-rtd #'rtd) "-" #'name)
+                               key
+                               #,(if (vector? (syntax->datum #'field-rtd))
+                                     #`(lambda (v) (map #,(gen-id #'field-rtd "scm->" (cleanup-rtd #'field-rtd))
+                                                        (vector->list v)))
+                                     (gen-id #'field-rtd "scm->" (cleanup-rtd #'field-rtd)))
+                               #,(if (vector? (syntax->datum #'field-rtd))
+                                     #`(lambda (v)
+                                         (list->vector
+                                          (map #,(gen-id #'field-rtd (cleanup-rtd #'field-rtd) "->scm") v)))
+                                     (gen-id #'field-rtd (cleanup-rtd #'field-rtd) "->scm" ))))))
+                       #'(field ...))))
+         #'(define-json-mapping mapping-rtd
+             constructor
+             predicate
+             json->record <=> record->json <=> scm->record <=> record->scm
+             fields ...))))))
 
 ;;; (json record) ends here

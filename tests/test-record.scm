@@ -1,6 +1,6 @@
 ;;; (tests test-record) --- Guile JSON implementation.
 
-;; Copyright (C) 2020 Aleix Conchillo Flaque <aconchillo@gmail.com>
+;; Copyright (C) 2020-2021 Aleix Conchillo Flaque <aconchillo@gmail.com>
 ;;
 ;; This file is part of guile-json.
 ;;
@@ -151,6 +151,57 @@
 ;; Check idempotence
 (test-equal (make-account "11111" "jane" (list (make-link "test" "http://guile.json")))
   (json->account (account->json test-account)))
+
+;; Check JSON types
+
+(define-json-type <account-type>
+  (id "id")
+  (username))
+
+(define test-json-account-type
+  "{\"id\":\"11111\",\"username\":\"jane\"}")
+
+(define test-account-type (json->account-type test-json-account-type))
+(test-equal "11111" (account-type-id test-account-type))
+(test-equal "jane" (account-type-username test-account-type))
+
+;; Check JSON types with nested objects.
+
+(define-json-type <link-type>
+  (type)
+  (url))
+
+(define-json-type <account-type>
+  (id)
+  (username)
+  (link "link" <link-type>))
+
+(define test-account-type
+  (make-account-type "11111" "jane" (make-link-type "test" "http://guile.json")))
+(test-equal "11111" (account-type-id test-account-type))
+(test-equal "jane" (account-type-username test-account-type))
+(test-equal (make-link-type "test" "http://guile.json")
+  (account-type-link test-account-type))
+
+(test-equal "{\"id\":\"11111\",\"username\":\"jane\",\"link\":{\"type\":\"test\",\"url\":\"http://guile.json\"}}"
+  (account-type->json test-account-type))
+
+;; Check JSON types with vectors.
+
+(define-json-type <account-type>
+  (id)
+  (username)
+  (links "links" #(<link-type>)))
+
+(define test-account-type
+  (make-account-type "11111" "jane" (list (make-link-type "test" "http://guile.json"))))
+(test-equal "11111" (account-type-id test-account-type))
+(test-equal "jane" (account-type-username test-account-type))
+(test-equal (make-link-type "test" "http://guile.json")
+  (car (account-type-links test-account-type)))
+
+(test-equal "{\"id\":\"11111\",\"username\":\"jane\",\"links\":[{\"type\":\"test\",\"url\":\"http://guile.json\"}]}"
+  (account-type->json test-account-type))
 
 (exit (if (test-end "test-record") 0 1))
 
