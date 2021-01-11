@@ -1,4 +1,10 @@
 
+* Version 4.5.1 (Jan 11, 2020)
+
+  - Allow false values in JSON mappings.
+    (Fixes #70)
+
+
 * Version 4.5.0 (Jan 3, 2020)
 
   - Introduce (define-json-type) a much simpler way to define JSON objects and
