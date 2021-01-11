@@ -104,21 +104,24 @@
   json->account <=> account->json
   (id       account-id)
   (username account-username)
-  (omitted  account-omitted))
+  (omitted  account-omitted)
+  (boolean  account-boolean))
 
 (define test-json-account
-  "{\"id\":\"11111\",\"username\":\"jane\"}")
+  "{\"id\":\"11111\",\"username\":\"jane\",\"boolean\":false}")
 
 (define test-account (json->account test-json-account))
 (test-equal "11111" (account-id test-account))
 (test-equal "jane" (account-username test-account))
 (test-equal *unspecified* (account-omitted test-account))
+(test-equal #f (account-boolean test-account))
 
 ;; Check idempotence
 (define test-account-idem (json->account (account->json test-account)))
 (test-equal "11111" (account-id test-account-idem))
 (test-equal "jane" (account-username test-account-idem))
 (test-equal *unspecified* (account-omitted test-account-idem))
+(test-equal #f (account-boolean test-account-idem))
 
 ;; Nested records
 
