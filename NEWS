@@ -1,4 +1,9 @@
 
+* Version 4.5.2 (Feb 3, 2021)
+
+  - Add missing modules to record.scm.
+
+
 * Version 4.5.1 (Jan 11, 2020)
 
   - Allow false values in JSON mappings.

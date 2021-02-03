@@ -15,7 +15,7 @@ documents according to the http://json.org specification.
 
 Download the latest tarball and untar it:
 
-- [guile-json-4.5.1.tar.gz](https://download.savannah.gnu.org/releases/guile-json/guile-json-4.5.1.tar.gz)
+- [guile-json-4.5.2.tar.gz](https://download.savannah.gnu.org/releases/guile-json/guile-json-4.5.2.tar.gz)
 
 If you are cloning the repository make sure you run this first:
 
