@@ -98,10 +98,10 @@ the module:
 
   - *null* : value for JSON's null, it defaults to the 'null symbol.
 
-- (**scm->json** native #:optional port #:key escape unicode pretty validate
-  null) : Creates a JSON document from the given native Guile value. The JSON
-  document is written into the given port, or to the current output port if
-  non is given.
+- (**scm->json** native #:optional port #:key solidus unicode null validate
+  pretty) : Creates a JSON document from the given native Guile value. The JSON
+  document is written into the given port, or to the current output port if non
+  is given.
 
   Optional arguments:
 
@@ -123,24 +123,9 @@ the module:
   - *pretty* : if true, the JSON document will be pretty printed (defaults to
     false).
 
-- (**scm->json-string** native #:key escape unicode pretty validate) : Creates
-  a JSON document from the given native Guile value into a string.
-
-  Keyword arguments:
-
-  - *solidus* : if true, the slash (/ solidus) character will be escaped
-    (defaults to false).
-
-  - *unicode* : if true, additional to control characters, non-ASCII
-    characters will be escaped as well (defaults to false).
-
-  - *null* : value for JSON's null (defaults to the 'null symbol).
-
-  - *validate* : if true, the native value will be validated before starting
-    to print the JSON document (defaults to true).
-
-  - *pretty* : if true, the JSON document will be pretty printed (defaults to
-    false).
+- (**scm->json-string** native #:key solidus unicode null validate pretty) :
+  Creates a JSON document from the given native Guile value into a string. For
+  keyword arguments meaning see *scm->json*.
 
   Note that when using alists to build JSON objects, symbols or numbers might
   be used as keys and they both will be converted to strings.
@@ -352,7 +337,7 @@ null
 
 # License
 
-Copyright (C) 2013-2020 Aleix Conchillo Flaque <aconchillo@gmail.com>
+Copyright (C) 2013-2021 Aleix Conchillo Flaque <aconchillo@gmail.com>
 
 guile-json is free software: you can redistribute it and/or modify it
 under the terms of the GNU General Public License as published by the
