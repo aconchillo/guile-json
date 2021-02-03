@@ -43,9 +43,6 @@ for example:
 
     $ GUILE_LOAD_PATH=/usr/local/share/guile/site guile
 
-A pkg-list.scm file is also provided for users of the Guildhall/Dorodango
-packaging system.
-
 
 # Usage
 

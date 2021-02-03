@@ -27,9 +27,6 @@ PKG_LIST_VERSION=$(shell echo $(PACKAGE_VERSION) | sed "s/\./ /g")
 
 dist-hook:
 	$(SHELL) $(top_srcdir)/ChangeLog > $(top_distdir)/ChangeLog
-	cp $(top_srcdir)/pkg-list.scm.in $(top_distdir)/pkg-list.scm
-        # '' is to make OS X happy
-	sed -i '' "s/%VERSION%/$(PKG_LIST_VERSION)/g" $(top_distdir)/pkg-list.scm
 
 GOBJECTS = $(SOURCES:%.scm=%.go)
 
