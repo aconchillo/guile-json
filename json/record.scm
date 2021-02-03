@@ -28,6 +28,8 @@
 ;;; Code:
 
 (define-module (json record)
+  #:use-module (json builder)
+  #:use-module (json parser)
   #:use-module (srfi srfi-9)
   #:export (<=> define-json-mapping define-json-type))
 
