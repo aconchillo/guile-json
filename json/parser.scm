@@ -24,8 +24,13 @@
 ;;; Code:
 
 (define-module (json parser)
+  #:use-module (ice-9 rdelim)
+  #:use-module (ice-9 streams)
+  #:use-module (rnrs io ports)
   #:export (json->scm
-            json-string->scm))
+            json-string->scm
+            json-seq->scm
+            json-seq-string->scm))
 
 ;;
 ;; Miscellaneuos helpers
@@ -72,6 +77,11 @@
      ((not (eqv? ch delimiter)) (json-exception port))
      ;; Unexpected EOF.
      ((eof-object? ch) (json-exception port)))))
+
+(define (skip-record-separators port)
+  (when (eqv? #\rs (peek-char port))
+    (read-char port)
+    (skip-record-separators port)))
 
 ;;
 ;; Number parsing helpers
@@ -402,5 +412,61 @@ null, it defaults to the 'null symbol."
 @var{str}, that contains the JSON document. It also takes a keyword argument:
 @{null}: value for JSON's null, it defaults to the 'null symbol "
   (call-with-input-string str (lambda (p) (json->scm p #:null null))))
+
+(define* (json-seq->scm #:optional (port (current-input-port))
+                        #:key (null 'null) (handle-truncate 'skip)
+                        (truncated-object 'truncated))
+  "Lazy parse a JSON text sequence from the port @var{port}.
+This procedure returns a stream of parsed documents. The optional argument
+@var{port} defines the port to read from and defaults to the current input
+port. It also takes a few keyword arguments: @{null}: value for JSON's null
+(defaults to the 'null symbol), @{handle-truncate}: defines how to handle data
+loss, @{truncated-object}: used to replace unparsable objects. Allowed values
+for @{handle-truncate} argument are 'throw (throw an exception), 'stop (stop
+parsing and end the stream), 'skip (default, skip corrupted fragment and
+return the next entry), 'replace (skip corrupted fragment and return
+@{truncated-object} instead)."
+  (letrec ((handle-truncation
+            (case handle-truncate
+              ((throw) json-exception)
+              ((stop) (const (eof-object)))
+              ((skip)
+               (lambda (port)
+                 (read-delimited "\x1e" port 'peek)
+                 (read-entry port)))
+              ((replace)
+               (lambda (port)
+                 (read-delimited "\x1e" port 'peek)
+                 truncated-object))))
+           (read-entry
+            (lambda (port)
+              (let ((ch (read-char port)))
+                (cond
+                 ((eof-object? ch) ch)
+                 ((not (eqv? ch #\rs))
+                  (handle-truncation port))
+                 (else
+                  (skip-record-separators port)
+                  (catch 'json-invalid
+                    (lambda ()
+                      (let ((next (json-read port null)))
+                        (if (eqv? #\lf (peek-char port))
+                            (begin
+                              (read-char port)
+                              next)
+                            (handle-truncation port))))
+                    (lambda (_ port)
+                      (handle-truncation port)))))))))
+    (port->stream port read-entry)))
+
+(define* (json-seq-string->scm str #:key (null 'null) (handle-truncate 'skip)
+                               (truncated-object 'truncated))
+  "Lazy parse a JSON text sequence from the string @var{str}.
+This procedure returns a stream of parsed documents and also takes the same
+keyword arguments as @code{json-seq->scm}."
+  (call-with-input-string str
+    (lambda (p)
+      (json-seq->scm p #:null null #:handle-truncate handle-truncate
+                     #:truncated-object truncated-object))))
 
 ;;; (json parser) ends here
