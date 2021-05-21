@@ -28,9 +28,7 @@
   #:export (json:test-runner))
 
 (define (json:test-runner)
-  (let ((runner (test-runner-null))
-        (num-passed 0)
-        (num-failed 0))
+  (let ((runner (test-runner-null)))
     (test-runner-on-test-end! runner
       (lambda (runner)
         (format #t "[~a] line:~a, test: ~a\n"
@@ -38,20 +36,19 @@
                 (test-result-ref runner 'source-line)
                 (test-runner-test-name runner))
         (case (test-result-kind runner)
-          ((pass xpass) (set! num-passed (1+ num-passed)))
           ((fail xfail)
            (if (test-result-ref runner 'expected-value)
                (format #t "~a\n -> expected: ~s\n -> obtained: ~s\n"
                        (string-join (test-runner-group-path runner) "/")
                        (test-result-ref runner 'expected-value)
-                       (test-result-ref runner 'actual-value)))
-           (set! num-failed (1+ num-failed)))
+                       (test-result-ref runner 'actual-value))))
           (else #t))))
     (test-runner-on-final! runner
       (lambda (runner)
         (format #t "Source:~a\npass = ~a, fail = ~a\n"
-                (test-result-ref runner 'source-file) num-passed num-failed)
-        (zero? num-failed)))
+                (test-result-ref runner 'source-file)
+                (test-runner-pass-count runner)
+                (test-runner-fail-count runner))))
     runner))
 
 ;;; (tests runner) ends here
