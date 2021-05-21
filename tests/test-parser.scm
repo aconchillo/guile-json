@@ -24,8 +24,8 @@
 ;;; Code:
 
 (define-module (tests test-parser)
-  #:use-module (srfi srfi-64)
   #:use-module (json)
+  #:use-module (srfi srfi-64)
   #:use-module (tests runner))
 
 (test-runner-factory json:test-runner)
@@ -111,6 +111,6 @@
 (test-error #t (json-string->scm "[1,2,3] extra"))
 (test-error #t (json-string->scm "{} extra"))
 
-(exit (if (test-end "test-parser") 0 1))
+(exit (zero? (test-runner-fail-count (test-end "test-parser"))))
 
 ;;; (tests test-parser) ends here

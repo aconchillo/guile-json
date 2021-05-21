@@ -24,8 +24,8 @@
 ;;; Code:
 
 (define-module (tests test-builder)
-  #:use-module (srfi srfi-64)
   #:use-module (json)
+  #:use-module (srfi srfi-64)
   #:use-module (tests runner))
 
 (test-runner-factory json:test-runner)
@@ -122,6 +122,6 @@
 (test-error #t (scm->json #(1 +inf.0 3)))
 (test-error #t (scm->json '((foo . +nan.0))))
 
-(exit (if (test-end "test-builder") 0 1))
+(exit (zero? (test-runner-fail-count (test-end "test-builder"))))
 
 ;;; (tests test-builder) ends here
