@@ -122,6 +122,8 @@
 (test-error #t (scm->json #(1 +inf.0 3)))
 (test-error #t (scm->json '((foo . +nan.0))))
 
-(exit (zero? (test-runner-fail-count (test-end "test-builder"))))
+(let ((fail-count (test-runner-fail-count (test-runner-current))))
+  (test-end "test-builder")
+  (exit (zero? fail-count)))
 
 ;;; (tests test-builder) ends here
