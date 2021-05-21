@@ -111,6 +111,8 @@
 (test-error #t (json-string->scm "[1,2,3] extra"))
 (test-error #t (json-string->scm "{} extra"))
 
-(exit (zero? (test-runner-fail-count (test-end "test-parser"))))
+(let ((fail-count (test-runner-fail-count (test-runner-current))))
+  (test-end "test-parser")
+  (exit (zero? fail-count)))
 
 ;;; (tests test-parser) ends here

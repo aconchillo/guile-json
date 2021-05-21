@@ -206,6 +206,8 @@
 (test-equal "{\"id\":\"11111\",\"username\":\"jane\",\"links\":[{\"type\":\"test\",\"url\":\"http://guile.json\"}]}"
   (account-type->json test-account-type))
 
-(exit (zero? (test-runner-fail-count (test-end "test-record"))))
+(let ((fail-count (test-runner-fail-count (test-runner-current))))
+  (test-end "test-record")
+  (exit (zero? fail-count)))
 
 ;;; (tests test-record) ends here
