@@ -27,7 +27,7 @@ Then, run the typical sequence:
     $ make
     $ sudo make install
 
-Where <guile-prefix> should preferably be the same as your system Guile
+Where `<guile-prefix>` should preferably be the same as your system Guile
 installation directory (e.g. /usr).
 
 If everything installed successfully you should be up and running:
