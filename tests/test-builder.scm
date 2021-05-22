@@ -122,6 +122,20 @@
 (test-error #t (scm->json #(1 +inf.0 3)))
 (test-error #t (scm->json '((foo . +nan.0))))
 
+;; Sequences
+(test-equal "\x1e[]\n" (scm->json-seq-string '(#())))
+(test-equal "\x1enull\n" (scm->json-seq-string '(null)))
+(test-equal "\x1enull\n" (scm->json-seq-string '(ball) #:null 'ball))
+(test-equal "\x1e1\n\x1e2\n\x1e3\n\x1e[1,2,3]\n" (scm->json-seq-string '(1 2 3 #(1 2 3))))
+(test-equal "\x1e{\"foo\":{\"bar\":{\"baz\":true}}}\n" (scm->json-seq-string '(((foo . (("bar" . ((baz . #t)))))))))
+
+(test-equal "\x1e\"\\u001e\"\n" (scm->json-seq-string (list "\x1e")))
+
+(test-error #t (scm->json-seq (list (vector 1 2 3 #u8(1 2 3)))))
+(test-error #t (scm->json-seq '(#u8(1 2 3))))
+(test-error #t (scm->json-seq '(#(1 +inf.0 3))))
+(test-error #t (scm->json-seq '(((foo . +nan.0)))))
+
 (let ((fail-count (test-runner-fail-count (test-runner-current))))
   (test-end "test-builder")
   (exit (zero? fail-count)))
