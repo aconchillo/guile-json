@@ -24,6 +24,7 @@
 ;;; Code:
 
 (define-module (tests test-parser)
+  #:use-module (ice-9 streams)
   #:use-module (json)
   #:use-module (srfi srfi-64)
   #:use-module (tests runner))
@@ -110,6 +111,19 @@
 (test-error #t (json-string->scm "we are missing the double-quotes"))
 (test-error #t (json-string->scm "[1,2,3] extra"))
 (test-error #t (json-string->scm "{} extra"))
+
+;; Sequences
+(define stream (json-seq-string->scm "\x1e1\n\x1e{}\n\x1e[null,true,false]\n\x1e{data loss"
+                                     #:handle-truncate 'replace))
+(test-equal 1 (stream-car stream))
+(test-equal '() (stream-car (stream-cdr stream)))
+(test-equal #(null #t #f) (stream-car (stream-cdr (stream-cdr stream))))
+(test-equal 'truncated (stream-car (stream-cdr (stream-cdr (stream-cdr stream)))))
+(test-assert (stream-null? (stream-cdr (stream-cdr (stream-cdr (stream-cdr stream))))))
+
+(test-assert (stream-null? (json-seq-string->scm "\x1enull\x1enull\x1enull" #:handle-truncate 'skip)))
+
+(test-equal "\x1e" (stream-car (json-seq-string->scm "\x1e\"\\u001e\"\n")))
 
 (let ((fail-count (test-runner-fail-count (test-runner-current))))
   (test-end "test-parser")

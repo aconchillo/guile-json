@@ -30,7 +30,9 @@
   #:use-module (srfi srfi-1)
   #:use-module (srfi srfi-43)
   #:export (scm->json
-            scm->json-string))
+            scm->json-string
+            scm->json-seq
+            scm->json-seq-string))
 
 
 ;;
@@ -250,5 +252,29 @@ used as keys and they both will be converted to strings.
      (scm->json scm p
                 #:solidus solidus #:unicode unicode #:null null
                 #:pretty pretty #:validate validate))))
+
+(define* (scm->json-seq objects #:optional (port (current-output-port))
+                        #:key (null 'null) (solidus #f) (validate #t))
+  "Create a JSON text sequence from native @var{objects} and write it.
+The optional argument @var{port} specifies the output port, which defaults to
+the current output port. This procedure also takes a subset of
+@code{json->scm} keyword arguments - @{null}, @{solidus} and @{validate}.
+@{unicode} and @{pretty} are unsupported because RFC 7464 requires JSON text
+sequences to be written in UTF-8, one per line."
+  (define (put-entry object)
+    (put-char port #\rs)
+    (scm->json object port
+               #:unicode #t #:null null #:solidus solidus #:validate validate)
+    (put-char port #\lf))
+  (for-each put-entry objects))
+
+(define* (scm->json-seq-string objects
+                               #:key (null 'null) (solidus #f) (validate #t))
+  "Create a JSON text sequence from native @var{objects} and return it.
+This procedure takes the same keyword arguments as @code{scm->json-seq}."
+  (call-with-output-string
+    (lambda (port)
+      (scm->json-seq objects port
+                     #:null null #:solidus solidus #:validate validate))))
 
 ;;; (json builder) ends here
