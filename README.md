@@ -6,6 +6,8 @@ documents according to the http://json.org specification.
 
 - Complies with http://json.org specification.
 
+- Supports JSON Text Sequences (RFC 7464).
+
 - Builds JSON documents programmatically using scheme data types.
 
 - Allows JSON pretty printing.
@@ -75,7 +77,7 @@ the module:
     scheme@(guile-user)> (use-modules (json))
 
 
-## Procedures
+## Reading JSON documents
 
 - (**json->scm** #:optional port #:key null) : Reads a JSON document from the
   given port, or from the current input port if none is given.
@@ -88,12 +90,13 @@ the module:
 
   - *null* : value for JSON's null, it defaults to the 'null symbol.
 
-- (**json-string->scm** str  #:key null) : Reads a JSON document from the given
+- (**json-string->scm** str #:key null) : Reads a JSON document from the given
   string.
 
-  Keyword arguments:
+  See keyword arguments for *json->scm*.
 
-  - *null* : value for JSON's null, it defaults to the 'null symbol.
+
+## Building JSON documents
 
 - (**scm->json** native #:optional port #:key solidus unicode null validate
   pretty) : Creates a JSON document from the given native Guile value. The JSON
@@ -121,11 +124,71 @@ the module:
     false).
 
 - (**scm->json-string** native #:key solidus unicode null validate pretty) :
-  Creates a JSON document from the given native Guile value into a string. For
-  keyword arguments meaning see *scm->json*.
+  Creates a JSON document from the given native Guile value into a string.
+
+  See keyword arguments for *scm->json*.
 
   Note that when using alists to build JSON objects, symbols or numbers might
   be used as keys and they both will be converted to strings.
+
+
+## Reading JSON Text Sequences
+
+- (**json-seq->scm** #:optional port #:key null handle-truncate
+  truncated-object) : Reads a stream of JSON documents from the given port, or
+  from the current input port if none is given.
+
+  Optional arguments:
+
+  - *port* : is optional, it defaults to the current input port.
+
+  Keyword arguments:
+
+  - *null* : value for JSON's null, it defaults to the 'null symbol.
+
+  - *handle-truncate* : defines how to handle data loss. Possible values:
+
+    - *'throw*: throw an exception.
+    - *'stop*: stop parsing and end the stream.
+    - *'skip*: skip corrupted fragment and return next object (default).
+    - *'replace*: skip corrupted fragment and return object specific by
+      *truncated-object*.
+
+  - *truncated-object* : use this object if an object could not be parsed (to be
+    used when setting *handle-truncate* to *'replace* value).
+
+- (**json-seq-string->scm** str #:key null handle-truncate truncated-object) :
+  Reads a stream of JSON documents from the given string.
+
+  See keyword arguments for *json-seq->scm*.
+
+
+## Building JSON Text Sequences
+
+- (**scm->json-seq** objects #:optional port #:key solidus null validate) :
+  Creates a JSON document sequence from the given list of native Guile
+  objects. The JSON document sequence is written into the given port, or to the
+  current output port if non is given.
+
+  Optional arguments:
+
+  - *port* : it defaults to the current output port.
+
+  Keyword arguments:
+
+  - *solidus* : if true, the slash (/ solidus) character will be escaped
+    (defaults to false).
+
+  - *null* : value for JSON's null (defaults to the 'null symbol).
+
+  - *validate* : if true, the native value will be validated before starting
+    to print the JSON document (defaults to true).
+
+- (**scm->json-seq-string** objects #:key solidus null validate) : Creates a
+  JSON document sequence from the given list of native Guile objects into a
+  string.
+
+  See keyword arguments for *scm->json-seq*.
 
 
 ## Exceptions
