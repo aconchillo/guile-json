@@ -393,19 +393,24 @@
 ;;
 
 (define* (json->scm #:optional (port (current-input-port))
-                    #:key (null 'null))
+                    #:key (null 'null) (concatenated #f))
   "Parse a JSON document into native. Takes one optional argument,
 @var{port}, which defaults to the current input port from where the JSON
-document is read. It also takes a keyword argument: @{null}: value for JSON's
-null, it defaults to the 'null symbol."
-  (let ((value (json-read port null)))
+document is read. It also takes a couple of keyword arguments: @{null}: value
+for JSON's null, it defaults to the 'null symbol and @{concatenated} which can
+be used to tell the parser that more JSON documents might come after a properly
+parsed document."
+  (let loop ((value (json-read port null)))
     ;; Skip any trailing whitespaces.
     (skip-whitespaces port)
     (cond
      ;; If we reach the end the parsing succeeded.
      ((eof-object? (peek-char port)) value)
-     ;; If there's anything else other than the end, parser fails.
-     (else (json-exception port)))))
+     ;; If there's anything else other than the end, check if user wants to keep
+     ;; parsing concatenated valid JSON documents, otherwise parser fails.
+     (else
+      (cond (concatenated value)
+            (else (json-exception port)))))))
 
 (define* (json-string->scm str #:key (null 'null))
   "Parse a JSON document into native. Takes a string argument,
@@ -428,7 +433,7 @@ return the next entry), 'replace (skip corrupted fragment and return
 @{truncated-object} instead)."
   (letrec ((handle-truncation
             (case handle-truncate
-              ((throw) json-exception)
+              ((throw) (json-exception port))
               ((stop) (const (eof-object)))
               ((skip)
                (lambda (port)

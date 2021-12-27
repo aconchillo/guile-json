@@ -8,6 +8,8 @@ documents according to the http://json.org specification.
 
 - Supports JSON Text Sequences (RFC 7464).
 
+- Supports parsing concatenated JSON documents.
+
 - Builds JSON documents programmatically using scheme data types.
 
 - Allows JSON pretty printing.
@@ -79,8 +81,8 @@ the module:
 
 ## Reading JSON documents
 
-- (**json->scm** #:optional port #:key null) : Reads a JSON document from the
-  given port, or from the current input port if none is given.
+- (**json->scm** #:optional port #:key null concatenated) : Reads a JSON
+  document from the given port, or from the current input port if none is given.
 
   Optional arguments:
 
@@ -90,10 +92,17 @@ the module:
 
   - *null* : value for JSON's null, it defaults to the 'null symbol.
 
+  - *concatenated* : if true it tells the parser that more JSON documents might
+    be present after a properly parsed document, otherwise the parser will fail
+    if additional data is present after the first document (this is the
+    default).
+
 - (**json-string->scm** str #:key null) : Reads a JSON document from the given
   string.
 
-  See keyword arguments for *json->scm*.
+  Keyword arguments:
+
+  - *null* : value for JSON's null, it defaults to the 'null symbol.
 
 
 ## Building JSON documents

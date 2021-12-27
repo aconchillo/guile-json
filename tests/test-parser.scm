@@ -1,6 +1,6 @@
 ;;; (tests test-parser) --- Guile JSON implementation.
 
-;; Copyright (C) 2018-2020 Aleix Conchillo Flaque <aconchillo@gmail.com>
+;; Copyright (C) 2018-2021 Aleix Conchillo Flaque <aconchillo@gmail.com>
 ;;
 ;; This file is part of guile-json.
 ;;
@@ -111,6 +111,14 @@
 (test-error #t (json-string->scm "we are missing the double-quotes"))
 (test-error #t (json-string->scm "[1,2,3] extra"))
 (test-error #t (json-string->scm "{} extra"))
+
+;; Concatenated documents
+(call-with-input-string "{}12345 \"concatenated\"    {\"foo\":\"bar\"}"
+  (lambda (p)
+    (test-equal '() (json->scm p #:concatenated #t))
+    (test-equal '12345 (json->scm p #:concatenated #t))
+    (test-equal "concatenated" (json->scm p #:concatenated #t))
+    (test-equal '(("foo" . "bar")) (json->scm p #:concatenated #t))))
 
 ;; Sequences
 (define stream (json-seq-string->scm "\x1e1\n\x1e{}\n\x1e[null,true,false]\n\x1e{data loss"
