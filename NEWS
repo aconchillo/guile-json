@@ -1,4 +1,13 @@
 
+* Version 4.6.0 (Dec 28, 2021)
+
+  - Add support for Concatenated JSON.
+    (Closes #76)
+
+  - Add support for JSON Text Sequences.
+    (thanks to Ivan Sokolov)
+
+
 * Version 4.5.2 (Feb 3, 2021)
 
   - Add missing modules to record.scm.
