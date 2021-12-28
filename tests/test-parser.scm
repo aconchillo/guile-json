@@ -118,7 +118,18 @@
     (test-equal '() (json->scm p #:concatenated #t))
     (test-equal '12345 (json->scm p #:concatenated #t))
     (test-equal "concatenated" (json->scm p #:concatenated #t))
-    (test-equal '(("foo" . "bar")) (json->scm p #:concatenated #t))))
+    (test-equal '(("foo" . "bar")) (json->scm p #:concatenated #t))
+    (test-error #t (json->scm p #:concatenated #t))))
+
+(call-with-input-string "{} \"foo\" bar"
+  (lambda (p)
+    (test-equal '() (json->scm p #:concatenated #t))
+    (test-equal "foo" (json->scm p #:concatenated #t))
+    (test-error #t (json->scm p #:concatenated #t))))
+
+(call-with-input-string "{"
+  (lambda (p)
+    (test-error #t (json->scm p #:concatenated #t))))
 
 ;; Sequences
 (define stream (json-seq-string->scm "\x1e1\n\x1e{}\n\x1e[null,true,false]\n\x1e{data loss"
