@@ -1,6 +1,6 @@
 ;;; (tests test-parser) --- Guile JSON implementation.
 
-;; Copyright (C) 2018-2021 Aleix Conchillo Flaque <aconchillo@gmail.com>
+;; Copyright (C) 2018-2022 Aleix Conchillo Flaque <aconchillo@gmail.com>
 ;;
 ;; This file is part of guile-json.
 ;;
@@ -97,6 +97,10 @@
 (test-error #t (json-string->scm "{\"foo\":}"))
 (test-error #t (json-string->scm "{,}"))
 (test-error #t (json-string->scm "{"))
+
+;; Objects (ordered)
+(test-equal '() (json-string->scm "{}" #:ordered #t))
+(test-equal '(("green" . 1) ("eggs" . 2) ("ham" . 3)) (json-string->scm "{\"green\":1, \"eggs\":2, \"ham\":3}" #:ordered #t))
 
 ;; Since the following JSON object contains more than one key-value pair, we
 ;; can't use "test-equal" directly since the output could be unordered.

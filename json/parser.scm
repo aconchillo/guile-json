@@ -197,7 +197,7 @@
 ;; Object parsing helpers
 ;;
 
-(define (read-pair port null)
+(define (read-pair port null ordered)
   ;; Read key.
   (let ((key (json-read-string port)))
     (skip-whitespaces port)
@@ -206,11 +206,11 @@
        ;; Skip colon and read value.
        ((eqv? ch #\:)
         (read-char port)
-        (cons key (json-read port null)))
+        (cons key (json-read port null ordered)))
        ;; Anything other than colon is an error.
        (else (json-exception port))))))
 
-(define (json-read-object port null)
+(define (json-read-object port null ordered)
   (expect-delimiter port #\{)
   (let loop ((pairs '()) (added #t))
     (skip-whitespaces port)
@@ -220,11 +220,11 @@
        ((eqv? ch #\})
         (read-char port)
         (cond
-         (added pairs)
+         (added (if ordered (reverse! pairs) pairs))
          (else (json-exception port))))
        ;; Read one pair and continue.
        ((eqv? ch #\")
-        (let ((pair (read-pair port null)))
+        (let ((pair (read-pair port null ordered)))
           (loop (cons pair pairs) #t)))
        ;; Skip comma and read more pairs.
        ((eqv? ch #\,)
@@ -239,7 +239,7 @@
 ;; Array parsing helpers
 ;;
 
-(define (json-read-array port null)
+(define (json-read-array port null ordered)
   (expect-delimiter port #\[)
   (skip-whitespaces port)
   (cond
@@ -249,7 +249,7 @@
     #())
    (else
     ;; Read first element in array.
-    (let loop ((values (list (json-read port null))))
+    (let loop ((values (list (json-read port null ordered))))
       (skip-whitespaces port)
       (let ((ch (peek-char port)))
         (cond
@@ -258,7 +258,7 @@
          ;; Handle comma (if there's a comma there should be another element).
          ((eqv? ch #\,)
           (read-char port)
-          (loop (cons (json-read port null) values)))
+          (loop (cons (json-read port null ordered) values)))
          ;; End of array.
          ((eqv? ch #\])
           (read-char port)
@@ -372,7 +372,7 @@
 ;; Main parser functions
 ;;
 
-(define (json-read port null)
+(define (json-read port null ordered)
   (skip-whitespaces port)
   (let ((ch (peek-char port)))
     (cond
@@ -382,8 +382,8 @@
      ((eqv? ch #\t) (json-read-true port))
      ((eqv? ch #\f) (json-read-false port))
      ((eqv? ch #\n) (json-read-null port null))
-     ((eqv? ch #\{) (json-read-object port null))
-     ((eqv? ch #\[) (json-read-array port null))
+     ((eqv? ch #\{) (json-read-object port null ordered))
+     ((eqv? ch #\[) (json-read-array port null ordered))
      ((eqv? ch #\") (json-read-string port))
      ;; Anything else should be a number.
      (else (json-read-number port)))))
@@ -393,14 +393,15 @@
 ;;
 
 (define* (json->scm #:optional (port (current-input-port))
-                    #:key (null 'null) (concatenated #f))
+                    #:key (null 'null) (ordered #f) (concatenated #f))
   "Parse a JSON document into native. Takes one optional argument,
 @var{port}, which defaults to the current input port from where the JSON
-document is read. It also takes a couple of keyword arguments: @{null}: value
-for JSON's null, it defaults to the 'null symbol and @{concatenated} which can
-be used to tell the parser that more JSON documents might come after a properly
-parsed document."
-  (let loop ((value (json-read port null)))
+document is read. It also takes a few of keyword arguments: @{null}: value for
+JSON's null, it defaults to the 'null symbol, @{ordered} to indicate whether
+JSON objects order should be preserved or not (the default) and @{concatenated}
+which can be used to tell the parser that more JSON documents might come after a
+properly parsed document."
+  (let loop ((value (json-read port null ordered)))
     ;; Skip any trailing whitespaces.
     (skip-whitespaces port)
     (cond
@@ -412,25 +413,28 @@ parsed document."
       (cond (concatenated value)
             (else (json-exception port)))))))
 
-(define* (json-string->scm str #:key (null 'null))
+(define* (json-string->scm str #:key (null 'null) (ordered #f))
   "Parse a JSON document into native. Takes a string argument,
-@var{str}, that contains the JSON document. It also takes a keyword argument:
-@{null}: value for JSON's null, it defaults to the 'null symbol "
-  (call-with-input-string str (lambda (p) (json->scm p #:null null))))
+@var{str}, that contains the JSON document. It also takes a couple of keyword
+argument: @{null}: value for JSON's null, it defaults to the 'null symbol and
+@{ordered} to indicate whether JSON objects order should be preserved or
+not (the default)."
+  (call-with-input-string str (lambda (p) (json->scm p #:null null #:ordered ordered))))
 
 (define* (json-seq->scm #:optional (port (current-input-port))
-                        #:key (null 'null) (handle-truncate 'skip)
-                        (truncated-object 'truncated))
+                        #:key (null 'null) (ordered #f)
+                        (handle-truncate 'skip) (truncated-object 'truncated))
   "Lazy parse a JSON text sequence from the port @var{port}.
 This procedure returns a stream of parsed documents. The optional argument
 @var{port} defines the port to read from and defaults to the current input
 port. It also takes a few keyword arguments: @{null}: value for JSON's null
-(defaults to the 'null symbol), @{handle-truncate}: defines how to handle data
-loss, @{truncated-object}: used to replace unparsable objects. Allowed values
-for @{handle-truncate} argument are 'throw (throw an exception), 'stop (stop
-parsing and end the stream), 'skip (default, skip corrupted fragment and
-return the next entry), 'replace (skip corrupted fragment and return
-@{truncated-object} instead)."
+(defaults to the 'null symbol), @{ordered} to indicate whether JSON objects
+order should be preserved or not (the default), @{handle-truncate}: defines how
+to handle data loss, @{truncated-object}: used to replace unparsable
+objects. Allowed values for @{handle-truncate} argument are 'throw (throw an
+exception), 'stop (stop parsing and end the stream), 'skip (default, skip
+corrupted fragment and return the next entry), 'replace (skip corrupted fragment
+and return @{truncated-object} instead)."
   (letrec ((handle-truncation
             (case handle-truncate
               ((throw) (json-exception port))
@@ -454,7 +458,7 @@ return the next entry), 'replace (skip corrupted fragment and return
                   (skip-record-separators port)
                   (catch 'json-invalid
                     (lambda ()
-                      (let ((next (json-read port null)))
+                      (let ((next (json-read port null ordered)))
                         (if (eqv? #\lf (peek-char port))
                             (begin
                               (read-char port)
@@ -464,14 +468,15 @@ return the next entry), 'replace (skip corrupted fragment and return
                       (handle-truncation port)))))))))
     (port->stream port read-entry)))
 
-(define* (json-seq-string->scm str #:key (null 'null) (handle-truncate 'skip)
-                               (truncated-object 'truncated))
+(define* (json-seq-string->scm str #:key (null 'null) (ordered #f)
+                               (handle-truncate 'skip) (truncated-object 'truncated))
   "Lazy parse a JSON text sequence from the string @var{str}.
 This procedure returns a stream of parsed documents and also takes the same
 keyword arguments as @code{json-seq->scm}."
   (call-with-input-string str
     (lambda (p)
-      (json-seq->scm p #:null null #:handle-truncate handle-truncate
+      (json-seq->scm p #:null null #:ordered ordered
+                     #:handle-truncate handle-truncate
                      #:truncated-object truncated-object))))
 
 ;;; (json parser) ends here
