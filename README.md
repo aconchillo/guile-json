@@ -19,7 +19,7 @@ documents according to the http://json.org specification.
 
 Download the latest tarball and untar it:
 
-- [guile-json-4.6.0.tar.gz](https://download.savannah.gnu.org/releases/guile-json/guile-json-4.6.0.tar.gz)
+- [guile-json-4.7.0.tar.gz](https://download.savannah.gnu.org/releases/guile-json/guile-json-4.7.0.tar.gz)
 
 If you are cloning the repository make sure you run this first:
 
@@ -81,7 +81,7 @@ the module:
 
 ## Reading JSON documents
 
-- (**json->scm** #:optional port #:key null concatenated) : Reads a JSON
+- (**json->scm** #:optional port #:key null ordered concatenated) : Reads a JSON
   document from the given port, or from the current input port if none is given.
 
   Optional arguments:
@@ -92,17 +92,23 @@ the module:
 
   - *null* : value for JSON's null, it defaults to the 'null symbol.
 
+  - *ordered* : indicate whether JSON objects order should be preserved or not
+    (the default).
+
   - *concatenated* : if true it tells the parser that more JSON documents might
     be present after a properly parsed document, otherwise the parser will fail
     if additional data is present after the first document (this is the
     default).
 
-- (**json-string->scm** str #:key null) : Reads a JSON document from the given
-  string.
+- (**json-string->scm** str #:key null ordered) : Reads a JSON document from the
+  given string.
 
   Keyword arguments:
 
   - *null* : value for JSON's null, it defaults to the 'null symbol.
+
+  - *ordered* : indicate whether JSON objects order should be preserved or not
+    (the default).
 
 
 ## Building JSON documents
@@ -143,7 +149,7 @@ the module:
 
 ## Reading JSON Text Sequences
 
-- (**json-seq->scm** #:optional port #:key null handle-truncate
+- (**json-seq->scm** #:optional port #:key null ordered handle-truncate
   truncated-object) : Reads a stream of JSON documents from the given port, or
   from the current input port if none is given.
 
@@ -154,6 +160,9 @@ the module:
   Keyword arguments:
 
   - *null* : value for JSON's null, it defaults to the 'null symbol.
+
+  - *ordered* : indicate whether JSON objects order should be preserved or not
+    (the default).
 
   - *handle-truncate* : defines how to handle data loss. Possible values:
 
@@ -166,8 +175,8 @@ the module:
   - *truncated-object* : use this object if an object could not be parsed (to be
     used when setting *handle-truncate* to *'replace* value).
 
-- (**json-seq-string->scm** str #:key null handle-truncate truncated-object) :
-  Reads a stream of JSON documents from the given string.
+- (**json-seq-string->scm** str #:key null ordered handle-truncate
+  truncated-object) : Reads a stream of JSON documents from the given string.
 
   See keyword arguments for *json-seq->scm*.
 

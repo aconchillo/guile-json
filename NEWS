@@ -1,4 +1,11 @@
 
+* Version 4.7.0 (Jan 2, 2022)
+
+  - Allow returning ordered JSON objects key/value pairs by using the keyword
+    argument #:ordered.
+    (Closes #77)
+
+
 * Version 4.6.0 (Dec 28, 2021)
 
   - Add support for Concatenated JSON.
