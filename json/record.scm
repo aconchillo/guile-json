@@ -112,7 +112,7 @@ representation following SPEC, a series of field specifications."
     "Define RTD as a record type with the given FIELDs and GETTERs, à la SRFI-9,
 and define JSON->RECORD as a conversion from JSON (from a port, string or alist)
 to a record of this type. Optionally, define RECORD->JSON as a conversion from a
-record of this type to a JSON string. Additionaly, define SCM->RECORD as a
+record of this type to a JSON string. Additionally, define SCM->RECORD as a
 conversion from an alist to a record of this type (equivalent to JSON->RECORD
 when passing an alist) and RECORD->SCM as a conversion from a record of this
 type to an alist."
