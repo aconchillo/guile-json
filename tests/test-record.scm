@@ -1,6 +1,6 @@
 ;;; (tests test-record) --- Guile JSON implementation.
 
-;; Copyright (C) 2020-2021 Aleix Conchillo Flaque <aconchillo@gmail.com>
+;; Copyright (C) 2020-2022 Aleix Conchillo Flaque <aconchillo@gmail.com>
 ;;
 ;; This file is part of guile-json.
 ;;
@@ -188,6 +188,31 @@
 
 (test-equal "{\"id\":\"11111\",\"username\":\"jane\",\"link\":{\"type\":\"test\",\"url\":\"http://guile.json\"}}"
   (account-type->json test-account-type))
+
+;; Check JSON types with optional nested objects.
+
+(define-json-type <omitted-type>
+  (name))
+
+(define-json-type <account-type>
+  (id)
+  (username)
+  (omitted "omitted" <omitted-type>))
+
+(define test-json-account
+  "{\"id\":\"11111\",\"username\":\"jane\"}")
+
+(define test-account-type (json->account-type test-json-account))
+
+(test-equal "11111" (account-type-id test-account-type))
+(test-equal "jane" (account-type-username test-account-type))
+(test-equal *unspecified* (account-type-omitted test-account-type))
+
+(test-equal (make-account-type "11111" "jane" *unspecified*)
+  (json->account-type (account-type->json test-account-type)))
+
+(test-equal (make-account-type "11111" "jane" *unspecified*)
+  (scm->account-type (account-type->scm test-account-type)))
 
 ;; Check JSON types with vectors.
 
