@@ -19,7 +19,7 @@ documents according to the http://json.org specification.
 
 Download the latest tarball and untar it:
 
-- [guile-json-4.7.0.tar.gz](https://download.savannah.gnu.org/releases/guile-json/guile-json-4.7.0.tar.gz)
+- [guile-json-4.7.1.tar.gz](https://download.savannah.gnu.org/releases/guile-json/guile-json-4.7.1.tar.gz)
 
 If you are cloning the repository make sure you run this first:
 
@@ -349,8 +349,10 @@ Or from a JSON string to a new record:
 
 ### Records and null fields
 
-When serializing a record to JSON it is possible to set a field to the
-\*unspecified\* value in order to omit it from serialization.
+When serializing a record to a JSON object it is possible to set a field to the
+\*unspecified\* value in order to omit it from serialization. Also, when
+deserializing a JSON object to a record, missing record fields in the JSON
+object will be set to \*unspecified\* in the record.
 
 
 # Examples
@@ -415,7 +417,7 @@ null
 
 # License
 
-Copyright (C) 2013-2021 Aleix Conchillo Flaque <aconchillo@gmail.com>
+Copyright (C) 2013-2022 Aleix Conchillo Flaque <aconchillo@gmail.com>
 
 guile-json is free software: you can redistribute it and/or modify it
 under the terms of the GNU General Public License as published by the

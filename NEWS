@@ -1,4 +1,11 @@
 
+* Version 4.7.1 (Apr 19, 2022)
+
+  - Allow optional nested records in other records. Not defined record fields
+    will be set to *unspecified* as any other value.
+    (Closes #78)
+
+
 * Version 4.7.0 (Jan 2, 2022)
 
   - Allow returning ordered JSON objects key/value pairs by using the keyword
