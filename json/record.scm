@@ -205,8 +205,10 @@ they would be defined by define-json-mapping."
                                #,(gen-id #'rtd (cleanup-rtd #'rtd) "-" #'name)
                                key
                                #,(if (vector? (syntax->datum #'field-rtd))
-                                     #`(lambda (v) (map #,(gen-id #'field-rtd "scm->" (cleanup-rtd #'field-rtd))
-                                                        (vector->list v)))
+                                     #`(lambda (v) (if (unspecified? v)
+                                                       *unspecified*
+                                                       (map #,(gen-id #'field-rtd "scm->" (cleanup-rtd #'field-rtd))
+                                                            (vector->list v))))
                                      #`(lambda (v) (if (unspecified? v)
                                                        *unspecified*
                                                        #,(gen-id #'field-rtd "scm->" (cleanup-rtd #'field-rtd)))))
