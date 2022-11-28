@@ -1,4 +1,10 @@
 
+* Version 4.7.3 (Nov 27, 2022)
+
+  - Fix a regression introduced in 4.7.1 where (json->RECORD) was not working
+    with nested fields.
+
+
 * Version 4.7.2 (Jun 26, 2022)
 
   - Fix breaking change introduced in 4.7.1 and properly allow optional nested
