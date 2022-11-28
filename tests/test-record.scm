@@ -189,6 +189,10 @@
 (test-equal "{\"id\":\"11111\",\"username\":\"jane\",\"link\":{\"type\":\"test\",\"url\":\"http://guile.json\"}}"
   (account-type->json test-account-type))
 
+;; Check idempotence
+(test-equal (make-account-type "11111" "jane" (make-link-type "test" "http://guile.json"))
+  (json->account-type (account-type->json test-account-type)))
+
 ;; Check JSON types with optional nested objects.
 
 (define-json-type <omitted-type>
@@ -230,6 +234,10 @@
 
 (test-equal "{\"id\":\"11111\",\"username\":\"jane\",\"links\":[{\"type\":\"test\",\"url\":\"http://guile.json\"}]}"
   (account-type->json test-account-type))
+
+;; Check idempotence with vectors
+(test-equal (make-account-type "11111" "jane" (list (make-link-type "test" "http://guile.json")))
+  (json->account-type (account-type->json test-account-type)))
 
 (let ((fail-count (test-runner-fail-count (test-runner-current))))
   (test-end "test-record")

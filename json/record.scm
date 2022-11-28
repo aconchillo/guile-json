@@ -211,7 +211,7 @@ they would be defined by define-json-mapping."
                                                             (vector->list v))))
                                      #`(lambda (v) (if (unspecified? v)
                                                        *unspecified*
-                                                       #,(gen-id #'field-rtd "scm->" (cleanup-rtd #'field-rtd)))))
+                                                       (#,(gen-id #'field-rtd "scm->" (cleanup-rtd #'field-rtd)) v))))
                                #,(if (vector? (syntax->datum #'field-rtd))
                                      #`(lambda (v)
                                          (list->vector
