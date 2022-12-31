@@ -283,6 +283,30 @@ Or from a JSON string to a new record:
 #<<account> id: "1234" username: "jane">
 ```
 
+We could also create a list of accounts:
+
+```
+> (define-json-type <accounts-list>
+    (accounts "accounts" #(<account)))
+```
+
+In which case we would do:
+
+```
+> (scm->accounts-list '(("accounts" . #((("id" . "1234") ("username" . "jane"))
+                                        (("id" . "4321") ("username" . "joe"))))))
+#<<accounts-list> accounts: (#<<account> id: "1234" username: "jane"> #<<account> id: "4321" username: "joe">)>
+```
+
+Note how the `accounts` field is stored as a list inside the record field, this
+is to simplify creating records and working with field getters. For example, to
+create the same but directly using records we would use:
+
+```
+> (make-accounts-list (list (make-account "1234" "jane") (make-account "4321" "joe")))
+```
+
+
 ### Macros
 
 - (**define-json-type** rtd (field key type) ...) : Define a new mapping between
@@ -302,7 +326,9 @@ Or from a JSON string to a new record:
 
     - *type* : indicates that this field contains a record type. It is also
       possible to indicate that the field contains an array of objects of the
-      same record type by using the vector syntax *#(type)*.
+      same record type by using the vector syntax *#(type)*. However, note that
+      in order to simplify things a list will be stored in the record field (see
+      examples).
 
 - (**define-json-mapping** rtd ctor pred json->record [<=> record->json [<=>
   scm->record]] (field getter key ...) ...) : Define a new mapping between a
