@@ -1,0 +1,25 @@
+name: GNU Guile 2.2
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Install dependencies
+        run: |
+          sudo apt update
+          sudo apt install automake autoconf libtool pkg-config make gcc
+          sudo apt install guile-2.2 guile-2.2-libs guile-2.2-dev
+      - name: Checkout repository
+        uses: actions/checkout@v2
+      - name: Bootstrap
+        run: autoreconf -vif
+      - name: Configure
+        run: ./configure
+      - name: Make distribution
+        run: make distcheck

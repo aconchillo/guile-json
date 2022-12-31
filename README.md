@@ -1,6 +1,9 @@
 
 # guile-json
 
+[![GNU Guile 2.0](https://github.com/aconchillo/guile-json/actions/workflows/guile2.2.yml/badge.svg)](https://github.com/aconchillo/guile-json/actions/workflows/guile2.2.yml)
+[![GNU Guile 3.0](https://github.com/aconchillo/guile-json/actions/workflows/guile3.0.yml/badge.svg)](https://github.com/aconchillo/guile-json/actions/workflows/guile3.0.yml)
+
 guile-json is a JSON module for Guile. It supports parsing and building JSON
 documents according to the http://json.org specification.
 
