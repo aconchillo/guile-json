@@ -1,7 +1,7 @@
 #
 # Makefile.am
 #
-# Copyright (C) 2013-2018 Aleix Conchillo Flaque <aconchillo@gmail.com>
+# Copyright (C) 2013-2022 Aleix Conchillo Flaque <aconchillo@gmail.com>
 #
 # This file is part of guile-json.
 #
@@ -24,9 +24,6 @@ SUBDIRS = json tests
 ACLOCAL_AMFLAGS = -I build-aux
 
 PKG_LIST_VERSION=$(shell echo $(PACKAGE_VERSION) | sed "s/\./ /g")
-
-dist-hook:
-	$(SHELL) $(top_srcdir)/ChangeLog > $(top_distdir)/ChangeLog
 
 GOBJECTS = $(SOURCES:%.scm=%.go)
 
