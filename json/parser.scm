@@ -437,7 +437,7 @@ corrupted fragment and return the next entry), 'replace (skip corrupted fragment
 and return @{truncated-object} instead)."
   (letrec ((handle-truncation
             (case handle-truncate
-              ((throw) (json-exception port))
+              ((throw) json-exception)
               ((stop) (const (eof-object)))
               ((skip)
                (lambda (port)
