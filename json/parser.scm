@@ -210,6 +210,12 @@
        ;; Anything other than colon is an error.
        (else (json-exception port))))))
 
+(define (uniquify-keys pairs res)
+  (cond ((null? pairs) res)
+        ((assoc (caar pairs) res)
+         (uniquify-keys (cdr pairs) res))
+        (#t (uniquify-keys (cdr pairs) (cons (car pairs) res)))))
+
 (define (json-read-object port null ordered)
   (expect-delimiter port #\{)
   (let loop ((pairs '()) (added #t))
@@ -220,7 +226,7 @@
        ((eqv? ch #\})
         (read-char port)
         (cond
-         (added (if ordered (reverse! pairs) pairs))
+         (added (uniquify-keys (if ordered (reverse! pairs) pairs) '()))
          (else (json-exception port))))
        ;; Read one pair and continue.
        ((eqv? ch #\")
