@@ -226,7 +226,9 @@
        ((eqv? ch #\})
         (read-char port)
         (cond
-         (added (uniquify-keys (if ordered (reverse! pairs) pairs) '()))
+         (added (if ordered
+                    (uniquify-keys pairs '())
+                    (reverse! (uniquify-keys pairs '()))))
          (else (json-exception port))))
        ;; Read one pair and continue.
        ((eqv? ch #\")
