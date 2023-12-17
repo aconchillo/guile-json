@@ -1,6 +1,6 @@
 ;;; (json parser) --- Guile JSON implementation.
 
-;; Copyright (C) 2013-2020 Aleix Conchillo Flaque <aconchillo@gmail.com>
+;; Copyright (C) 2013-2023 Aleix Conchillo Flaque <aconchillo@gmail.com>
 ;;
 ;; This file is part of guile-json.
 ;;
@@ -212,7 +212,9 @@
 
 (define (json-read-object port null ordered)
   (expect-delimiter port #\{)
-  (let loop ((pairs '()) (added #t))
+  (let loop ((items-hash (make-hash-table))
+             (items-order '())
+             (added #t))
     (skip-whitespaces port)
     (let ((ch (peek-char port)))
       (cond
@@ -220,17 +222,23 @@
        ((eqv? ch #\})
         (read-char port)
         (cond
-         (added (if ordered (reverse! pairs) pairs))
+         (added (if ordered
+                    (map (lambda (pair) (hash-ref items-hash (car pair)))
+                         (reverse! items-order))
+                    (hash-map->list (lambda (key value) value) items-hash)))
          (else (json-exception port))))
        ;; Read one pair and continue.
        ((eqv? ch #\")
-        (let ((pair (read-pair port null ordered)))
-          (loop (cons pair pairs) #t)))
+        (let* ((pair (read-pair port null ordered))
+               (key (car pair))
+               (key-exists (hash-ref items-hash key) ))
+          (hash-set! items-hash key pair)
+          (loop items-hash (if key-exists items-order (cons pair items-order)) #t)))
        ;; Skip comma and read more pairs.
        ((eqv? ch #\,)
         (read-char port)
         (cond
-         (added (loop pairs #f))
+         (added (loop items-hash items-order #f))
          (else (json-exception port))))
        ;; Invalid object.
        (else (json-exception port))))))
