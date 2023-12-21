@@ -86,6 +86,7 @@
 (test-error #t (json-string->scm "[,1]"))
 (test-error #t (json-string->scm "[1,2,,,5]"))
 (test-error #t (json-string->scm "[1,2"))
+(test-error #t (json-string->scm "[1,2,]"))
 
 ;; Objects
 (test-equal '() (json-string->scm "{}"))
@@ -101,6 +102,11 @@
 ;; Objects (ordered)
 (test-equal '() (json-string->scm "{}" #:ordered #t))
 (test-equal '(("green" . 1) ("eggs" . 2) ("ham" . 3)) (json-string->scm "{\"green\":1, \"eggs\":2, \"ham\":3}" #:ordered #t))
+
+;; Objects with duplicate keys
+(test-equal '(("bar" . 2) ("baz" . #(1 2 3)) ("foo" . "last")) (json-string->scm "{\"foo\": \"first\", \"bar\": 2, \"foo\": \"second\", \"baz\": [1, 2, 3], \"foo\": \"last\"}" #:ordered #t))
+
+(test-equal '(("foo" . "last") ("baz" . #(1 2 3)) ("bar" . 2)) (json-string->scm "{\"foo\": \"first\", \"bar\": 2, \"foo\": \"second\", \"baz\": [1, 2, 3], \"foo\": \"last\"}" ))
 
 ;; Since the following JSON object contains more than one key-value pair, we
 ;; can't use "test-equal" directly since the output could be unordered.
