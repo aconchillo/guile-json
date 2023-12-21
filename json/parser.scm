@@ -214,7 +214,7 @@
   (cond ((null? pairs) res)
         ((assoc (caar pairs) res)
          (uniquify-keys (cdr pairs) res))
-        (#t (uniquify-keys (cdr pairs) (cons (car pairs) res)))))
+        (else (uniquify-keys (cdr pairs) (cons (car pairs) res)))))
 
 (define (json-read-object port null ordered)
   (expect-delimiter port #\{)
