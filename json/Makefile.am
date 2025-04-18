@@ -22,7 +22,7 @@
 moddir=$(datadir)/guile/site/$(GUILE_EFFECTIVE_VERSION)/json
 objdir=$(libdir)/guile/$(GUILE_EFFECTIVE_VERSION)/site-ccache/json
 
-SOURCES = builder.scm parser.scm record.scm
+SOURCES = builder.scm goops.scm parser.scm record.scm
 
 GOBJECTS = $(SOURCES:%.scm=%.go)
 
