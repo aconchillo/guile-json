@@ -19,7 +19,7 @@
 # along with guile-json. If not, see https://www.gnu.org/licenses/.
 #
 
-TESTS = test-builder.scm test-parser.scm test-record.scm
+TESTS = test-builder.scm test-goops.scm test-parser.scm test-record.scm
 
 TEST_EXTENSIONS = .scm
 
