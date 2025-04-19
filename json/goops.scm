@@ -129,6 +129,11 @@ from the document into the slot.
 in the document before it is inserted into the slot.
 @item @code{#:json-key}: A different object field instead of the slot name in the
 document that will the slot value will be retrieved from.
+@item @code{#:type}: A class type that the value from the document will be
+deserialized into. If the value in this slot definition option is a list/vector
+of the type, then the value in the document will be deserialized into a
+list/vector of values of that type. If both @code{#:json-deserializer} and
+@code{#:type} are present, the former will take precedence.
 @end")
 
 (define-method (scm->object (class <class>) (scm <list>))
@@ -184,6 +189,11 @@ from the document into the slot.
 in the document before it is inserted into the slot.
 @item @code{#:json-key}: A different object field instead of the slot name in the
 document that will the slot value will be retrieved from.
+@item @code{#:type}: A class type that the value from the document will be
+deserialized into. If the value in this slot definition option is a list/vector
+of the type, then the value in the document will be deserialized into a
+list/vector of values of that type. If both @code{#:json-deserializer} and
+@code{#:type} are present, the former will take precedence.
 @end"
   (json->object! (make class) input))
 
@@ -202,6 +212,11 @@ the class object:
 of the slot before it is serialized and inserted into the document.
 @item @code{#:json-key}: A different field in the document instead of the slot
 name that the slot value will be inserted into.
+@item @code{#:type}: A class type that the value in the document will be
+serialized from. If the value in this slot definition option is a list/vector
+of the type, then the value in the document will be serialized from a list/vector
+of values of that type contained in the slot. If both @code{#:json-serializer}
+and @code{#:type} are present, the former will take precedence.
 @end")
 
 (define-method (object->scm (object <object>))
@@ -255,6 +270,11 @@ document from the class object:
 of the slot before it is serialized and inserted into the document.
 @item @code{#:json-key}: A different field in the document instead of the slot
 name that the slot value will be inserted into.
+@item @code{#:type}: A class type that the value in the document will be
+serialized from. If the value in this slot definition option is a list/vector
+of the type, then the value in the document will be serialized from a list/vector
+of values of that type contained in the slot. If both @code{#:json-serializer}
+and @code{#:type} are present, the former will take precedence.
 @end"
   (define scm (object->scm object))
   (if port
