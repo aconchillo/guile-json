@@ -192,30 +192,6 @@
 (test-equal test-account-type
   (json->object <account-type> (object->json test-account-type)))
 
-;; Class with nested class type
-
-(define-class <link-type> (<comparable>)
-  (type #:init-keyword #:type #:accessor !type)
-  (url  #:init-keyword #:url  #:accessor !url))
-
-(define-class <account-type> (<comparable>)
-  (id       #:init-keyword #:id       #:accessor !id)
-  (username #:init-keyword #:username #:accessor !username)
-  (link     #:init-keyword #:link     #:accessor !link #:type <link-type>))
-
-(define test-account-type
-  (make <account-type>
-    #:id "11111"
-    #:username "jane"
-    #:link (make <link-type> #:type "test" #:url "http://guile.json")))
-
-(test-equal "{\"id\":\"11111\",\"username\":\"jane\",\"link\":{\"type\":\"test\",\"url\":\"http://guile.json\"}}"
-  (object->json test-account-type))
-
-;; Check idempotence
-(test-equal test-account-type
-  (json->object <account-type> (object->json test-account-type)))
-
 ;; Class with vector type
 
 (define-class <account-type> (<comparable>)
