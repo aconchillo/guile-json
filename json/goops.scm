@@ -99,11 +99,11 @@
 ;;
 
 (define (scm->object! object scm)
-  "Read into class object @var{object} the values in the parsed Scheme format
-JSON document contained in @var{scm}.
+  "Read into object @var{object} the data in the Scheme-formatted JSON document
+contained in @var{scm}.
 
-The slot definition options control the changes made to the class object from
-the JSON document are identical to what's used by @code{scm->object}."
+The slot definition options that control the changes made to the class object
+from the JSON document are identical to what's used by @code{scm->object}."
   (for-each (lambda (slot)
               (when (slot-json-deserializable? slot)
                 (let* ((slot-name (slot-definition-name slot))
@@ -117,7 +117,7 @@ the JSON document are identical to what's used by @code{scm->object}."
   object)
 
 (define-generic-with-docs scm->object
-  "Create an object of @var{class} from the parsed Scheme format JSON document
+  "Create an object of @var{class} from the Scheme-formatted JSON document
 contained in @var{scm}.
 
 The following slot definition options control the creation of the class object
@@ -127,8 +127,8 @@ from the JSON document:
 from the document into the slot.
 @item @code{#:json-deserializer}: The procedure that will be applied to the value
 in the document before it is inserted into the slot.
-@item @code{#:json-key}: A different object key instead of the slot name that
-the slot value will be read from.
+@item @code{#:json-key}: A different object field instead of the slot name in the
+document that will the slot value will be retrieved from.
 @end")
 
 (define-method (scm->object (class <class>) (scm <list>))
@@ -156,7 +156,7 @@ the slot value will be read from.
   (compose vector->list (type->deserializer (list->vector type))))
 
 (define-generic-with-docs json->object!
-  "Read into class object @var{object} from the JSON document provided by
+  "Read into class object @var{object} the data in the JSON document provided by
 @var{input}, which can be a string or a port containing a JSON document, or a
 JSON document in parsed Scheme format.
 
@@ -171,7 +171,7 @@ the JSON document are identical to what's used by @code{json->object}.")
   (scm->object! object scm))
 
 (define (json->object class input)
-  "Create an object of @var{class} from the JSON document provided by
+  "Create an instance @var{class} with data from the JSON document provided by
 @var{input}, which can be a string or a port containing a JSON document, or a
 JSON document in parsed Scheme format.
 
@@ -182,8 +182,8 @@ from the JSON document:
 from the document into the slot.
 @item @code{#:json-deserializer}: The procedure that will be applied to the value
 in the document before it is inserted into the slot.
-@item @code{#:json-key}: A different object key instead of the slot name that
-the slot value will be read from.
+@item @code{#:json-key}: A different object field instead of the slot name in the
+document that will the slot value will be retrieved from.
 @end"
   (json->object! (make class) input))
 
@@ -192,7 +192,7 @@ the slot value will be read from.
 ;;
 
 (define-generic-with-docs object->scm
-  "Create a JSON document in Scheme format from class object @var{object}.
+  "Create a JSON document in Scheme format from the data of object @var{object}.
 
 The following slot definition options control the creation of the document from
 the class object:
@@ -200,8 +200,8 @@ the class object:
 @item @code{#:json-serializable?}: Whether to insert the slot into the document.
 @item @code{#:json-serializer}: The procedure that will be applied to the value
 of the slot before it is serialized and inserted into the document.
-@item @code{#:json-key}: A different object key instead of the slot name that
-the slot value will be inserted into.
+@item @code{#:json-key}: A different field in the document instead of the slot
+name that the slot value will be inserted into.
 @end")
 
 (define-method (object->scm (object <object>))
@@ -242,10 +242,10 @@ the slot value will be inserted into.
      (map object->scm vec))))
 
 (define* (object->json object #:optional (port #f))
-  "Create a JSON document from class object @var{object}. Takes one optional
-argument @var{port}, which defaults to @code{#f} meaning that the document will
-be returned as a string. If a port is supplied instead, the document will be
-written to that port.
+  "Create a JSON document from the data of object @var{object}. Takes one
+optional argument @var{port}, which defaults to @code{#f} meaning that the
+document will be returned as a string. If a port is supplied instead, the
+document will be written to that port.
 
 The following slot definition options control the serialization of the JSON
 document from the class object:
@@ -253,8 +253,8 @@ document from the class object:
 @item @code{#:json-serializable?}: Whether to insert the slot into the document.
 @item @code{#:json-serializer}: The procedure that will be applied to the value
 of the slot before it is serialized and inserted into the document.
-@item @code{#:json-key}: A different object key instead of the slot name that
-the slot value will be inserted into.
+@item @code{#:json-key}: A different field in the document instead of the slot
+name that the slot value will be inserted into.
 @end"
   (define scm (object->scm object))
   (if port
