@@ -128,7 +128,7 @@ from the document into the slot.
 @item @code{#:json-deserializer}: The procedure that will be applied to the value
 in the document before it is inserted into the slot.
 @item @code{#:json-key}: A different object field instead of the slot name in the
-document that will the slot value will be retrieved from.
+document that the slot value will be retrieved from.
 @item @code{#:type}: A class type that the value from the document will be
 deserialized into. If the value in this slot definition option is a list/vector
 of the type, then the value in the document will be deserialized into a
@@ -188,7 +188,7 @@ from the document into the slot.
 @item @code{#:json-deserializer}: The procedure that will be applied to the value
 in the document before it is inserted into the slot.
 @item @code{#:json-key}: A different object field instead of the slot name in the
-document that will the slot value will be retrieved from.
+document that the slot value will be retrieved from.
 @item @code{#:type}: A class type that the value from the document will be
 deserialized into. If the value in this slot definition option is a list/vector
 of the type, then the value in the document will be deserialized into a
