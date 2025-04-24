@@ -139,6 +139,8 @@ list/vector of values of that type. If both @code{#:json-deserializer} and
 (define-method (scm->object (class <class>) (scm <list>))
   (scm->object! (make class) scm))
 
+;; For the types present in a JSON document other than alists, let the value pass
+;; through.
 (for-each (lambda (type)
             (add-method! scm->object
                          (make <method>
@@ -146,10 +148,12 @@ list/vector of values of that type. If both @code{#:json-deserializer} and
                            #:procedure (lambda (a b) b))))
           protected-scm-types)
 
+;; (slot-name ... #:type <some-type>)
 (define-method (type->deserializer (type <class>))
   (lambda (scm)
     (scm->object type scm)))
 
+;; (slot-name ... #:type (vector <some-type>))
 (define-method (type->deserializer (type <vector>))
   (define class (vector-ref type 0))
   (lambda (scm)
@@ -157,6 +161,7 @@ list/vector of values of that type. If both @code{#:json-deserializer} and
                   (scm->object class element))
                 scm)))
 
+;; (slot-name ... #:type (list <some-type>))
 (define-method (type->deserializer (type <list>))
   (compose vector->list (type->deserializer (list->vector type))))
 
@@ -237,6 +242,8 @@ and @code{#:type} are present, the former will take precedence.
               (loop table (cdr slots))))
         (reverse table))))
 
+;; For the types present in a JSON document other than alists, let the value pass
+;; through.
 (for-each (lambda (type)
             (add-method! object->scm
                          (make <method>
@@ -244,13 +251,16 @@ and @code{#:type} are present, the former will take precedence.
                            #:procedure identity)))
           protected-scm-types)
 
+;; (slot-name ... #:type <some-type>)
 (define-method (type->serializer (type <class>))
   object->scm)
 
+;; (slot-name ... #:type (vector <some-type>))
 (define-method (type->serializer (type <vector>))
   (lambda (vec)
     (vector-map object->scm vec)))
 
+;; (slot-name ... #:type (list <some-type>))
 (define-method (type->serializer (type <list>))
   (lambda (vec)
     (list->vector
