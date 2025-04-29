@@ -164,7 +164,12 @@ list/vector of values of that type. If both @code{#:json-deserializer} and
 
 ;; (slot-name ... #:type (list <some-type>))
 (define-method (type->deserializer (type <list>))
-  (compose vector->list (type->deserializer (list->vector type))))
+  (define class (car type))
+  (lambda (scm)
+    (vector->list
+     (vector-map (lambda (element)
+                   (scm->object class element))
+                 scm))))
 
 (define-generic-with-docs json->object!
   "Read into class object @var{object} the data in the JSON document provided by
