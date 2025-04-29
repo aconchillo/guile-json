@@ -28,6 +28,7 @@
   #:use-module (json parser)
   #:use-module (oop goops)
   #:use-module (rnrs base)
+  #:use-module ((srfi srfi-1) #:select (fold))
   #:export (scm->object!
             scm->object
             json->object!
@@ -226,21 +227,18 @@ and @code{#:type} are present, the former will take precedence.
 
 (define-method (object->scm (object <object>))
   (define class (class-of object))
-  (let loop ((table '())
-             (slots (class-slots class)))
-    (if (pair? slots)
-        (let ((slot (car slots)))
-          (if (and (slot-bound? object (slot-definition-name slot))
-                   (slot-json-serializable? slot))
-              (let* ((slot-name (slot-definition-name slot))
-                     (key (slot-json-key slot))
-                     (serialize (slot-json-serializer slot))
-                     (serialized-value (serialize (slot-ref object slot-name))))
-                (loop (cons `(,key . ,serialized-value)
-                            table)
-                      (cdr slots)))
-              (loop table (cdr slots))))
-        (reverse table))))
+  (reverse!
+   (fold (lambda (slot table)
+           (if (and (slot-bound? object (slot-definition-name slot))
+                    (slot-json-serializable? slot))
+               (let* ((slot-name (slot-definition-name slot))
+                      (key (slot-json-key slot))
+                      (serialize (slot-json-serializer slot))
+                      (serialized-value (serialize (slot-ref object slot-name))))
+                 (cons `(,key . ,serialized-value)
+                       table))
+               table))
+         '() (class-slots class))))
 
 ;; For the types present in a JSON document other than alists, let the value pass
 ;; through.
