@@ -1,6 +1,6 @@
 ;;; (json parser) --- Guile JSON implementation.
 
-;; Copyright (C) 2013-2020 Aleix Conchillo Flaque <aconchillo@gmail.com>
+;; Copyright (C) 2013-2025 Aleix Conchillo Flaque <aconchillo@gmail.com>
 ;;
 ;; This file is part of guile-json.
 ;;
@@ -401,12 +401,12 @@
 ;;
 
 (define* (json->scm #:optional (port (current-input-port))
-                    #:key (null 'null) (ordered #f) (concatenated #f))
+                    #:key (null 'null) (ordered #t) (concatenated #f))
   "Parse a JSON document into native. Takes one optional argument,
 @var{port}, which defaults to the current input port from where the JSON
 document is read. It also takes a few of keyword arguments: @{null}: value for
 JSON's null, it defaults to the 'null symbol, @{ordered} to indicate whether
-JSON objects order should be preserved or not (the default) and @{concatenated}
+JSON objects order should be preserved (the default) or not and @{concatenated}
 which can be used to tell the parser that more JSON documents might come after a
 properly parsed document."
   (let loop ((value (json-read port null ordered)))
@@ -421,23 +421,23 @@ properly parsed document."
       (cond (concatenated value)
             (else (json-exception port)))))))
 
-(define* (json-string->scm str #:key (null 'null) (ordered #f))
+(define* (json-string->scm str #:key (null 'null) (ordered #t))
   "Parse a JSON document into native. Takes a string argument,
 @var{str}, that contains the JSON document. It also takes a couple of keyword
 argument: @{null}: value for JSON's null, it defaults to the 'null symbol and
-@{ordered} to indicate whether JSON objects order should be preserved or
-not (the default)."
+@{ordered} to indicate whether JSON objects order should be preserved (the
+default) or not."
   (call-with-input-string str (lambda (p) (json->scm p #:null null #:ordered ordered))))
 
 (define* (json-seq->scm #:optional (port (current-input-port))
-                        #:key (null 'null) (ordered #f)
+                        #:key (null 'null) (ordered #t)
                         (handle-truncate 'skip) (truncated-object 'truncated))
   "Lazy parse a JSON text sequence from the port @var{port}.
 This procedure returns a stream of parsed documents. The optional argument
 @var{port} defines the port to read from and defaults to the current input
 port. It also takes a few keyword arguments: @{null}: value for JSON's null
 (defaults to the 'null symbol), @{ordered} to indicate whether JSON objects
-order should be preserved or not (the default), @{handle-truncate}: defines how
+order should be preserved (the default) or not, @{handle-truncate}: defines how
 to handle data loss, @{truncated-object}: used to replace unparsable
 objects. Allowed values for @{handle-truncate} argument are 'throw (throw an
 exception), 'stop (stop parsing and end the stream), 'skip (default, skip
@@ -476,7 +476,7 @@ and return @{truncated-object} instead)."
                       (handle-truncation port)))))))))
     (port->stream port read-entry)))
 
-(define* (json-seq-string->scm str #:key (null 'null) (ordered #f)
+(define* (json-seq-string->scm str #:key (null 'null) (ordered #t)
                                (handle-truncate 'skip) (truncated-object 'truncated))
   "Lazy parse a JSON text sequence from the string @var{str}.
 This procedure returns a stream of parsed documents and also takes the same
