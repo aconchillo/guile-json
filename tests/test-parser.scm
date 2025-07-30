@@ -1,6 +1,6 @@
 ;;; (tests test-parser) --- Guile JSON implementation.
 
-;; Copyright (C) 2018-2022 Aleix Conchillo Flaque <aconchillo@gmail.com>
+;; Copyright (C) 2018-2025 Aleix Conchillo Flaque <aconchillo@gmail.com>
 ;;
 ;; This file is part of guile-json.
 ;;
@@ -91,6 +91,7 @@
 ;; Objects
 (test-equal '() (json-string->scm "{}"))
 (test-equal '(("foo" . "bar")) (json-string->scm "{\"foo\":\"bar\"}"))
+(test-equal '(("foo" . "bar") ("fooz" . "barz")) (json-string->scm "{\"foo\":\"bar\", \"fooz\":\"barz\"}"))
 (test-equal '(("foo" . #(1 2 3))) (json-string->scm "{\"foo\"   :   [1,2,3]}"))
 (test-equal '(("foo" . (("bar" . #(1 2 3))))) (json-string->scm "{\"foo\"   :{\"bar\":  [1,2,3]}}"))
 (test-equal '(("foo" . #(1 (("two" . "three"))))) (json-string->scm "{\"foo\":[1,{\"two\":\"three\"}]}"))
@@ -99,14 +100,14 @@
 (test-error #t (json-string->scm "{,}"))
 (test-error #t (json-string->scm "{"))
 
-;; Objects (ordered)
-(test-equal '() (json-string->scm "{}" #:ordered #t))
-(test-equal '(("green" . 1) ("eggs" . 2) ("ham" . 3)) (json-string->scm "{\"green\":1, \"eggs\":2, \"ham\":3}" #:ordered #t))
+;; Objects (unordered)
+(test-equal '() (json-string->scm "{}" #:ordered #f))
+(test-equal '(("ham" . 3) ("eggs" . 2) ("green" . 1)) (json-string->scm "{\"green\":1, \"eggs\":2, \"ham\":3}" #:ordered #f))
 
 ;; Objects with duplicate keys
-(test-equal '(("bar" . 2) ("baz" . #(1 2 3)) ("foo" . "last")) (json-string->scm "{\"foo\": \"first\", \"bar\": 2, \"foo\": \"second\", \"baz\": [1, 2, 3], \"foo\": \"last\"}" #:ordered #t))
+(test-equal '(("bar" . 2) ("baz" . #(1 2 3)) ("foo" . "last")) (json-string->scm "{\"foo\": \"first\", \"bar\": 2, \"foo\": \"second\", \"baz\": [1, 2, 3], \"foo\": \"last\"}" ))
 
-(test-equal '(("foo" . "last") ("baz" . #(1 2 3)) ("bar" . 2)) (json-string->scm "{\"foo\": \"first\", \"bar\": 2, \"foo\": \"second\", \"baz\": [1, 2, 3], \"foo\": \"last\"}" ))
+(test-equal '(("foo" . "last") ("baz" . #(1 2 3)) ("bar" . 2)) (json-string->scm "{\"foo\": \"first\", \"bar\": 2, \"foo\": \"second\", \"baz\": [1, 2, 3], \"foo\": \"last\"}" #:ordered #f))
 
 ;; Since the following JSON object contains more than one key-value pair, we
 ;; can't use "test-equal" directly since the output could be unordered.
